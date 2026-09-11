@@ -71,7 +71,9 @@ jobs:
       - name: Zentraler Einstieg als Smoke-Test prüfen
         env:
           PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          LOWERCASE_URL: https://${{ github.repository_owner }}.github.io/fediwings/
         run: |
           status=$(curl -sS -o /dev/null -w '%{http_code}' "$PAGES_URL")
           test "$status" = "200"
           curl -fsS "$PAGES_URL" | grep -q "FediWings"
+          curl -sS "$LOWERCASE_URL" | grep -q "FediWings"
