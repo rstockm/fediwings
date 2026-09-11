@@ -3048,6 +3048,69 @@ footer {
   font: 0.68rem/1.6 var(--mono);
 }
 
+.follower-progress-block {
+  margin: 16px 0 0;
+}
+
+.follower-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.follower-progress-head strong {
+  color: var(--paper);
+  font: 650 0.68rem var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.follower-progress-head span {
+  color: var(--text-on-dark);
+  font: 0.66rem var(--mono);
+}
+
+.follower-progress-track {
+  height: 5px;
+  margin: 9px 0 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: rgba(243, 240, 232, 0.14);
+}
+
+.follower-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius);
+  background: var(--lime);
+  transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.follower-progress-track .track-complete {
+  border-radius: var(--radius);
+}
+
+.follower-progress-track.track-pending span {
+  animation: follower-progress-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes follower-progress-sweep {
+  0% {
+    margin-left: -30%;
+  }
+
+  100% {
+    margin-left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .follower-progress-track.track-pending span {
+    animation: none;
+  }
+}
+
 .follower-charts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

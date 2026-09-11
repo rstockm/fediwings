@@ -137,6 +137,30 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   expect(overflow).toBe(false);
 });
 
+test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  let firstNotifications = true;
+  await page.route('https://test.social/api/v1/notifications?*', async (route) => {
+    if (firstNotifications) {
+      firstNotifications = false;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    await route.fallback();
+  });
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+
+  const progress = page.getByRole('progressbar', { name: 'Follower-Verlauf wird geladen' });
+  await expect(progress).toBeVisible();
+  await expect(page.getByText('0 von 40 Seiten')).toBeVisible();
+  await expect(progress).toBeHidden({ timeout: 15_000 });
+  await expect(page.getByRole('img', { name: /Neue Follower pro Monat/ })).toBeVisible();
+});
+
 test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus der Sitzung', async ({
   page,
 }) => {

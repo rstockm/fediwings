@@ -314,7 +314,10 @@ export const en: Messages = {
     accountFailed: 'The account could not be loaded.',
     loginStartFailed: 'The login could not be started.',
     historyFailed: 'The follower history could not be loaded.',
-    progress: ' · oldest: {date}',
+    progressLabel: 'Loading follower history',
+    progressPages: '{requests} of {budget} pages',
+    progressEvents: '{events} follow events',
+    progressOldest: 'oldest: {date}',
     cancel: 'Cancel',
     retry: 'Try again',
     partial:

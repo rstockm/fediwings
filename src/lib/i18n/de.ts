@@ -314,7 +314,10 @@ export const de = {
     accountFailed: 'Der Account konnte nicht geladen werden.',
     loginStartFailed: 'Der Login konnte nicht gestartet werden.',
     historyFailed: 'Der Follower-Verlauf konnte nicht geladen werden.',
-    progress: ' · ältester: {date}',
+    progressLabel: 'Follower-Verlauf wird geladen',
+    progressPages: '{requests} von {budget} Seiten',
+    progressEvents: '{events} Follow-Ereignisse',
+    progressOldest: 'ältester: {date}',
     cancel: 'Abbrechen',
     retry: 'Erneut versuchen',
     partial:

@@ -6,6 +6,7 @@
   import {
     buildAnchoredSeries,
     buildMonthlySeries,
+    DEFAULT_MAX_PAGES,
     fetchFollowerEvents,
     type AnchoredSeries,
     type FollowerProgress,
@@ -100,6 +101,9 @@
   let historyController: AbortController | null = null;
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
+  const progressPercent = $derived(
+    Math.min(100, Math.round((requestsUsed / DEFAULT_MAX_PAGES) * 100)),
+  );
   const months = $derived(monthly.map((point) => point.month));
   const monthLabels = $derived.by(() => {
     const every = Math.max(1, Math.ceil(months.length / 6));
@@ -471,19 +475,38 @@
       <h2 id="history-title">@{account.acct}</h2>
 
       {#if historyPhase === 'loading'}
-        <p class="follower-progress" aria-live="polite">
-          {$_('follower.progress', {
-            values: {
-              events: eventsCount,
-              oldest: oldestDate
-                ? $_('follower.oldestPrefix', {
-                    values: { date: $_date(new Date(oldestDate), { format: 'date' }) },
-                  })
-                : '',
-              requests: requestsUsed,
-            },
-          })}
-        </p>
+        <div class="follower-progress-block" role="status" aria-live="polite">
+          <div class="follower-progress-head">
+            <strong>{$_('follower.progressLabel')}</strong>
+            <span
+              >{$_('follower.progressPages', {
+                values: { requests: requestsUsed, budget: DEFAULT_MAX_PAGES },
+              })}</span
+            >
+          </div>
+          <div
+            class="follower-progress-track"
+            class:track-pending={requestsUsed === 0}
+            role="progressbar"
+            aria-label={$_('follower.progressLabel')}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={requestsUsed === 0 ? null : progressPercent}
+          >
+            <span
+              class:track-complete={progressPercent === 100}
+              style:width={`${requestsUsed === 0 ? 30 : progressPercent}%`}
+            ></span>
+          </div>
+          <p class="follower-progress">
+            {$_('follower.progressEvents', { values: { events: eventsCount } })}
+            {#if oldestDate}
+              · {$_('follower.progressOldest', {
+                values: { date: $_date(new Date(oldestDate), { format: 'date' }) },
+              })}
+            {/if}
+          </p>
+        </div>
         <div class="follower-actions">
           <button type="button" onclick={stopHistory}>{$_('follower.cancel')}</button>
         </div>
