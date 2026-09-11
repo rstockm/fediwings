@@ -1251,6 +1251,15 @@ footer {
   -webkit-box-orient: vertical;
 }
 
+.post-content-preview p {
+  display: inline;
+}
+
+.post-content-preview p + p::before {
+  content: ' · ';
+  color: var(--text-on-light);
+}
+
 .post-content p,
 .thread-entry-content p {
   margin: 0 0 0.65em;

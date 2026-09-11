@@ -252,6 +252,11 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     .first()
     .evaluate((el) => getComputedStyle(el).getPropertyValue('-webkit-line-clamp'));
   expect(clamp).toBe('2');
+  const previewParagraphDisplay = await page
+    .locator('.post-content-preview p')
+    .first()
+    .evaluate((el) => getComputedStyle(el).display);
+  expect(previewParagraphDisplay).toBe('inline');
 
   const cards = page.locator('.post-card');
   await expect(cards.locator('.post-thumb')).toHaveCount(2);
