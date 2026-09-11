@@ -6,11 +6,17 @@
     <title>FediWings</title>
     <script>
       (() => {
-        const corrected = location.pathname.replace(/\/fediwings(\/|$)/i, '/FediWings$1');
-        location.replace(`${location.origin}${corrected}${location.search}${location.hash}`);
+        const segments = location.pathname.split('/');
+        const first = segments[1] ?? '';
+        if (first.toLowerCase() === 'fediwings' && first !== 'FediWings') {
+          segments[1] = 'FediWings';
+          location.replace(
+            `${location.origin}${segments.join('/')}${location.search}${location.hash}`,
+          );
+        }
       })();
     </script>
-    <meta http-equiv="refresh" content="0;url=https://rstockm.github.io/FediWings/" />
+    <meta http-equiv="refresh" content="0;url=/FediWings/" />
   </head>
   <body></body>
 </html>
