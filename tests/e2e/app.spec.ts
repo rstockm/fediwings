@@ -449,7 +449,7 @@ test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async 
         () => (window as Window & { __fediWingsShareUrl?: string }).__fediWingsShareUrl ?? '',
       ),
     )
-    .toBe('http://127.0.0.1:4173/#share=https%3A%2F%2Ftest.social%2F%40alice%2Fstatus-1');
+    .toBe(`${new URL('.', page.url()).href}#share=https%3A%2F%2Ftest.social%2F%40alice%2Fstatus-1`);
   const sharedUrl = await page.evaluate(
     () => (window as Window & { __fediWingsShareUrl?: string }).__fediWingsShareUrl!,
   );
