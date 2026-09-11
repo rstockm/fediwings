@@ -146,5 +146,5 @@ export const cardServiceResponseSchema = z.object({
   id: z.string().min(1).max(12),
   url: z.string().url(),
   imageUrl: z.string().url(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
