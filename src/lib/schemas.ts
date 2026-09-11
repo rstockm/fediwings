@@ -31,6 +31,7 @@ export const statusSchema = z.object({
   url: z.string().nullable(),
   content: z.string(),
   spoiler_text: z.string().default(''),
+  sensitive: z.boolean().default(false),
   visibility: z.string(),
   favourites_count: z.number().int().nonnegative(),
   reblogs_count: z.number().int().nonnegative(),
@@ -53,6 +54,10 @@ export const pixelfedStatusSchema = z
       .string()
       .nullish()
       .transform((value) => value ?? ''),
+    sensitive: z
+      .boolean()
+      .nullish()
+      .transform((value) => value ?? false),
     visibility: z.string(),
     favourites_count: z.number().int().nonnegative(),
     reblogs_count: z.number().int().nonnegative(),
@@ -131,3 +136,15 @@ export const followerNotificationSchema = z.object({
 });
 
 export const followerNotificationListSchema = z.array(followerNotificationSchema);
+
+export const cardShareTokenSchema = z.object({
+  token: z.string().min(1),
+  expiresIn: z.number().int().positive(),
+});
+
+export const cardServiceResponseSchema = z.object({
+  id: z.string().min(1).max(12),
+  url: z.string().url(),
+  imageUrl: z.string().url(),
+  createdAt: z.string().datetime(),
+});

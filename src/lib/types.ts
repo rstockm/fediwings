@@ -39,6 +39,7 @@ export interface MastodonStatus {
   url: string | null;
   content: string;
   spoiler_text: string;
+  sensitive?: boolean;
   visibility: string;
   favourites_count: number;
   reblogs_count: number;
@@ -104,4 +105,37 @@ export interface AnalysisProgress {
   totalPosts: number;
   requests: number;
   waitingUntil?: number;
+}
+
+export interface CardSnapshot {
+  version: 1;
+  sourceUrl: string;
+  account: {
+    url: string;
+    displayName: string;
+    handle: string;
+    avatarUrl: string;
+  };
+  content: {
+    excerpt: string;
+    thumbnailUrl: string | null;
+    contentWarning: string;
+    sensitive: boolean;
+  };
+  metrics: {
+    netReach: number;
+    grossReach: number;
+    likes: number;
+    boosts: number;
+  };
+  analysisState: 'complete' | 'partial';
+  analyzedAt: string;
+  algorithmVersion: 'net-reach-v1';
+}
+
+export interface CardServiceResponse {
+  id: string;
+  url: string;
+  imageUrl: string;
+  createdAt: string;
 }

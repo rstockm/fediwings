@@ -1,12 +1,63 @@
 import { describe, expect, it } from 'vitest';
 import {
   createSharedThreadUrl,
+  contentExcerpt,
+  createCardSnapshot,
   decodeSharedPost,
+  fullHandle,
   hasSharedThreadHash,
   parseSharedPostUrl,
 } from './share';
+import type { MastodonAccount, PostReach } from './types';
 
 const postUrl = 'https://example.social/@alice/114000000000000001';
+
+const account: MastodonAccount = {
+  id: 'account-1',
+  username: 'alice',
+  acct: 'alice',
+  display_name: 'Alice Example',
+  url: 'https://example.social/@alice',
+  avatar_static: 'https://example.social/avatar.png',
+  followers_count: 1000,
+};
+
+const result: PostReach = {
+  status: {
+    id: 'post-1',
+    created_at: '2026-09-10T18:45:00.000Z',
+    url: postUrl,
+    content: '<p>Hallo <img alt=":fedi:" src="emoji.png"> Fediverse</p>',
+    spoiler_text: '',
+    sensitive: false,
+    visibility: 'public',
+    favourites_count: 12,
+    reblogs_count: 3,
+    replies_count: 1,
+    in_reply_to_id: null,
+    in_reply_to_account_id: null,
+    media_attachments: [],
+  },
+  threadStatuses: [],
+  threadTruncated: false,
+  threadSize: 1,
+  thumbnail: {
+    type: 'image',
+    url: 'https://example.social/image.jpg',
+    preview_url: 'https://example.social/image-small.jpg',
+  },
+  state: 'complete',
+  authorFollowers: 1000,
+  likes: 12,
+  interactions: 13,
+  boosts: 3,
+  visibleBoosters: 2,
+  boosterFollowers: 240,
+  grossReach: 1240,
+  netReach: 730,
+  unattributedBoosts: 1,
+  pagesLoaded: 1,
+};
 
 describe('Share-Links', () => {
   it('liest Instanz und Status-ID aus einer öffentlichen Beitrags-URL', () => {
@@ -51,5 +102,35 @@ describe('Share-Links', () => {
     expect(() => createSharedThreadUrl(null, 'https://fediwings.example/')).toThrow(
       'keine öffentliche URL',
     );
+  });
+
+  it('erstellt einen validierbaren Card-Snapshot ohne HTML und mit vollstaendigem Handle', () => {
+    const snapshot = createCardSnapshot(result, account, '2026-09-10T19:00:00.000Z');
+
+    expect(fullHandle(account)).toBe('@alice@example.social');
+    expect(snapshot.content.excerpt).toBe('Hallo :fedi: Fediverse');
+    expect(snapshot.content.thumbnailUrl).toBe('https://example.social/image-small.jpg');
+    expect(snapshot.metrics).toEqual({ netReach: 730, grossReach: 1240, likes: 12, boosts: 3 });
+  });
+
+  it('laesst bei CW und sensitiven Medien keinen verborgenen Inhalt in den Snapshot', () => {
+    const sensitive = {
+      ...result,
+      status: {
+        ...result.status,
+        content: '<p>Verborgener Inhalt</p>',
+        spoiler_text: 'Spoiler',
+        sensitive: true,
+      },
+    };
+    const snapshot = createCardSnapshot(sensitive, account, '2026-09-10T19:00:00.000Z');
+
+    expect(snapshot.content).toEqual({
+      excerpt: 'CW: Spoiler',
+      thumbnailUrl: null,
+      contentWarning: 'Spoiler',
+      sensitive: true,
+    });
+    expect(contentExcerpt('<p>a  b</p>', 1)).toBe('…');
   });
 });

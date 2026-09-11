@@ -35,6 +35,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+        env:
+          VITE_CARD_SERVICE_URL: ${{ vars.CARD_SERVICE_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -50,6 +52,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_CARD_SERVICE_URL: ${{ vars.CARD_SERVICE_URL }}
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
 

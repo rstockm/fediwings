@@ -61,6 +61,7 @@
   let posts = $state<PostReach[]>([]);
   let insightStatuses = $state<MastodonStatus[]>([]);
   let insightReferenceTime = $state(Date.now());
+  let analyzedAt = $state('');
   let insightHistoryComplete = $state(false);
   let insightOldestFetchedAt = $state<string | null>(null);
   let insightReachSelectionComplete = $state(false);
@@ -207,6 +208,7 @@
     posts = [];
     insightStatuses = [];
     insightReferenceTime = Date.now();
+    analyzedAt = '';
     insightHistoryComplete = false;
     insightOldestFetchedAt = null;
     insightReachSelectionComplete = false;
@@ -267,6 +269,7 @@
       phase = posts.some((post) => post.state === 'partial' || post.state === 'error')
         ? 'partial'
         : 'complete';
+      analyzedAt = new Date().toISOString();
       message = phase === 'partial' ? msg('notice.partial') : msg('notice.complete');
 
       try {
@@ -528,7 +531,7 @@
 
           <div class="post-list">
             {#each sortedPosts as post, index (post.status.id)}
-              <PostCard result={post} {maxNetReach} {index} />
+              <PostCard result={post} {maxNetReach} {index} {account} {analyzedAt} />
             {/each}
           </div>
         {/if}

@@ -2,13 +2,26 @@
   import DOMPurify from 'dompurify';
   import { onDestroy } from 'svelte';
   import { _, date as _date, number as _number } from 'svelte-i18n';
-  import { createSharedThreadUrl } from '../lib/share';
-  import type { PostReach } from '../lib/types';
+  import ShareDialog from './ShareDialog.svelte';
+  import { cardServiceAvailable, createSharedThreadUrl } from '../lib/share';
   import { msg } from '../lib/i18n';
+  import type { MastodonAccount, PostReach } from '../lib/types';
 
-  let { result, maxNetReach, index }: { result: PostReach; maxNetReach: number; index: number } =
-    $props();
+  let {
+    result,
+    maxNetReach,
+    index,
+    account,
+    analyzedAt,
+  }: {
+    result: PostReach;
+    maxNetReach: number;
+    index: number;
+    account: MastodonAccount;
+    analyzedAt: string;
+  } = $props();
   let expanded = $state(false);
+  let shareDialogOpen = $state(false);
   let shareFeedback = $state('');
   let shareResetTimer: number | undefined;
 
@@ -67,7 +80,6 @@
         // Fall through for browsers that expose the API but deny clipboard access.
       }
     }
-
     const textarea = document.createElement('textarea');
     textarea.value = url;
     textarea.style.position = 'fixed';
@@ -88,14 +100,14 @@
   }
 
   async function shareThread(): Promise<void> {
+    if (cardServiceAvailable()) {
+      shareDialogOpen = true;
+      return;
+    }
     try {
       const url = createSharedThreadUrl(result.status.url, window.location.href);
       if (navigator.share) {
-        await navigator.share({
-          title: msg('post.shareTitle'),
-          text: msg('post.shareText'),
-          url,
-        });
+        await navigator.share({ title: msg('post.shareTitle'), text: msg('post.shareText'), url });
         showShareFeedback(msg('post.shared'));
       } else {
         await copyShareUrl(url);
@@ -341,8 +353,8 @@
         type="button"
         class="post-details-action"
         aria-label={$_('post.share')}
-        title={shareFeedback || 'Beitrag teilen'}
-        disabled={!result.status.url || result.state === 'pending' || result.state === 'loading'}
+        title={$_('post.share')}
+        disabled={!result.status.url || (result.state !== 'complete' && result.state !== 'partial')}
         onclick={shareThread}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -368,4 +380,11 @@
       <span class="share-feedback" role="status" aria-live="polite">{shareFeedback}</span>
     </div>
   </div>
+  <ShareDialog
+    open={shareDialogOpen}
+    {result}
+    {account}
+    {analyzedAt}
+    onclose={() => (shareDialogOpen = false)}
+  />
 </article>

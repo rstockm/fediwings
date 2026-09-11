@@ -43,8 +43,9 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
 
 ## Sicherheit und Datenschutz
 
-- Die App ist eine Static App ohne Backend, Accounts, Cookies oder eigene Persistenz. Analysedaten bleiben ausschließlich im Arbeitsspeicher der laufenden Browser-Sitzung.
-- Der „Follower“-Tab bietet einen optionalen Login am kompatiblen Fediverse-Server (OAuth mit PKCE, Scope `read:notifications`) für den persönlichen Follower-Verlauf. Der Access-Token liegt im `sessionStorage` des Tabs und überlebt damit Neuladen und Ansichtswechsel innerhalb der Tab-Sitzung; beim Abmelden, bei HTTP 401 und beim Schließen des Tabs wird er gelöscht. Der kurzlebige Login-Handshake liegt ebenfalls transient im `sessionStorage` und wird nach dem Token-Austausch gelöscht (ADR-0003).
+- Die FediWings-App ist eine Static App ohne eigene Accounts, Cookies oder Persistenz. Analysedaten bleiben ausschließlich im Arbeitsspeicher der laufenden Browser-Sitzung.
+- Der „Follower“-Tab bietet einen optionalen Login am kompatiblen Fediverse-Server (OAuth mit PKCE, Scope `read:notifications`) für den persönlichen Follower-Verlauf. Der Access-Token liegt im `sessionStorage` des Tabs und überlebt damit Neuladen und Ansichtswechsel innerhalb der Tab-Sitzung; beim Abmelden, bei HTTP 401 und beim Schließen des Tabs wird er gelöscht. Der kurzlebige Login-Handshake liegt ebenfalls transient im `sessionStorage` und wird nach dem Token-Austausch gelöscht.
+- Beim Teilen kann die App einen separaten Card Service verwenden. Dorthin gehen ausschließlich der bewusst ausgelöste öffentliche Snapshot (Post-URL, Anzeigename, Handle, Avatar-URL, bereinigter Textanriss, Kennzahlen und Analysezeitpunkt) sowie ein optionales öffentliches Thumbnail. Der Dienst speichert den Snapshot und die daraus gerenderte PNG als öffentliche Share-URL; die entfernten Quellbilder werden nicht gespeichert. Content Warnings und sensible Medien übertragen weder Thumbnail noch verborgenen Text. Ist der Dienst nicht erreichbar, bleibt der fragmentbasierte direkte Share-Link nutzbar.
 - Eine restriktive Content-Security-Policy wird beim Build eingebettet (`default-src 'none'`; Scripts und Styles nur vom eigenen Origin).
 - Erlaubte ausgehende HTTPS-Ziele (nutzerinduziert):
   - Heimatinstanz des eingegebenen Handles (`https://<domain>/api/...`)
@@ -52,6 +53,7 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
   - WebFinger-Endpunkt derselben Domain (`.well-known/webfinger`)
   - Instanz, die ein WebFinger-`self`-Link angibt
   - Nur im „Follower“-Tab nach ausdrücklichem Login: OAuth-Endpunkte derselben Instanz (`/api/v1/apps`, `/oauth/authorize`, `/oauth/token`, `/api/v1/notifications`)
+  - Nur nach Aktivierung der Share-Funktion: konfigurierte HTTPS-Domain des FediWings Card Service für Request-Token und Snapshot-Erstellung
   - Keine Abfragen an die Heimatserver der Booster, keine Tracking- oder Analyseanbieter.
 - Alle API-Antworten werden gegen feste Schemas validiert; Beitrags-HTML wird vor der Darstellung mit einer engen Allowlist sanitisiert (DOMPurify).
 - Es werden keine Secrets oder Zugangsdaten im Build benötigt.

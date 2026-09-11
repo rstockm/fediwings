@@ -521,6 +521,73 @@ test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async 
   expect(blocking).toEqual([]);
 });
 
+test('erstellt und teilt eine individuelle Card ueber den konfigurierten Service', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    (window as Window & { __fediWingsCardServiceUrl?: string }).__fediWingsCardServiceUrl =
+      'https://cards.test';
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => {
+        (window as Window & { __fediWingsCardUrl?: string }).__fediWingsCardUrl = data.url;
+      },
+    });
+  });
+  const cors = { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173' };
+  await page.route('https://cards.test/api/v1/share-token/', async (route) => {
+    await route.fulfill({ json: { token: 'test-token', expiresIn: 300 }, headers: cors });
+  });
+  await page.route('https://cards.test/api/v1/cards/', async (route) => {
+    const snapshot = route.request().postDataJSON();
+    expect(await route.request().headerValue('Idempotency-Key')).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
+    expect(snapshot.account.handle).toBe('@alice@test.social');
+    expect(snapshot.content.excerpt).toBe('Ein Testbeitrag aus dem Fediverse.');
+    await route.fulfill({
+      status: 201,
+      headers: cors,
+      json: {
+        id: '7Yp2mK9q',
+        url: 'https://cards.test/s/7Yp2mK9q/',
+        imageUrl: 'https://cards.test/s/7Yp2mK9q/card.png',
+        createdAt: '2026-09-11T12:00:00.000Z',
+      },
+    });
+  });
+  await mockMastodon(page);
+  await page.goto('/');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  const threadCard = page.locator('.post-card').filter({
+    hasText: 'Ein Testbeitrag aus dem Fediverse.',
+  });
+  await threadCard.getByRole('button', { name: 'Beitrag teilen' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Analyse teilen' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('Deine individuelle Vorschaukarte ist bereit.')).toBeVisible();
+  await expect(dialog.locator('img')).toHaveAttribute(
+    'src',
+    'https://cards.test/s/7Yp2mK9q/card.png',
+  );
+  await dialog.getByRole('button', { name: 'Teilen' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __fediWingsCardUrl?: string }).__fediWingsCardUrl ?? '',
+      ),
+    )
+    .toBe('https://cards.test/s/7Yp2mK9q/');
+
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  const blocking = accessibility.violations.filter(
+    (violation) => violation.impact === 'serious' || violation.impact === 'critical',
+  );
+  expect(blocking).toEqual([]);
+});
+
 test('zeigt fuer einen ungueltigen Share-Link einen sicheren Fehlerzustand', async ({ page }) => {
   await page.goto('/#share=j.invalid');
 
