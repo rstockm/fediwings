@@ -1,0 +1,107 @@
+export interface ParsedHandle {
+  username: string;
+  domain: string;
+  acct: string;
+}
+
+export interface InstanceTarget extends ParsedHandle {
+  origin: string;
+}
+
+export interface ServerPlatform {
+  id: string;
+  name: string;
+  mastodonApi: boolean;
+}
+
+export interface MastodonAccount {
+  id: string;
+  username: string;
+  acct: string;
+  display_name: string;
+  url: string;
+  uri?: string;
+  avatar_static: string;
+  followers_count: number;
+  hide_collections?: boolean | null;
+}
+
+export interface MastodonMediaAttachment {
+  type: string;
+  url: string;
+  preview_url: string | null;
+  description?: string | null;
+}
+
+export interface MastodonStatus {
+  id: string;
+  created_at: string;
+  url: string | null;
+  content: string;
+  spoiler_text: string;
+  visibility: string;
+  favourites_count: number;
+  reblogs_count: number;
+  replies_count: number;
+  quotes_count?: number;
+  in_reply_to_id: string | null;
+  in_reply_to_account_id: string | null;
+  media_attachments: MastodonMediaAttachment[];
+}
+
+export interface MastodonStatusWithAccount extends MastodonStatus {
+  account: MastodonAccount;
+}
+
+export interface MastodonStatusContext {
+  ancestors: MastodonStatusWithAccount[];
+  descendants: MastodonStatusWithAccount[];
+}
+
+export interface RateLimit {
+  limit: number | null;
+  remaining: number | null;
+  resetAt: number | null;
+}
+
+export interface ApiPage<T> {
+  data: T;
+  link: string | null;
+  rateLimit: RateLimit;
+}
+
+export interface ThreadCard {
+  status: MastodonStatus;
+  threadStatuses: MastodonStatus[];
+  threadTruncated: boolean;
+  threadSize: number;
+}
+
+export type AnalysisState = 'pending' | 'loading' | 'complete' | 'partial' | 'error';
+
+export interface PostReach {
+  status: MastodonStatus;
+  threadStatuses: MastodonStatus[];
+  threadTruncated: boolean;
+  threadSize: number;
+  thumbnail: MastodonMediaAttachment | null;
+  state: AnalysisState;
+  authorFollowers: number;
+  likes: number;
+  interactions: number;
+  boosts: number;
+  visibleBoosters: number;
+  boosterFollowers: number;
+  grossReach: number;
+  netReach: number;
+  unattributedBoosts: number;
+  pagesLoaded: number;
+  error?: string;
+}
+
+export interface AnalysisProgress {
+  completedPosts: number;
+  totalPosts: number;
+  requests: number;
+  waitingUntil?: number;
+}

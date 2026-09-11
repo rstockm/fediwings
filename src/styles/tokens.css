@@ -1,0 +1,45 @@
+/*
+ * Design tokens as CSS custom properties.
+ * This is the single source for colors, typography and spacing-related values.
+ * Do not duplicate these values in components.
+ */
+:root {
+  font-family: Inter, Avenir, 'Segoe UI', Helvetica, Arial, sans-serif;
+  color: #f3f0e8;
+  background: #17181b;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  /* surfaces */
+  --ink: #17181b;
+  --paper: #f1eee5;
+  --paper-muted: #d9d5ca;
+  --paper-raised: #faf9f5;
+
+  /* accents */
+  --violet: #8b7cff;
+  --violet-strong: #5d4cf0;
+  --blue: #149df2;
+  --lime: #c7f36b;
+  --positive: #14745b;
+  --negative: #b13747;
+  --chart-muted: #b9b6bd;
+
+  /* text on dark surfaces (contrast >= 4.5:1) */
+  --text-on-dark: #9f9f9f;
+  /* text on light surfaces (contrast >= 4.5:1) */
+  --text-on-light: #5c5a62;
+
+  /* hairline separators */
+  --line-dark: rgba(243, 240, 232, 0.16);
+  --line-light: rgba(23, 24, 27, 0.16);
+
+  /* shape */
+  --radius: 8px;
+
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --sans-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --sans-display-thin:
+    'Helvetica Neue UltraLight', 'Arial Nova Light', 'Segoe UI Light', 'Roboto Thin',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+playwright-report/
+test-results/
+.playwright-browsers/
+.DS_Store
+*.log
+*.csv
+test.md
