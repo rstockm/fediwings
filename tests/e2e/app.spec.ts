@@ -78,7 +78,7 @@ const statuses = [
     id: 'status-2',
     created_at: daysAgo(3),
     url: 'https://test.social/@alice/status-2',
-    content: '<p>Ein Beitrag ohne Boosts.</p>',
+    content: '<p>Re: Ein Beitrag ohne Boosts.</p>',
     spoiler_text: '',
     visibility: 'public',
     favourites_count: 4,
@@ -260,6 +260,8 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await expect(page.getByText('Antwort auf einen fremden Beitrag.')).toHaveCount(0);
   await expect(page.getByText('Ein Testbeitrag aus dem Fediverse.')).toBeVisible();
   await expect(page.getByText('Thread · 2 Postings')).toBeVisible();
+  const quoteCard = page.locator('.post-card').filter({ hasText: 'Re: Ein Beitrag ohne Boosts.' });
+  await expect(quoteCard.locator('.quote-badge')).toHaveText('Quote');
 
   const thumb = page.locator('.post-thumb img').first();
   await expect(thumb).toBeVisible();

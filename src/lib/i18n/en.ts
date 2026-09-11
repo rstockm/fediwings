@@ -128,6 +128,7 @@ export const en: Messages = {
     openAt: 'Open post from {date} in the Fediverse',
     thread: 'Thread · {count} posts',
     threadTruncated: 'Thread · {count} posts, partially loaded',
+    quote: 'Quote',
     statePending: 'waiting',
     stateLoading: 'analysing',
     statePartial: 'Partial result',

@@ -1200,6 +1200,16 @@ footer {
   white-space: nowrap;
 }
 
+.quote-badge {
+  padding: 4px 9px;
+  border: 1px solid #a85d2e;
+  border-radius: var(--radius);
+  color: #8c461f;
+  background: rgba(207, 112, 49, 0.1);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .state-loading {
   border-color: var(--violet);
   color: #6050d8;

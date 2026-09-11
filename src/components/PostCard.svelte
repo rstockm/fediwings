@@ -37,6 +37,11 @@
   }
 
   const safeContent = $derived(sanitizeContent(result.status.content));
+  const quoteLabel = $derived(
+    /^re:/i.test(result.status.content.replace(/<[^>]+>/g, '').trimStart())
+      ? $_('post.quote')
+      : null,
+  );
   const additionalThreadEntries = $derived(
     result.threadStatuses
       .map((status, position) => ({
@@ -166,6 +171,9 @@
         {/if}
         {#if threadLabel}
           <span class="thread-badge">{threadLabel}</span>
+        {/if}
+        {#if quoteLabel}
+          <span class="quote-badge">{quoteLabel}</span>
         {/if}
         {#if result.state !== 'complete'}
           <span class="state-pill state-{result.state}">{$_(`post.state.${result.state}`)}</span>

@@ -126,6 +126,7 @@ export const de = {
     openAt: 'Beitrag vom {date} im Fediverse öffnen',
     thread: 'Thread · {count} Postings',
     threadTruncated: 'Thread · {count} Postings, teilweise geladen',
+    quote: 'Quote',
     statePending: 'wartet',
     stateLoading: 'wird analysiert',
     statePartial: 'Teilergebnis',
