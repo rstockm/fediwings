@@ -5,3 +5,4 @@ playwright-report/
 .playwright-browsers/
 package-lock.json
 *.md
+*.sarif
