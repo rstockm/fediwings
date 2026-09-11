@@ -212,6 +212,11 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await mockMastodon(page);
   await page.goto('/');
 
+  await expect(page.getByText('von Ralf Stockmann', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'FediWings MVP' })).toHaveAttribute(
+    'href',
+    'https://github.com/rstockm/fediwings',
+  );
   await expect(page.getByLabel('Threads')).toHaveValue('80');
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();

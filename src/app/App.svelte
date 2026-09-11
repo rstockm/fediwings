@@ -407,7 +407,7 @@
     <section class="hero" class:hero-collapsed={heroCollapsed} aria-labelledby="page-title">
       <div class="hero-copy">
         <img class="hero-emblem" src={emblemUrl} alt="" aria-hidden="true" />
-        <p class="kicker">Federated signal analysis / 01</p>
+        <p class="kicker">von Ralf Stockmann</p>
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
         <h1 id="page-title">{@html $_('hero.title')}</h1>
         <p class="intro">{$_('hero.intro')}</p>
@@ -541,7 +541,9 @@
 {/if}
 
 <footer>
-  <span>{$_('results.footerMvp')}</span>
+  <a href="https://github.com/rstockm/fediwings" target="_blank" rel="noreferrer">
+    {$_('results.footerMvp')}
+  </a>
   <a
     href="https://docs.joinmastodon.org/methods/statuses/#reblogged_by"
     target="_blank"
