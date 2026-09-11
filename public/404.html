@@ -8,15 +8,15 @@
       (() => {
         const segments = location.pathname.split('/');
         const first = segments[1] ?? '';
-        if (first.toLowerCase() === 'fediwings' && first !== 'FediWings') {
-          segments[1] = 'FediWings';
+        if (first.toLowerCase() === 'fediwings' && first !== 'fediwings') {
+          segments[1] = 'fediwings';
           location.replace(
             `${location.origin}${segments.join('/')}${location.search}${location.hash}`,
           );
         }
       })();
     </script>
-    <meta http-equiv="refresh" content="0;url=/FediWings/" />
+    <meta http-equiv="refresh" content="0;url=/fediwings/" />
   </head>
   <body></body>
 </html>
