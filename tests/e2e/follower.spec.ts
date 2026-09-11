@@ -117,6 +117,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
+  await expect(page.locator('.follower-hero')).toHaveClass(/follower-hero-collapsed/);
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
 
   await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();

@@ -95,6 +95,7 @@
   let historyController: AbortController | null = null;
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
+  const heroCollapsed = $derived(anonPhase === 'loading' || account !== null);
   const progressPercent = $derived(
     Math.min(100, Math.round((requestsUsed / DEFAULT_MAX_PAGES) * 100)),
   );
@@ -449,8 +450,12 @@
   }
 </script>
 
-<main class="follower-page">
-  <section class="follower-hero" aria-labelledby="follower-title">
+<main class="follower-page" class:follower-page-collapsed={heroCollapsed}>
+  <section
+    class="follower-hero"
+    class:follower-hero-collapsed={heroCollapsed}
+    aria-labelledby="follower-title"
+  >
     <p class="kicker">Federated signal analysis / 02</p>
     <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
     <h1 id="follower-title">{@html $_('follower.titleHtml')}</h1>

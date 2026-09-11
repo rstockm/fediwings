@@ -3042,6 +3042,29 @@ footer {
 
 .follower-page {
   padding: 54px 0 110px;
+  transition: padding 460ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.follower-page-collapsed {
+  padding-top: 28px;
+}
+
+.follower-hero {
+  max-height: 500px;
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    max-height 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 240ms ease,
+    visibility 460ms;
+}
+
+.follower-hero-collapsed {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .follower-hero h1 {
@@ -3064,6 +3087,10 @@ footer {
   min-height: 0;
   justify-content: flex-start;
   margin-top: 48px;
+}
+
+.follower-page-collapsed .follower-shell {
+  margin-top: 0;
 }
 
 .follower-shell .follower-error {
