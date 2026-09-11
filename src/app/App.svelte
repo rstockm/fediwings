@@ -21,6 +21,7 @@
   import { analyzePosts, preparePosts, prepareSharedPost } from '../lib/analysis';
   import { resolveHandle } from '../lib/handle';
   import { loadSavedHandles, saveHandleToHistory, type SavedHandle } from '../lib/history';
+  import { readLastAccount, writeLastAccount } from '../lib/lastAccount';
   import { buildPostingInsights } from '../lib/insights';
   import { detectPlatform } from '../lib/platform';
   import { decodeSharedPost, hasSharedThreadHash } from '../lib/share';
@@ -46,7 +47,7 @@
     return 'analyse';
   }
 
-  const view = $state<View>(readView());
+  let view = $state<View>(readView());
 
   let handle = $state('');
   let postLimit = $state(80);
@@ -73,6 +74,32 @@
   let sharedThreadError = $state('');
   let shareController: AbortController | null = null;
   let shareLoadId = 0;
+
+  $effect(() => {
+    if (view !== 'analyse') return;
+    const last = readLastAccount();
+    if (last?.source === 'follower') handle = last.handle;
+  });
+
+  function navigate(next: View): void {
+    window.history.pushState(null, '', next === 'analyse' ? './' : `./?view=${next}`);
+    view = next;
+  }
+
+  function navClick(event: MouseEvent, next: View): void {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    event.preventDefault();
+    navigate(next);
+  }
 
   const busy = $derived(phase === 'resolving' || phase === 'analyzing');
   const heroCollapsed = $derived(busy || posts.length > 0);
@@ -157,11 +184,16 @@
 
   onMount(() => {
     const onHashChange = () => void loadShareView();
+    const onPopState = () => {
+      view = readView();
+    };
     void loadShareView();
     window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onPopState);
     return () => {
       shareController?.abort();
       window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('popstate', onPopState);
     };
   });
 
@@ -238,17 +270,15 @@
       message = phase === 'partial' ? msg('notice.partial') : msg('notice.complete');
 
       try {
-        sessionStorage.setItem(
-          'fediscope:last-snapshot-v1',
-          JSON.stringify({
-            handle: `@${target.acct}`,
-            acct: target.acct,
-            followers: account?.followers_count ?? 0,
-            origin: target.origin,
-            platformId: platform?.id ?? 'unknown',
-            platformName: platform?.name ?? 'ActivityPub-Server',
-          }),
-        );
+        writeLastAccount({
+          handle: `@${target.acct}`,
+          acct: target.acct,
+          followers: account?.followers_count ?? 0,
+          origin: target.origin,
+          platformId: platform?.id ?? 'unknown',
+          platformName: platform?.name ?? 'ActivityPub-Server',
+          source: 'analyse',
+        });
       } catch {
         // Sitzungsspeicher nicht verfügbar: Übergabe an den Follower-Tab entfällt.
       }
@@ -283,7 +313,12 @@
 </svelte:head>
 
 <header class="site-header">
-  <a class="brand" href="./" aria-label={$_('header.home')}>
+  <a
+    class="brand"
+    href="./"
+    aria-label={$_('header.home')}
+    onclick={(event) => navClick(event, 'analyse')}
+  >
     <span class="brand-logo-lockup" aria-hidden="true">
       <img
         class="brand-logo brand-logo-lockup-part brand-logo-lockup-mark"
@@ -303,14 +338,20 @@
     <img class="brand-logo brand-logo-emblem" src={emblemUrl} alt="" width="58" height="28" />
   </a>
   <nav class="view-tabs" aria-label="Hauptnavigation">
-    <a href="./" aria-current={view === 'analyse' ? 'page' : undefined}
-      >{$_('header.navAnalysis')}</a
+    <a
+      href="./"
+      aria-current={view === 'analyse' ? 'page' : undefined}
+      onclick={(event) => navClick(event, 'analyse')}>{$_('header.navAnalysis')}</a
     >
-    <a href="./?view=follower" aria-current={view === 'follower' ? 'page' : undefined}
-      >{$_('header.navFollower')}</a
+    <a
+      href="./?view=follower"
+      aria-current={view === 'follower' ? 'page' : undefined}
+      onclick={(event) => navClick(event, 'follower')}>{$_('header.navFollower')}</a
     >
-    <a href="./?view=methodik" aria-current={view === 'methodik' ? 'page' : undefined}
-      >{$_('header.navMethodology')}</a
+    <a
+      href="./?view=methodik"
+      aria-current={view === 'methodik' ? 'page' : undefined}
+      onclick={(event) => navClick(event, 'methodik')}>{$_('header.navMethodology')}</a
     >
   </nav>
   <div class="header-right">

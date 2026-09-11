@@ -214,7 +214,7 @@ test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus de
 }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem(
-      'fediscope:last-snapshot-v1',
+      'fediscope:last-account-v1',
       JSON.stringify({
         handle: '@alice@test.social',
         acct: 'alice@test.social',
@@ -222,6 +222,8 @@ test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus de
         origin: 'https://test.social',
         platformId: 'mastodon',
         platformName: 'Mastodon',
+        source: 'analyse',
+        savedAt: '2026-09-11T00:00:00.000Z',
       }),
     );
     localStorage.setItem(
@@ -244,6 +246,28 @@ test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus de
       .locator('#follower-saved-handles-listbox')
       .getByRole('option', { name: 'alice@test.social' }),
   ).toBeVisible();
+});
+
+test('uebergibt den im Follower-Tab geladenen Account ohne Reload an die Analyse', async ({
+  page,
+}) => {
+  await mockInstance(page);
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await expect(page.getByText('1.000')).toBeVisible();
+
+  await page.evaluate(() => {
+    (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload = 'alive';
+  });
+  await page.getByRole('link', { name: 'Analyse' }).click();
+  await expect(page.getByRole('button', { name: 'Analysieren' })).toBeVisible();
+  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
+  const marker = await page.evaluate(
+    () => (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload,
+  );
+  expect(marker).toBe('alive');
 });
 
 test('meldet einen abgebrochenen Login verstaendlich', async ({ page }) => {

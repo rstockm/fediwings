@@ -31,6 +31,7 @@
     type OAuthHandshake,
   } from '../lib/oauth';
   import { detectPlatform } from '../lib/platform';
+  import { readLastAccount, writeLastAccount } from '../lib/lastAccount';
   import type { MastodonAccount, ServerPlatform } from '../lib/types';
   import { msg } from '../lib/i18n';
 
@@ -48,34 +49,24 @@
     } | null;
   } = $props();
 
-  interface SessionSnapshot {
-    handle: string;
-    acct: string;
-    followers: number;
-    origin: string;
-    platformId: string;
-    platformName: string;
-  }
-
-  function loadSessionSnapshot(): SessionSnapshot | null {
-    try {
-      const raw = sessionStorage.getItem('fediscope:last-snapshot-v1');
-      if (!raw) return null;
-      const parsed: unknown = JSON.parse(raw);
-      if (
-        typeof parsed !== 'object' ||
-        parsed === null ||
-        typeof (parsed as SessionSnapshot).handle !== 'string' ||
-        typeof (parsed as SessionSnapshot).acct !== 'string' ||
-        typeof (parsed as SessionSnapshot).followers !== 'number' ||
-        typeof (parsed as SessionSnapshot).origin !== 'string'
-      ) {
-        return null;
-      }
-      return parsed as SessionSnapshot;
-    } catch {
-      return null;
-    }
+  function applyStoredAccount(stored: NonNullable<ReturnType<typeof readLastAccount>>): void {
+    const username = stored.acct.split('@')[0] ?? stored.acct;
+    handle = stored.handle;
+    origin = stored.origin;
+    platform =
+      stored.platformId === 'unknown'
+        ? null
+        : { id: stored.platformId, name: stored.platformName, mastodonApi: true };
+    account = {
+      id: '',
+      username,
+      acct: stored.acct,
+      display_name: username,
+      url: `https://${stored.origin.replace(/^https:\/\//, '')}/@${username}`,
+      avatar_static: '',
+      followers_count: stored.followers,
+    };
+    anonPhase = 'ready';
   }
 
   type AnonPhase = 'idle' | 'loading' | 'ready' | 'error';
@@ -150,32 +141,17 @@
       applyFollowerSession(followerSession);
     }
 
-    const session = followerSession ? null : loadSessionSnapshot();
-    if (session) {
-      const username = session.acct.split('@')[0] ?? session.acct;
-      handle = session.handle;
-      origin = session.origin;
-      platform = {
-        id: session.platformId,
-        name: session.platformName,
-        mastodonApi: true,
-      };
-      account = {
-        id: '',
-        username,
-        acct: session.acct,
-        display_name: username,
-        url: `https://${session.origin.replace(/^https:\/\//, '')}/@${username}`,
-        avatar_static: '',
-        followers_count: session.followers,
-      };
-      anonPhase = 'ready';
+    const stored = readLastAccount();
+    if (!followerSession && stored?.source === 'follower') {
+      applyStoredAccount(stored);
     } else if (snapshot) {
       handle = prefillHandle || `@${snapshot.account.acct}`;
       account = snapshot.account;
       platform = snapshot.platform;
       origin = snapshot.origin;
       anonPhase = 'ready';
+    } else if (!followerSession && stored) {
+      applyStoredAccount(stored);
     } else if (prefillHandle && !handle) {
       handle = prefillHandle;
     }
@@ -219,6 +195,19 @@
         followers: handshake.followers,
         savedAt: new Date().toISOString(),
       });
+      const previous = readLastAccount();
+      const sameAccount = previous?.acct === handshake.acct;
+      writeLastAccount({
+        handle: `@${handshake.acct}`,
+        acct: handshake.acct,
+        origin: handshake.origin,
+        followers: handshake.followers,
+        platformId: sameAccount ? (previous?.platformId ?? 'unknown') : 'unknown',
+        platformName: sameAccount
+          ? (previous?.platformName ?? 'ActivityPub-Server')
+          : 'ActivityPub-Server',
+        source: 'follower',
+      });
       authPhase = 'connected';
       account = {
         id: '',
@@ -253,6 +242,17 @@
       ]);
       account = accountResult;
       platform = platformResult;
+      writeLastAccount({
+        handle: `@${accountResult.acct.includes('@') ? accountResult.acct : `${accountResult.acct}@${new URL(target.origin).hostname}`}`,
+        acct: accountResult.acct.includes('@')
+          ? accountResult.acct
+          : `${accountResult.acct}@${new URL(target.origin).hostname}`,
+        origin: target.origin,
+        followers: accountResult.followers_count,
+        platformId: platformResult?.id ?? 'unknown',
+        platformName: platformResult?.name ?? 'ActivityPub-Server',
+        source: 'follower',
+      });
       anonPhase = 'ready';
     } catch (error) {
       anonPhase = 'error';

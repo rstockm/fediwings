@@ -423,6 +423,31 @@ test('vergleicht gemeldete Interaktionen mit den 30 Tagen davor', async ({ page 
   await expect(chart.locator('.insight-tooltip')).toBeVisible();
 });
 
+test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async ({ page }) => {
+  await mockMastodon(page);
+  await page.goto('/');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  await expect(
+    page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
+  ).toBeVisible();
+
+  await page.evaluate(() => {
+    (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload = 'alive';
+  });
+  await page.getByRole('link', { name: 'Follower' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
+  await expect(page.getByText('1.000')).toBeVisible();
+  const marker = await page.evaluate(
+    () => (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload,
+  );
+  expect(marker).toBe('alive');
+});
+
 test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'share', {
