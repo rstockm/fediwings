@@ -363,6 +363,16 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   const actionButtons = threadCard.locator('.post-details-actions button');
   await expect(actionButtons).toHaveCount(1);
   await expect(actionButtons.first()).toHaveAccessibleName('Beitrag teilen');
+  const [actionBox, detailsBarBox] = await Promise.all([
+    actionButtons.first().boundingBox(),
+    threadCard.locator('.post-details-bar').boundingBox(),
+  ]);
+  expect(actionBox).not.toBeNull();
+  expect(detailsBarBox).not.toBeNull();
+  expect(actionBox!.y).toBeGreaterThanOrEqual(detailsBarBox!.y);
+  expect(actionBox!.y + actionBox!.height).toBeLessThanOrEqual(
+    detailsBarBox!.y + detailsBarBox!.height,
+  );
   await actionButtons.first().click();
   await expect(details).toHaveAttribute('open', '');
 

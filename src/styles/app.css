@@ -1471,7 +1471,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
+  min-height: 44px;
   padding: 4px 16px;
   color: #8d89a3;
   cursor: pointer;
@@ -1520,7 +1520,7 @@ footer {
 
 .post-details-actions {
   position: absolute;
-  top: 15px;
+  top: 22px;
   right: 10px;
   display: flex;
   align-items: center;
@@ -1538,7 +1538,7 @@ footer {
   border: 1px solid #c9c5ba;
   border-radius: 50%;
   color: #5040c8;
-  background: #faf9f5;
+  background: transparent;
   cursor: pointer;
   pointer-events: auto;
   transition:
@@ -1560,7 +1560,7 @@ footer {
 
 .post-details-action:hover {
   color: #4637c4;
-  background: rgba(124, 108, 255, 0.14);
+  background: rgba(124, 108, 255, 0.1);
 }
 
 .post-details-action:active {
