@@ -455,6 +455,7 @@ test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async
 
 test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async ({ page }) => {
   await page.addInitScript(() => {
+    (window as Window & { __fediWingsCardServiceUrl?: string }).__fediWingsCardServiceUrl = '';
     Object.defineProperty(navigator, 'share', {
       configurable: true,
       value: async (data: ShareData) => {
