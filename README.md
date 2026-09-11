@@ -2,7 +2,7 @@
 
 FediWings ist eine statische Webanwendung zur Analyse der Netto-Reichweite öffentlicher Fediverse-Beiträge auf unterstützten API-kompatiblen Servern. Die App lädt Daten direkt aus dem Browser von der Heimatinstanz des analysierten Accounts und speichert keine Analyseergebnisse.
 
-Die Oberfläche ist zweisprachig (Deutsch/Englisch, Umschalter in der Kopfzeile, ADR-0004). Ohne weiteren Hinweis startet die App auf Deutsch; die Browsersprache dient als Vorschlag.
+Die Oberfläche ist zweisprachig (Deutsch/Englisch, Umschalter in der Kopfzeile). Ohne weiteren Hinweis startet die App auf Deutsch; die Browsersprache dient als Vorschlag.
 
 ## Entwicklung
 
@@ -45,7 +45,7 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
 
 - Die App ist eine Static App ohne Backend, Accounts, Cookies oder eigene Persistenz. Analysedaten bleiben ausschließlich im Arbeitsspeicher der laufenden Browser-Sitzung.
 - Der „Follower“-Tab bietet einen optionalen Login am kompatiblen Fediverse-Server (OAuth mit PKCE, Scope `read:notifications`) für den persönlichen Follower-Verlauf. Der Access-Token liegt im `sessionStorage` des Tabs und überlebt damit Neuladen und Ansichtswechsel innerhalb der Tab-Sitzung; beim Abmelden, bei HTTP 401 und beim Schließen des Tabs wird er gelöscht. Der kurzlebige Login-Handshake liegt ebenfalls transient im `sessionStorage` und wird nach dem Token-Austausch gelöscht (ADR-0003).
-- Eine restriktive Content-Security-Policy wird beim Build eingebettet (`default-src 'none'`; Scripts und Styles nur vom eigenen Origin; Details in `docs/adr/0002-externe-origins-und-csp.md`).
+- Eine restriktive Content-Security-Policy wird beim Build eingebettet (`default-src 'none'`; Scripts und Styles nur vom eigenen Origin).
 - Erlaubte ausgehende HTTPS-Ziele (nutzerinduziert):
   - Heimatinstanz des eingegebenen Handles (`https://<domain>/api/...`)
   - NodeInfo-Endpunkte derselben Domain (`.well-known/nodeinfo` und Profil-Link)
@@ -72,7 +72,7 @@ Netto-Reichweite = min(
 Brutto-Reichweite = Autor-Follower + Summe der Follower öffentlicher Booster
 ```
 
-Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regression aus Instagram-Story-Daten heuristisch auf Beiträge im Fediverse. Der Faktor `2 × Boosts` unterstellt einen höheren Boost-Wert in der nicht algorithmisch sortierten Timeline; er ist nicht mit Fediverse-Impressionsdaten kalibriert. Die Schätzung wird an der ergänzend ausgewiesenen Brutto-Reichweite gedeckelt und fällt nie unter die Summe aus Likes und Boosts, da jede reagierende Person den Beitrag nachweislich gesehen hat. Die Brutto-Reichweite ist keine Impressionenzahl und enthält Überschneidungen zwischen Followerkreisen. Details zur Einordnung stehen in `UMSETZUNGSPLAN.md` und in den ADRs unter `docs/adr/`.
+Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regression aus Instagram-Story-Daten heuristisch auf Beiträge im Fediverse. Der Faktor `2 × Boosts` unterstellt einen höheren Boost-Wert in der nicht algorithmisch sortierten Timeline; er ist nicht mit Fediverse-Impressionsdaten kalibriert. Die Schätzung wird an der ergänzend ausgewiesenen Brutto-Reichweite gedeckelt und fällt nie unter die Summe aus Likes und Boosts, da jede reagierende Person den Beitrag nachweislich gesehen hat. Die Brutto-Reichweite ist keine Impressionenzahl und enthält Überschneidungen zwischen Followerkreisen. Details zur Einordnung stehen auf der Methodik-Seite der App.
 
 Die Ergebnisübersicht vergleicht Beiträge aus den letzten 30 Kalendertagen mit den 30 Tagen davor und gruppiert die Werte nach Veröffentlichungsdatum. An erster Stelle steht die Summe der bereits pro Thread berechneten Netto-Reichweiten; wegen möglicher Zielgruppenüberschneidungen ist sie keine Schätzung eindeutig erreichter Personen. Die weiteren Karten verwenden direkt gemeldete Postingzähler: Likes und Boosts sowie Likes, Boosts und Antworten zusammen als Interaktionen. Die Zähler zeigen den Stand zum Analysezeitpunkt, nicht den Zeitpunkt einzelner Reaktionen. Reicht die geladene Historie oder die Auswahl der 80 analysierten Threads nicht bis zum Beginn eines Zeitfensters, zeigt FediWings dafür weder eine Teilsumme noch eine irreführende Kurve. Eine Prozentabweichung entfällt außerdem, wenn die Vorperiodensumme null ist.
 
@@ -80,4 +80,4 @@ Standardmäßig werden bis zu 80 Threads analysiert. Antworten auf fremde Beitr�
 
 ## Architekturentscheidungen
 
-Begründete Abweichungen vom Referenz-Stack (Svelte 5, handgeschriebenes Token-CSS statt Tailwind, svelte-check als Typecheck, keine IndexedDB) sind in `docs/adr/0001-begruendete-stack-abweichungen.md` dokumentiert.
+Begründete Abweichungen vom Referenz-Stack (Svelte 5, handgeschriebenes Token-CSS statt Tailwind, svelte-check als Typecheck, keine IndexedDB) sind in der internen Architekturdokumentation des Projekts festgehalten, die nicht Teil dieses öffentlichen Repos ist.

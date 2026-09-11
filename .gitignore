@@ -9,3 +9,9 @@ test-results/
 test.md
 results.sarif
 *.sarif
+
+# Planungs- und Entscheidungsdokumente bleiben lokal (keine Veroeffentlichung).
+/docs/
+/specs/
+/*.md
+!README.md
