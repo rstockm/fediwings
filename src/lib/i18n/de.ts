@@ -296,7 +296,7 @@ export const de = {
   follower: {
     titleHtml: 'Wie wächst<br />dein Account?',
     intro:
-      'Die aktuelle Followerzahl ist ohne Login öffentlich. Den Verlauf über Zeit liefert nur dein eigener Account – über Follow-Benachrichtigungen, abgerufen mit einem separaten Login bei deinem Fediverse-Server. Der Token bleibt im Arbeitsspeicher dieser Sitzung.',
+      'Die aktuelle Followerzahl ist ohne Login öffentlich. Den Verlauf über Zeit liefert nur dein eigener Account – über Follow-Benachrichtigungen, abgerufen mit einem separaten Login bei deinem Fediverse-Server. Der Token liegt im Sitzungsspeicher dieses Browser-Tabs und wird beim Tabwechsel-Ende oder Abmelden gelöscht.',
     stepAnon: 'Schritt 1 · aktuelle Zahlen · ohne Login',
     load: 'Laden',
     loading: 'Lädt…',

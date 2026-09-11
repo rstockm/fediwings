@@ -16,14 +16,17 @@
   import type { SavedHandle } from '../lib/history';
   import {
     buildAuthorizeUrl,
+    clearFollowerSession,
     clearHandshake,
     createPkcePair,
     exchangeCode,
+    loadFollowerSession,
     loadHandshake,
     OAuthError,
     parseCallback,
     randomState,
     registerApp,
+    saveFollowerSession,
     saveHandshake,
     type OAuthHandshake,
   } from '../lib/oauth';
@@ -118,8 +121,36 @@
     window.history.replaceState(null, '', './?view=follower');
   }
 
+  function applyFollowerSession(session: {
+    token: string;
+    origin: string;
+    acct: string;
+    followers: number;
+  }): void {
+    token = session.token;
+    origin = session.origin;
+    const username = session.acct.split('@')[0] ?? session.acct;
+    handle = `@${session.acct}`;
+    account = {
+      id: '',
+      username,
+      acct: session.acct,
+      display_name: username,
+      url: `https://${session.origin.replace(/^https:\/\//, '')}/@${username}`,
+      avatar_static: '',
+      followers_count: session.followers,
+    };
+    anonPhase = 'ready';
+    authPhase = 'connected';
+  }
+
   onMount(() => {
-    const session = loadSessionSnapshot();
+    const followerSession = loadFollowerSession();
+    if (followerSession) {
+      applyFollowerSession(followerSession);
+    }
+
+    const session = followerSession ? null : loadSessionSnapshot();
     if (session) {
       const username = session.acct.split('@')[0] ?? session.acct;
       handle = session.handle;
@@ -181,6 +212,13 @@
         code,
         handshake.verifier,
       );
+      saveFollowerSession({
+        token,
+        origin: handshake.origin,
+        acct: handshake.acct,
+        followers: handshake.followers,
+        savedAt: new Date().toISOString(),
+      });
       authPhase = 'connected';
       account = {
         id: '',
@@ -285,6 +323,14 @@
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof Error && error.message === msg('error.followersExpired')) {
+        clearFollowerSession();
+        token = '';
+        authPhase = 'idle';
+        anonPhase = 'ready';
+        anonMessage = error.message;
+        return;
+      }
       historyPhase = 'error';
       historyMessage = error instanceof Error ? error.message : msg('follower.historyFailed');
     }
@@ -296,6 +342,7 @@
 
   function logout(): void {
     historyController?.abort();
+    clearFollowerSession();
     token = '';
     authPhase = 'idle';
     authMessage = '';
@@ -434,7 +481,7 @@
       </div>
     </form>
 
-    {#if anonPhase === 'error'}
+    {#if anonMessage}
       <p class="follower-error" role="alert">{anonMessage}</p>
     {/if}
 
@@ -698,6 +745,12 @@
         </div>
       {:else if historyPhase === 'idle'}
         <p class="follower-muted">{$_('follower.idle')}</p>
+        <div class="follower-actions">
+          <button type="button" onclick={() => void loadHistory()}>{$_('follower.reload')}</button>
+          <button type="button" class="logout-button" onclick={logout}
+            >{$_('follower.signOut')}</button
+          >
+        </div>
       {/if}
     </section>
   {/if}

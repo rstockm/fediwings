@@ -296,7 +296,7 @@ export const en: Messages = {
   follower: {
     titleHtml: 'How is your<br />account growing?',
     intro:
-      'The current follower count is public without login. The history over time comes only from your own account – via follow notifications, retrieved with a separate login on your Fediverse server. The token stays in this session’s memory.',
+      'The current follower count is public without login. The history over time comes only from your own account – via follow notifications, retrieved with a separate login on your Fediverse server. The token lives in this browser tab’s session storage and is deleted when the tab session ends or on sign-out.',
     stepAnon: 'Step 1 · current numbers · no login',
     load: 'Load',
     loading: 'Loading…',

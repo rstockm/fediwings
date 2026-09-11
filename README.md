@@ -44,7 +44,7 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
 ## Sicherheit und Datenschutz
 
 - Die App ist eine Static App ohne Backend, Accounts, Cookies oder eigene Persistenz. Analysedaten bleiben ausschließlich im Arbeitsspeicher der laufenden Browser-Sitzung.
-- Der „Follower“-Tab bietet einen optionalen Login am kompatiblen Fediverse-Server (OAuth mit PKCE, Scope `read:notifications`) für den persönlichen Follower-Verlauf. Der Access-Token bleibt ausschließlich im Arbeitsspeicher; nur der kurzlebige Login-Handshake liegt transient im `sessionStorage` und wird nach dem Token-Austausch gelöscht (ADR-0003).
+- Der „Follower“-Tab bietet einen optionalen Login am kompatiblen Fediverse-Server (OAuth mit PKCE, Scope `read:notifications`) für den persönlichen Follower-Verlauf. Der Access-Token liegt im `sessionStorage` des Tabs und überlebt damit Neuladen und Ansichtswechsel innerhalb der Tab-Sitzung; beim Abmelden, bei HTTP 401 und beim Schließen des Tabs wird er gelöscht. Der kurzlebige Login-Handshake liegt ebenfalls transient im `sessionStorage` und wird nach dem Token-Austausch gelöscht (ADR-0003).
 - Eine restriktive Content-Security-Policy wird beim Build eingebettet (`default-src 'none'`; Scripts und Styles nur vom eigenen Origin; Details in `docs/adr/0002-externe-origins-und-csp.md`).
 - Erlaubte ausgehende HTTPS-Ziele (nutzerinduziert):
   - Heimatinstanz des eingegebenen Handles (`https://<domain>/api/...`)

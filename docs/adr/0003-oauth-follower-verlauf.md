@@ -65,3 +65,31 @@ rueckwirkende Quelle.
 
 Bei Einführung dauerhafter Logins (z. B. eigener Kleinstserver) ist
 dieses ADR zu überarbeiten und die Speicherentscheidung neu zu bewerten.
+
+## Ergänzung (2026-09-11): Tab-weite Sitzungspersistenz
+
+**Auslöser:** Der Token lag ausschließlich im Arbeitsspeicher. Jeder
+Reload oder Tabwechsel zur Analyseansicht warf ihn weg und erzwang einen
+neuen OAuth-Login – unabhängig davon, ob der Token serverseitig noch
+gueltig war.
+
+**Entscheidung:** Nach erfolgreichem Token-Austausch liegt der
+Access-Token zusammen mit Origin, Account und Followerzahl unter
+`fediscope:follower-session-v1` im **sessionStorage des Tabs**. Der
+Zustand gilt damit pro Tab bis zum Schließen des Tabs; Neuladen und
+Wechsel zwischen den Ansichten behalten den Login.
+
+**Aufraeumen:** Beim Abmelden, bei HTTP 401 (abgelaufener/ungültiger
+Token) und beim Schließen des Tabs (automatisch durch den Browser) wird
+der Eintrag gelöscht. Es gibt kein clientseitiges Ablaufdatum; ein vom
+Server abgelehnter Token führt zur Reparatur über den normalen
+Fehlerpfad mit erneuter Login-Moeglichkeit.
+
+**Grenzen:** Der Token ist fuer jeden Code im gleichen Tab lesbar; das
+Risiko entspricht dem des Arbeitsspeichers bei laufender Anwendung.
+localStorage und IndexedDB bleiben weiterhin ausgeschlossen. Nach dem
+Schließen des Tabs ist ein neuer Login noetig.
+
+**Betroffene Stellen:** `src/lib/oauth.ts` (Session-Speicher),
+`src/components/FollowerPage.svelte` (Wiederherstellung, 401-Behandlung,
+Abmelden), README-Sicherheitsabschnitt.

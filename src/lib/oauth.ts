@@ -179,6 +179,53 @@ export function clearHandshake(): void {
   }
 }
 
+export const FOLLOWER_SESSION_KEY = 'fediscope:follower-session-v1';
+
+export interface FollowerSession {
+  token: string;
+  origin: string;
+  acct: string;
+  followers: number;
+  savedAt: string;
+}
+
+export function saveFollowerSession(session: FollowerSession): void {
+  try {
+    sessionStorage.setItem(FOLLOWER_SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Sitzungsspeicher nicht verfuegbar: der Token gilt nur fuer diese Ansicht.
+  }
+}
+
+export function loadFollowerSession(): FollowerSession | null {
+  try {
+    const raw = sessionStorage.getItem(FOLLOWER_SESSION_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      typeof (parsed as FollowerSession).token !== 'string' ||
+      typeof (parsed as FollowerSession).origin !== 'string' ||
+      typeof (parsed as FollowerSession).acct !== 'string' ||
+      typeof (parsed as FollowerSession).followers !== 'number'
+    ) {
+      return null;
+    }
+    return parsed as FollowerSession;
+  } catch {
+    return null;
+  }
+}
+
+export function clearFollowerSession(): void {
+  try {
+    sessionStorage.removeItem(FOLLOWER_SESSION_KEY);
+  } catch {
+    // Sitzungsspeicher nicht verfuegbar: nichts zu aufzuraeumen.
+  }
+}
+
 export interface OAuthCallback {
   code: string;
   state: string;

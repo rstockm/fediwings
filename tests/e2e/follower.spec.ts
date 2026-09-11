@@ -161,6 +161,54 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
   await expect(page.getByRole('img', { name: /Neue Follower pro Monat/ })).toBeVisible();
 });
 
+test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  let tokenExchanges = 0;
+  await page.route('https://test.social/oauth/token', async (route) => {
+    tokenExchanges += 1;
+    await route.fulfill({ json: { access_token: 'tok-1', token_type: 'Bearer' } });
+  });
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Verlauf neu laden' })).toBeVisible();
+  expect(tokenExchanges).toBe(1);
+
+  await page.getByRole('button', { name: 'Verlauf neu laden' }).click();
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+  expect(tokenExchanges).toBe(1);
+});
+
+test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async ({ page }) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Abmelden' }).click();
+  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v1'));
+  expect(stored).toBeNull();
+
+  await page.reload();
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+  ).toBeVisible();
+});
+
 test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus der Sitzung', async ({
   page,
 }) => {
