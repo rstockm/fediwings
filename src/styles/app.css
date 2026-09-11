@@ -1524,29 +1524,21 @@ footer {
   right: 10px;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   transform: translateY(-50%);
   pointer-events: none;
-}
-
-.post-details-actions::before {
-  width: 1px;
-  height: 18px;
-  margin-right: 2px;
-  background: #ddd8eb;
-  content: '';
 }
 
 .post-details-action {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  border: 0;
+  border: 1px solid #c9c5ba;
   border-radius: 50%;
-  color: #7d7894;
-  background: transparent;
+  color: #5040c8;
+  background: #faf9f5;
   cursor: pointer;
   pointer-events: auto;
   transition:
@@ -1731,8 +1723,8 @@ footer {
 }
 
 .share-dialog-actions button {
-  min-height: 42px;
-  padding: 10px 15px;
+  min-height: 46px;
+  padding: 11px 18px;
   border: 1px solid var(--line-dark);
   border-radius: var(--radius);
   color: var(--paper);
@@ -3675,6 +3667,31 @@ footer {
 
   .thread-detail-body {
     padding: 20px 16px 22px;
+  }
+
+  .post-details summary {
+    min-height: 52px;
+  }
+
+  .post-details-actions {
+    top: 26px;
+  }
+
+  .post-details-action {
+    width: 48px;
+    height: 48px;
+  }
+
+  .share-dialog-actions {
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .share-dialog-actions button {
+    flex: 1 1 100%;
+    min-height: 56px;
+    padding: 14px 20px;
+    font-size: 0.92rem;
   }
 
   .thread-posts li {
