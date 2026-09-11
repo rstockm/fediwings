@@ -52,7 +52,7 @@ footer {
 .site-header {
   min-height: 72px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 24px;
   border-bottom: 1px solid var(--line-dark);
@@ -62,6 +62,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 18px;
+  justify-self: end;
 }
 
 .brand {
@@ -249,6 +250,7 @@ footer {
 
 .hero.hero-collapsed {
   min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
   padding-top: 0;
   padding-bottom: 30px;
 }

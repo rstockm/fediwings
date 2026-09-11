@@ -220,6 +220,19 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await expect(
     page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
   ).toBeVisible();
+  const viewport = page.viewportSize();
+  const tabsBox = await page.locator('.view-tabs').boundingBox();
+  expect(tabsBox).not.toBeNull();
+  expect(Math.abs(tabsBox!.x + tabsBox!.width / 2 - viewport!.width / 2)).toBeLessThanOrEqual(1);
+  if (viewport!.width > 1050) {
+    const [heroBox, searchBox] = await Promise.all([
+      page.locator('.hero').boundingBox(),
+      page.locator('.search-shell').boundingBox(),
+    ]);
+    expect(heroBox).not.toBeNull();
+    expect(searchBox).not.toBeNull();
+    expect(searchBox!.width).toBeGreaterThan(heroBox!.width * 0.85);
+  }
   const insights = page.getByRole('region', { name: '30 Tage. Direkt vergleichbar.' });
   await expect(insights.locator('.insight-card')).toHaveCount(4);
   await expect(insights.locator('.insight-card').first()).toContainText('Netto-Reichweite');
