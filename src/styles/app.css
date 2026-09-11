@@ -625,6 +625,18 @@ footer {
   text-transform: uppercase;
 }
 
+.footer-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.footer-github svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
 .account-origin {
   position: absolute;
   top: 0;

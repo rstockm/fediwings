@@ -213,7 +213,7 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await page.goto('/');
 
   await expect(page.getByText('von Ralf Stockmann', { exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'FediWings MVP' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'GitHub' })).toHaveAttribute(
     'href',
     'https://github.com/rstockm/fediwings',
   );

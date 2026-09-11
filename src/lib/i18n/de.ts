@@ -76,7 +76,6 @@ export const de = {
     sortReach: 'Reichweite',
     sortLikes: 'Likes',
     sortBoosts: 'Boosts',
-    footerMvp: 'FediWings MVP',
     footerApiRef: 'API-Referenz ↗',
   },
   insights: {

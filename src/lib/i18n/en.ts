@@ -78,7 +78,6 @@ export const en: Messages = {
     sortReach: 'Reach',
     sortLikes: 'Likes',
     sortBoosts: 'Boosts',
-    footerMvp: 'FediWings MVP',
     footerApiRef: 'API reference ↗',
   },
   insights: {
