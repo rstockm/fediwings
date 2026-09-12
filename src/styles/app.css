@@ -973,6 +973,7 @@ footer {
 }
 
 .insight-card footer {
+  min-height: 45px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--line-light);

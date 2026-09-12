@@ -265,6 +265,9 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await expect(insights.getByText('Antworten', { exact: true })).toHaveCount(0);
   await expect(insights.locator('.insight-chart-wrap')).toHaveCount(4);
   await expect(insights.getByText('keine %-Basis')).toHaveCount(4);
+  const previousTotal = insights.locator('.insight-card footer').first();
+  await expect(previousTotal).toContainText('Davor gesamt');
+  await expect(previousTotal).toHaveCSS('min-height', '45px');
   await expect(page.getByText('Antwort auf einen fremden Beitrag.')).toHaveCount(0);
   await expect(page.getByText('Ein Testbeitrag aus dem Fediverse.')).toBeVisible();
   await expect(page.getByText('Thread · 2 Postings')).toBeVisible();
