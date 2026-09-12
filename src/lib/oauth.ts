@@ -1,9 +1,11 @@
-import { appRegistrationSchema, oauthTokenSchema } from './schemas';
+import { accountSchema, appRegistrationSchema, oauthTokenSchema } from './schemas';
 import { fetchWithTimeout } from './http';
 import { msg } from './i18n';
+import type { MastodonAccount } from './types';
 
-export const OAUTH_SCOPE = 'read:notifications';
-export const OAUTH_PENDING_KEY = 'fediscope:oauth-handshake-v1';
+export const OAUTH_SCOPE = 'read:accounts read:notifications';
+export const OAUTH_PENDING_KEY = 'fediscope:oauth-handshake-v2';
+const LEGACY_OAUTH_PENDING_KEY = 'fediscope:oauth-handshake-v1';
 const OAUTH_TIMEOUT_MS = 10_000;
 
 export interface OAuthClient {
@@ -17,8 +19,8 @@ export interface OAuthHandshake {
   clientSecret: string;
   verifier: string;
   state: string;
+  accountId: string;
   acct: string;
-  followers: number;
 }
 
 export class OAuthError extends Error {
@@ -44,6 +46,16 @@ function randomString(length = 64): string {
   return base64Url(bytes);
 }
 
+function isSecureOrigin(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.origin === value;
+  } catch {
+    return false;
+  }
+}
+
 export async function createPkcePair(): Promise<{ verifier: string; challenge: string }> {
   const verifier = randomString(64);
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
@@ -54,7 +66,12 @@ export function randomState(): string {
   return randomString(16);
 }
 
-async function postForm(origin: string, path: string, body: URLSearchParams, signal?: AbortSignal) {
+async function postFormResponse(
+  origin: string,
+  path: string,
+  body: URLSearchParams,
+  signal?: AbortSignal,
+): Promise<Response> {
   let response: Response;
   try {
     response = (
@@ -78,6 +95,17 @@ async function postForm(origin: string, path: string, body: URLSearchParams, sig
   if (!response.ok) {
     throw new OAuthError(msg('error.oauthRejected', { status: response.status }));
   }
+
+  return response;
+}
+
+async function postForm(
+  origin: string,
+  path: string,
+  body: URLSearchParams,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  const response = await postFormResponse(origin, path, body, signal);
 
   try {
     return await response.json();
@@ -139,6 +167,52 @@ export async function exchangeCode(
   return parsed.data.access_token;
 }
 
+export async function verifyCredentials(
+  origin: string,
+  token: string,
+  signal?: AbortSignal,
+): Promise<MastodonAccount> {
+  let response: Response;
+  try {
+    response = (
+      await fetchWithTimeout(
+        `${origin}/api/v1/accounts/verify_credentials`,
+        { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } },
+        signal,
+        OAUTH_TIMEOUT_MS,
+      )
+    ).response;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
+      throw error;
+    throw new OAuthError(msg('error.oauthVerify'));
+  }
+
+  if (!response.ok) throw new OAuthError(msg('error.oauthVerify'));
+  try {
+    const parsed = accountSchema.safeParse(await response.json());
+    if (!parsed.success) throw new OAuthError(msg('error.oauthVerify'));
+    return parsed.data;
+  } catch (error) {
+    if (error instanceof OAuthError) throw error;
+    throw new OAuthError(msg('error.oauthVerify'));
+  }
+}
+
+export async function revokeToken(
+  origin: string,
+  client: OAuthClient,
+  token: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const body = new URLSearchParams({
+    client_id: client.clientId,
+    client_secret: client.clientSecret,
+    token,
+  });
+  await postFormResponse(origin, '/oauth/revoke', body, signal);
+}
+
 export function saveHandshake(handshake: OAuthHandshake): void {
   try {
     sessionStorage.setItem(OAUTH_PENDING_KEY, JSON.stringify(handshake));
@@ -157,11 +231,13 @@ export function loadHandshake(): OAuthHandshake | null {
     if (
       typeof parsed !== 'object' ||
       parsed === null ||
-      typeof (parsed as OAuthHandshake).origin !== 'string' ||
+      !isSecureOrigin((parsed as OAuthHandshake).origin) ||
       typeof (parsed as OAuthHandshake).clientId !== 'string' ||
       typeof (parsed as OAuthHandshake).clientSecret !== 'string' ||
       typeof (parsed as OAuthHandshake).verifier !== 'string' ||
-      typeof (parsed as OAuthHandshake).state !== 'string'
+      typeof (parsed as OAuthHandshake).state !== 'string' ||
+      typeof (parsed as OAuthHandshake).accountId !== 'string' ||
+      typeof (parsed as OAuthHandshake).acct !== 'string'
     ) {
       return null;
     }
@@ -174,18 +250,21 @@ export function loadHandshake(): OAuthHandshake | null {
 export function clearHandshake(): void {
   try {
     sessionStorage.removeItem(OAUTH_PENDING_KEY);
+    sessionStorage.removeItem(LEGACY_OAUTH_PENDING_KEY);
   } catch {
     // Sitzungsspeicher nicht verfuegbar: nichts zu aufzuraeumen.
   }
 }
 
-export const FOLLOWER_SESSION_KEY = 'fediscope:follower-session-v1';
+export const FOLLOWER_SESSION_KEY = 'fediscope:follower-session-v2';
+const LEGACY_FOLLOWER_SESSION_KEY = 'fediscope:follower-session-v1';
 
 export interface FollowerSession {
   token: string;
   origin: string;
-  acct: string;
-  followers: number;
+  clientId: string;
+  clientSecret: string;
+  account: MastodonAccount;
   savedAt: string;
 }
 
@@ -199,21 +278,47 @@ export function saveFollowerSession(session: FollowerSession): void {
 
 export function loadFollowerSession(): FollowerSession | null {
   try {
+    sessionStorage.removeItem(LEGACY_FOLLOWER_SESSION_KEY);
     const raw = sessionStorage.getItem(FOLLOWER_SESSION_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (
-      typeof parsed !== 'object' ||
-      parsed === null ||
-      typeof (parsed as FollowerSession).token !== 'string' ||
-      typeof (parsed as FollowerSession).origin !== 'string' ||
-      typeof (parsed as FollowerSession).acct !== 'string' ||
-      typeof (parsed as FollowerSession).followers !== 'number'
-    ) {
+    if (typeof parsed !== 'object' || parsed === null) {
+      sessionStorage.removeItem(FOLLOWER_SESSION_KEY);
       return null;
     }
-    return parsed as FollowerSession;
+    const candidate = parsed as FollowerSession;
+    const account = accountSchema.safeParse(candidate.account);
+    let accountOrigin = '';
+    if (account.success) {
+      try {
+        accountOrigin = new URL(account.data.url).origin;
+      } catch {
+        accountOrigin = '';
+      }
+    }
+    if (
+      typeof candidate.token !== 'string' ||
+      candidate.token.length === 0 ||
+      typeof candidate.clientId !== 'string' ||
+      candidate.clientId.length === 0 ||
+      typeof candidate.clientSecret !== 'string' ||
+      candidate.clientSecret.length === 0 ||
+      typeof candidate.savedAt !== 'string' ||
+      !isSecureOrigin(candidate.origin) ||
+      !account.success ||
+      account.data.id.length === 0 ||
+      accountOrigin !== candidate.origin
+    ) {
+      sessionStorage.removeItem(FOLLOWER_SESSION_KEY);
+      return null;
+    }
+    return { ...candidate, account: account.data };
   } catch {
+    try {
+      sessionStorage.removeItem(FOLLOWER_SESSION_KEY);
+    } catch {
+      // Sitzungsspeicher nicht verfügbar: nichts weiter aufzuräumen.
+    }
     return null;
   }
 }
@@ -221,6 +326,7 @@ export function loadFollowerSession(): FollowerSession | null {
 export function clearFollowerSession(): void {
   try {
     sessionStorage.removeItem(FOLLOWER_SESSION_KEY);
+    sessionStorage.removeItem(LEGACY_FOLLOWER_SESSION_KEY);
   } catch {
     // Sitzungsspeicher nicht verfuegbar: nichts zu aufzuraeumen.
   }
@@ -231,12 +337,14 @@ export interface OAuthCallback {
   state: string;
 }
 
-export function parseCallback(location: Location): OAuthCallback | { error: string } | null {
+export function parseCallback(
+  location: Location,
+): OAuthCallback | { error: string; state: string | null } | { invalid: true } | null {
   const params = new URLSearchParams(location.search);
   const error = params.get('error');
-  if (error) return { error };
+  if (error) return { error, state: params.get('state') };
   const code = params.get('code');
   const state = params.get('state');
-  if (!code || !state) return null;
+  if (!code || !state) return code || state ? { invalid: true } : null;
   return { code, state };
 }

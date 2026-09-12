@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { _, date as _date, number as _number } from 'svelte-i18n';
   import HandleCombobox from './HandleCombobox.svelte';
   import { getAccount, MastodonApiError } from '../lib/api';
@@ -26,8 +26,12 @@
     parseCallback,
     randomState,
     registerApp,
+    revokeToken,
     saveFollowerSession,
     saveHandshake,
+    verifyCredentials,
+    type FollowerSession,
+    type OAuthClient,
     type OAuthHandshake,
   } from '../lib/oauth';
   import { detectPlatform } from '../lib/platform';
@@ -82,7 +86,7 @@
 
   let authPhase = $state<AuthPhase>('idle');
   let authMessage = $state('');
-  let token = $state('');
+  let authSession = $state<FollowerSession | null>(null);
 
   let historyPhase = $state<HistoryPhase>('idle');
   let historyMessage = $state('');
@@ -93,6 +97,9 @@
   let oldestDate = $state('');
   let historyIncomplete = $state(false);
   let historyController: AbortController | null = null;
+  let loginController: AbortController | null = null;
+  let pendingLogin: { origin: string; client: OAuthClient; token: string } | null = null;
+  let destroyed = false;
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
   const heroCollapsed = $derived(anonPhase === 'loading' || account !== null);
@@ -113,53 +120,78 @@
     window.history.replaceState(null, '', './?view=follower');
   }
 
-  function applyFollowerSession(session: {
-    token: string;
-    origin: string;
-    acct: string;
-    followers: number;
-  }): void {
-    token = session.token;
+  function followerViewActive(): boolean {
+    return new URLSearchParams(window.location.search).get('view') === 'follower';
+  }
+
+  function canonicalAcct(candidate: MastodonAccount, sessionOrigin: string): string {
+    return candidate.acct.includes('@')
+      ? candidate.acct
+      : `${candidate.acct}@${new URL(sessionOrigin).hostname}`;
+  }
+
+  function applyFollowerSession(session: FollowerSession): void {
+    authSession = session;
     origin = session.origin;
-    const username = session.acct.split('@')[0] ?? session.acct;
-    handle = `@${session.acct}`;
-    account = {
-      id: '',
-      username,
-      acct: session.acct,
-      display_name: username,
-      url: `https://${session.origin.replace(/^https:\/\//, '')}/@${username}`,
-      avatar_static: '',
-      followers_count: session.followers,
-    };
+    handle = `@${canonicalAcct(session.account, session.origin)}`;
+    account = session.account;
     anonPhase = 'ready';
     authPhase = 'connected';
+  }
+
+  function cancelPendingLogin(): void {
+    loginController?.abort();
+    const pending = pendingLogin;
+    pendingLogin = null;
+    if (pending)
+      void revokeToken(pending.origin, pending.client, pending.token).catch(() => undefined);
   }
 
   onMount(() => {
     const followerSession = loadFollowerSession();
     if (followerSession) {
       applyFollowerSession(followerSession);
+    } else {
+      const stored = readLastAccount();
+      if (stored?.source === 'follower') {
+        applyStoredAccount(stored);
+      } else if (snapshot) {
+        handle = prefillHandle || `@${snapshot.account.acct}`;
+        account = snapshot.account;
+        platform = snapshot.platform;
+        origin = snapshot.origin;
+        anonPhase = 'ready';
+      } else if (stored) {
+        applyStoredAccount(stored);
+      } else if (prefillHandle) {
+        handle = prefillHandle;
+      }
     }
 
-    const stored = readLastAccount();
-    if (!followerSession && stored?.source === 'follower') {
-      applyStoredAccount(stored);
-    } else if (snapshot) {
-      handle = prefillHandle || `@${snapshot.account.acct}`;
-      account = snapshot.account;
-      platform = snapshot.platform;
-      origin = snapshot.origin;
-      anonPhase = 'ready';
-    } else if (!followerSession && stored) {
-      applyStoredAccount(stored);
-    } else if (prefillHandle && !handle) {
-      handle = prefillHandle;
-    }
     const callback = parseCallback(window.location);
     if (!callback) return;
     cleanCallbackUrl();
+    const handshake = loadHandshake();
+    clearHandshake();
+    if ('invalid' in callback) {
+      if (authSession) {
+        anonMessage = msg('follower.loginInvalid');
+      } else {
+        authPhase = 'error';
+        authMessage = msg('follower.loginInvalid');
+      }
+      return;
+    }
     if ('error' in callback) {
+      if (!handshake || !callback.state || handshake.state !== callback.state) {
+        if (authSession) {
+          anonMessage = msg('follower.loginInvalid');
+        } else {
+          authPhase = 'error';
+          authMessage = msg('follower.loginInvalid');
+        }
+        return;
+      }
       authPhase = 'error';
       authMessage =
         callback.error === 'access_denied'
@@ -168,8 +200,6 @@
       return;
     }
 
-    const handshake = loadHandshake();
-    clearHandshake();
     if (!handshake || handshake.state !== callback.state) {
       authPhase = 'error';
       authMessage = msg('follower.loginInvalid');
@@ -182,54 +212,74 @@
   async function completeLogin(handshake: OAuthHandshake, code: string): Promise<void> {
     authPhase = 'connecting';
     origin = handshake.origin;
+    const client = { clientId: handshake.clientId, clientSecret: handshake.clientSecret };
+    loginController?.abort();
+    loginController = new AbortController();
+    const signal = loginController.signal;
+    let issuedToken = '';
+    let revocationFailed = false;
     try {
-      token = await exchangeCode(
-        handshake.origin,
-        { clientId: handshake.clientId, clientSecret: handshake.clientSecret },
-        code,
-        handshake.verifier,
-      );
-      saveFollowerSession({
-        token,
+      issuedToken = await exchangeCode(handshake.origin, client, code, handshake.verifier, signal);
+      pendingLogin = { origin: handshake.origin, client, token: issuedToken };
+      const verifiedAccount = await verifyCredentials(handshake.origin, issuedToken, signal);
+      if (destroyed || signal.aborted || !followerViewActive()) {
+        throw new DOMException('Abgebrochen', 'AbortError');
+      }
+      if (verifiedAccount.id !== handshake.accountId) {
+        throw new OAuthError(msg('follower.accountMismatch', { account: verifiedAccount.acct }));
+      }
+
+      const session: FollowerSession = {
+        token: issuedToken,
         origin: handshake.origin,
-        acct: handshake.acct,
-        followers: handshake.followers,
+        clientId: handshake.clientId,
+        clientSecret: handshake.clientSecret,
+        account: verifiedAccount,
         savedAt: new Date().toISOString(),
-      });
+      };
+      saveFollowerSession(session);
+      pendingLogin = null;
+      applyFollowerSession(session);
+
+      const acct = canonicalAcct(verifiedAccount, handshake.origin);
       const previous = readLastAccount();
-      const sameAccount = previous?.acct === handshake.acct;
+      const sameAccount = previous?.acct === acct;
       writeLastAccount({
-        handle: `@${handshake.acct}`,
-        acct: handshake.acct,
+        handle: `@${acct}`,
+        acct,
         origin: handshake.origin,
-        followers: handshake.followers,
+        followers: verifiedAccount.followers_count,
         platformId: sameAccount ? (previous?.platformId ?? 'unknown') : 'unknown',
         platformName: sameAccount
           ? (previous?.platformName ?? 'ActivityPub-Server')
           : 'ActivityPub-Server',
         source: 'follower',
       });
-      authPhase = 'connected';
-      account = {
-        id: '',
-        username: handshake.acct.split('@')[0] ?? handshake.acct,
-        acct: handshake.acct,
-        display_name: handshake.acct,
-        url: `https://${handshake.acct.split('@').pop()}/@${handshake.acct.split('@')[0]}`,
-        avatar_static: '',
-        followers_count: handshake.followers,
-      };
       await loadHistory();
     } catch (error) {
+      const pending = pendingLogin;
+      pendingLogin = null;
+      if (pending) {
+        try {
+          await revokeToken(pending.origin, pending.client, pending.token);
+        } catch {
+          revocationFailed = true;
+        }
+      }
+      clearFollowerSession();
+      authSession = null;
+      if (destroyed) return;
       authPhase = 'error';
-      authMessage =
+      const message =
         error instanceof OAuthError || error instanceof Error
           ? error.message
           : msg('follower.loginFailed');
+      authMessage = revocationFailed ? `${message} ${msg('follower.revokeFailed')}` : message;
     }
   }
 
   async function loadAnonymous(): Promise<void> {
+    if (authSession) return;
     anonPhase = 'loading';
     anonMessage = '';
     account = null;
@@ -265,11 +315,19 @@
   }
 
   async function startLogin(): Promise<void> {
-    if (!account) return;
+    if (!account || authSession) return;
     authPhase = 'connecting';
     authMessage = '';
+    loginController?.abort();
+    loginController = new AbortController();
+    const signal = loginController.signal;
     try {
-      const client = await registerApp(origin);
+      const selectedAccount = account.id
+        ? account
+        : await getAccount(origin, canonicalAcct(account, origin));
+      account = selectedAccount;
+      const client = await registerApp(origin, signal);
+      if (destroyed || signal.aborted) return;
       const { verifier, challenge } = await createPkcePair();
       const state = randomState();
       saveHandshake({
@@ -278,11 +336,16 @@
         clientSecret: client.clientSecret,
         verifier,
         state,
-        acct: account.acct,
-        followers: account.followers_count,
+        accountId: selectedAccount.id,
+        acct: canonicalAcct(selectedAccount, origin),
       });
       window.location.assign(buildAuthorizeUrl(origin, client.clientId, challenge, state));
     } catch (error) {
+      if (
+        destroyed ||
+        (error instanceof DOMException && error.name === 'AbortError' && signal.aborted)
+      )
+        return;
       authPhase = 'error';
       authMessage =
         error instanceof OAuthError || error instanceof Error
@@ -292,6 +355,8 @@
   }
 
   async function loadHistory(): Promise<void> {
+    const session = authSession;
+    if (!session) return;
     historyController?.abort();
     historyController = new AbortController();
     const signal = historyController.signal;
@@ -299,10 +364,10 @@
     historyMessage = '';
 
     try {
-      const currentFollowers = account?.followers_count ?? 0;
+      const currentFollowers = session.account.followers_count;
       const result = await fetchFollowerEvents(
-        origin,
-        token,
+        session.origin,
+        session.token,
         signal,
         (progress: FollowerProgress) => {
           eventsCount = progress.events;
@@ -326,7 +391,7 @@
       if (error instanceof DOMException && error.name === 'AbortError') return;
       if (error instanceof Error && error.message === msg('error.followersExpired')) {
         clearFollowerSession();
-        token = '';
+        authSession = null;
         authPhase = 'idle';
         anonPhase = 'ready';
         anonMessage = error.message;
@@ -341,10 +406,17 @@
     historyController?.abort();
   }
 
-  function logout(): void {
+  onDestroy(() => {
+    destroyed = true;
+    cancelPendingLogin();
+    historyController?.abort();
+  });
+
+  async function logout(): Promise<void> {
+    const session = authSession;
     historyController?.abort();
     clearFollowerSession();
-    token = '';
+    authSession = null;
     authPhase = 'idle';
     authMessage = '';
     historyPhase = 'idle';
@@ -355,6 +427,16 @@
     requestsUsed = 0;
     oldestDate = '';
     historyIncomplete = false;
+    if (!session) return;
+    try {
+      await revokeToken(
+        session.origin,
+        { clientId: session.clientId, clientSecret: session.clientSecret },
+        session.token,
+      );
+    } catch {
+      anonMessage = msg('follower.revokeFailed');
+    }
   }
 
   const chartA = { left: 38, right: 348, top: 14, bottom: 148 };
@@ -478,9 +560,12 @@
           listboxId="follower-saved-handles-listbox"
           bind:value={handle}
           {savedHandles}
-          disabled={anonPhase === 'loading'}
+          disabled={anonPhase === 'loading' || authSession !== null}
         />
-        <button type="submit" disabled={anonPhase === 'loading' || handle.trim().length === 0}>
+        <button
+          type="submit"
+          disabled={anonPhase === 'loading' || authSession !== null || handle.trim().length === 0}
+        >
           {anonPhase === 'loading' ? $_('follower.loading') : $_('follower.load')}
         </button>
       </div>
@@ -502,9 +587,11 @@
           <strong>{platform?.name ?? 'ActivityPub'}</strong>
           <small>{$_('follower.serverSoftware')}</small>
         </div>
-        <button type="button" class="login-button" onclick={() => void startLogin()}>
-          {authPhase === 'connecting' ? $_('hero.connecting') : $_('follower.loginButton')}
-        </button>
+        {#if authSession === null}
+          <button type="button" class="login-button" onclick={() => void startLogin()}>
+            {authPhase === 'connecting' ? $_('hero.connecting') : $_('follower.loginButton')}
+          </button>
+        {/if}
       </div>
     {/if}
   </section>
@@ -568,6 +655,9 @@
         <p class="follower-error" role="alert">{historyMessage}</p>
         <div class="follower-actions">
           <button type="button" onclick={() => void loadHistory()}>{$_('follower.retry')}</button>
+          <button type="button" class="logout-button" onclick={() => void logout()}
+            >{$_('follower.signOut')}</button
+          >
         </div>
       {/if}
 
@@ -744,7 +834,7 @@
 
         <div class="follower-actions">
           <button type="button" onclick={() => void loadHistory()}>{$_('follower.reload')}</button>
-          <button type="button" class="logout-button" onclick={logout}
+          <button type="button" class="logout-button" onclick={() => void logout()}
             >{$_('follower.signOut')}</button
           >
         </div>
@@ -752,7 +842,7 @@
         <p class="follower-muted">{$_('follower.idle')}</p>
         <div class="follower-actions">
           <button type="button" onclick={() => void loadHistory()}>{$_('follower.reload')}</button>
-          <button type="button" class="logout-button" onclick={logout}
+          <button type="button" class="logout-button" onclick={() => void logout()}
             >{$_('follower.signOut')}</button
           >
         </div>

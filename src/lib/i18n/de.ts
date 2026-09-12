@@ -285,7 +285,7 @@ export const de = {
     ledgerYes2: 'Öffentliche Booster und deren Followerzahlen',
     ledgerYes3: 'Optional bis zu drei Handles im lokalen Browserspeicher',
     ledgerNo: 'Was nicht stattfindet',
-    ledgerNo1: 'Kein Login, Token oder eigener Server',
+    ledgerNo1: 'Kein verpflichtender Login und keine zentral gespeicherten Nutzerprofile',
     ledgerNo2: 'Keine persistente Speicherung von Ergebnissen oder Boosterprofilen',
     ledgerNo3: 'Kein Tracking und keine externen Analysedienste',
     secZod: 'Zod-validierte API-Antworten',
@@ -315,7 +315,7 @@ export const de = {
   follower: {
     titleHtml: 'Wie wächst<br />dein Account?',
     intro:
-      'Die aktuelle Followerzahl ist ohne Login öffentlich. Den Verlauf über Zeit liefert nur dein eigener Account – über Follow-Benachrichtigungen, abgerufen mit einem separaten Login bei deinem Fediverse-Server. Der Token liegt im Sitzungsspeicher dieses Browser-Tabs und wird beim Tabwechsel-Ende oder Abmelden gelöscht.',
+      'Die aktuelle Followerzahl ist ohne Login öffentlich. Den Verlauf über Zeit liefert nur dein eigener Account – über Follow-Benachrichtigungen, abgerufen mit einem separaten Login bei deinem Fediverse-Server. FediWings prüft den angemeldeten Account und bindet den Token fest an dessen Server. Der Token liegt im Sitzungsspeicher dieses Browser-Tabs und wird beim Ende der Tab-Sitzung gelöscht; beim Abmelden wird er zusätzlich beim Server widerrufen.',
     stepAnon: 'Schritt 1 · aktuelle Zahlen · ohne Login',
     load: 'Laden',
     loading: 'Lädt…',
@@ -324,12 +324,15 @@ export const de = {
     loginButton: 'Follower-Verlauf mit Login abrufen',
     stepLogin: 'Schritt 2 · Login',
     redirecting: 'Weiterleitung zum Server …',
-    authorizeNote: 'Der Authorize-Bildschirm deines Fediverse-Servers öffnet sich.',
+    authorizeNote:
+      'Der Authorize-Bildschirm deines Fediverse-Servers öffnet sich. Melde dich mit dem zuvor ausgewählten Account an.',
     stepHistory: 'Schritt 2 · Follower-Verlauf · mit Login',
     accessDenied: 'Login im Server-Interface abgebrochen. Es wurden keine Daten übertragen.',
     loginRejected: 'Der Server hat den Login abgelehnt ({error}).',
     loginInvalid: 'Der Login ist ungültig oder abgelaufen. Bitte verbinde den Account erneut.',
     loginFailed: 'Der Login konnte nicht abgeschlossen werden.',
+    accountMismatch:
+      'Angemeldet wurde @{account}, nicht der zuvor ausgewählte Account. Der Zugriff wurde verworfen.',
     accountFailed: 'Der Account konnte nicht geladen werden.',
     loginStartFailed: 'Der Login konnte nicht gestartet werden.',
     historyFailed: 'Der Follower-Verlauf konnte nicht geladen werden.',
@@ -354,6 +357,8 @@ export const de = {
       'Kumuliert aus {count} Follow-Ereignissen, am aktuellen Stand ({current}) verankert. Unfollows sind nicht sichtbar.',
     reload: 'Verlauf neu laden',
     signOut: 'Abmelden',
+    revokeFailed:
+      'Die lokale Sitzung wurde gelöscht, aber der Serverzugriff konnte nicht automatisch widerrufen werden. Bitte entferne FediWings in den App-Einstellungen deines Servers.',
     idle: 'Nach dem Login lädt FediWings deine Follow-Benachrichtigungen und baut daraus beide Verlaufskurven.',
     emptyHistory:
       'Keine Follow-Benachrichtigungen gefunden. Wenn sie gelöscht wurden, ist der Verlauf kürzer.',
@@ -380,6 +385,7 @@ export const de = {
     oauthInvalid: 'Der Fediverse-Server lieferte keine gueltige OAuth-Antwort.',
     oauthAppRegistration: 'Die App-Registrierung lieferte ungueltige Daten.',
     oauthToken: 'Die Token-Antwort enthaelt kein Access-Token.',
+    oauthVerify: 'Der angemeldete Account konnte nicht sicher bestätigt werden.',
     shareNoUrl: 'Der Share-Link enthält keine gültige Beitrags-URL.',
     shareInsecure: 'Der Share-Link enthält keine gültige öffentliche HTTPS-URL.',
     shareNoId: 'Die Beitrags-ID fehlt im Share-Link.',

@@ -286,7 +286,7 @@ export const en: Messages = {
     ledgerYes2: 'Public boosters and their follower counts',
     ledgerYes3: 'Optionally up to three handles in local browser storage',
     ledgerNo: 'What does not happen',
-    ledgerNo1: 'No login, token or own server',
+    ledgerNo1: 'No mandatory login and no centrally stored user profiles',
     ledgerNo2: 'No persistent storage of results or booster profiles',
     ledgerNo3: 'No tracking and no external analytics services',
     secZod: 'Zod-validated API responses',
@@ -315,7 +315,7 @@ export const en: Messages = {
   follower: {
     titleHtml: 'How is your<br />account growing?',
     intro:
-      'The current follower count is public without login. The history over time comes only from your own account – via follow notifications, retrieved with a separate login on your Fediverse server. The token lives in this browser tab’s session storage and is deleted when the tab session ends or on sign-out.',
+      'The current follower count is public without login. The history over time comes only from your own account – via follow notifications, retrieved with a separate login on your Fediverse server. FediWings verifies the signed-in account and binds the token to its server. The token lives in this browser tab’s session storage and is deleted when the tab session ends; signing out also revokes it at the server.',
     stepAnon: 'Step 1 · current numbers · no login',
     load: 'Load',
     loading: 'Loading…',
@@ -324,12 +324,15 @@ export const en: Messages = {
     loginButton: 'Get follower history with login',
     stepLogin: 'Step 2 · login',
     redirecting: 'Redirecting to the server …',
-    authorizeNote: 'The authorize screen of your Fediverse server is opening.',
+    authorizeNote:
+      'The authorize screen of your Fediverse server is opening. Sign in with the account selected before.',
     stepHistory: 'Step 2 · follower history · with login',
     accessDenied: 'Login in the server interface was cancelled. No data was transferred.',
     loginRejected: 'The server rejected the login ({error}).',
     loginInvalid: 'The login is invalid or expired. Please connect the account again.',
     loginFailed: 'The login could not be completed.',
+    accountMismatch:
+      'You signed in as @{account}, not as the account selected before. Access was discarded.',
     accountFailed: 'The account could not be loaded.',
     loginStartFailed: 'The login could not be started.',
     historyFailed: 'The follower history could not be loaded.',
@@ -354,6 +357,8 @@ export const en: Messages = {
       'Cumulated from {count} follow events, anchored to the current level ({current}). Unfollows are not visible.',
     reload: 'Reload history',
     signOut: 'Sign out',
+    revokeFailed:
+      'The local session was deleted, but server access could not be revoked automatically. Please remove FediWings in your server’s app settings.',
     idle: 'After login, FediWings loads your follow notifications and builds both history curves from them.',
     emptyHistory: 'No follow notifications found. If they were deleted, the history is shorter.',
   },
@@ -379,6 +384,7 @@ export const en: Messages = {
     oauthInvalid: 'The Fediverse server did not return a valid OAuth response.',
     oauthAppRegistration: 'The app registration returned invalid data.',
     oauthToken: 'The token response does not contain an access token.',
+    oauthVerify: 'The signed-in account could not be verified securely.',
     shareNoUrl: 'The share link does not contain a valid post URL.',
     shareInsecure: 'The share link does not contain a valid public HTTPS URL.',
     shareNoId: 'The post ID is missing from the share link.',

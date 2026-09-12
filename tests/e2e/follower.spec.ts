@@ -59,6 +59,12 @@ async function mockOAuthFlow(page: Page) {
   await page.route('https://test.social/oauth/token', async (route) => {
     await route.fulfill({ json: { access_token: 'tok-1', token_type: 'Bearer' } });
   });
+  await page.route('https://test.social/api/v1/accounts/verify_credentials', async (route) => {
+    await route.fulfill({ json: account });
+  });
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    await route.fulfill({ json: {} });
+  });
   await page.route('https://test.social/api/v1/notifications?*', async (route) => {
     const url = new URL(route.request().url());
     const maxId = url.searchParams.get('max_id');
@@ -131,6 +137,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
 
   await expect(page.getByText('Kumuliert aus 162 Follow-Ereignissen')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Abmelden' })).toBeVisible();
+  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toBeDisabled();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -191,6 +198,11 @@ test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) 
 test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async ({ page }) => {
   await mockInstance(page);
   await mockOAuthFlow(page);
+  let revocations = 0;
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    revocations += 1;
+    await route.fulfill({ json: {} });
+  });
   await page.goto('/?view=follower');
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
@@ -199,7 +211,8 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Abmelden' }).click();
-  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v1'));
+  await expect.poll(() => revocations).toBe(1);
+  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
   expect(stored).toBeNull();
 
   await page.reload();
@@ -208,6 +221,59 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
   await expect(
     page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
   ).toBeVisible();
+});
+
+test('warnt nach lokalem Abmelden vor fehlgeschlagenem Server-Widerruf', async ({ page }) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    await route.fulfill({ status: 500, json: {} });
+  });
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Abmelden' }).click();
+
+  await expect(
+    page.getByText(/Serverzugriff konnte nicht automatisch widerrufen werden/),
+  ).toBeVisible();
+  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
+  expect(stored).toBeNull();
+});
+
+test('verwirft den Token beim Login mit einem anderen Account', async ({ page }) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  let revocations = 0;
+  let notificationRequests = 0;
+  await page.route('https://test.social/api/v1/accounts/verify_credentials', async (route) => {
+    await route.fulfill({ json: { ...account, id: 'account-2', acct: 'mallory' } });
+  });
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    revocations += 1;
+    await route.fulfill({ status: 500, json: {} });
+  });
+  await page.route('https://test.social/api/v1/notifications?*', async (route) => {
+    notificationRequests += 1;
+    await route.fulfill({ json: [] });
+  });
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+
+  await expect(page.getByText(/Angemeldet wurde @mallory/)).toBeVisible();
+  await expect(
+    page.getByText(/Serverzugriff konnte nicht automatisch widerrufen werden/),
+  ).toBeVisible();
+  await expect.poll(() => revocations).toBe(1);
+  expect(notificationRequests).toBe(0);
+  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
+  expect(stored).toBeNull();
 });
 
 test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus der Sitzung', async ({
@@ -272,9 +338,67 @@ test('uebergibt den im Follower-Tab geladenen Account ohne Reload an die Analyse
 });
 
 test('meldet einen abgebrochenen Login verstaendlich', async ({ page }) => {
-  await page.goto('/?error=access_denied');
+  await page.goto('/?view=follower');
+  await page.evaluate(() => {
+    sessionStorage.setItem(
+      'fediscope:oauth-handshake-v2',
+      JSON.stringify({
+        origin: 'https://test.social',
+        clientId: 'cid',
+        clientSecret: 'cs',
+        verifier: 'verifier',
+        state: 'state-1',
+        accountId: 'account-1',
+        acct: 'alice@test.social',
+      }),
+    );
+  });
+  await page.goto('/?error=access_denied&state=state-1');
   await expect(
     page.getByText('Login im Server-Interface abgebrochen. Es wurden keine Daten übertragen.'),
   ).toBeVisible();
   await expect(page).toHaveURL(/\?view=follower$/);
+  const handshake = await page.evaluate(() =>
+    sessionStorage.getItem('fediscope:oauth-handshake-v2'),
+  );
+  expect(handshake).toBeNull();
+});
+
+test('speichert nach einem Ansichtswechsel während der Anmeldung keinen Token', async ({
+  page,
+}) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  let verificationStarted = false;
+  let revocations = 0;
+  let releaseVerification = () => undefined;
+  const verificationGate = new Promise<void>((resolve) => {
+    releaseVerification = resolve;
+  });
+  await page.route('https://test.social/api/v1/accounts/verify_credentials', async (route) => {
+    verificationStarted = true;
+    await verificationGate;
+    try {
+      await route.fulfill({ json: account });
+    } catch {
+      // Navigation aborts the delayed browser request.
+    }
+  });
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    revocations += 1;
+    await route.fulfill({ json: {} });
+  });
+  await page.goto('/?view=follower');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Laden' }).click();
+  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await expect.poll(() => verificationStarted).toBe(true);
+  await page.getByRole('link', { name: 'Analyse' }).click();
+  releaseVerification();
+
+  await expect(page.getByRole('button', { name: 'Analysieren' })).toBeVisible();
+  await expect.poll(() => revocations).toBe(1);
+  const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
+  expect(stored).toBeNull();
 });

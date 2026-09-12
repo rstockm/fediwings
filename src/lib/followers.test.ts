@@ -89,6 +89,17 @@ describe('fetchFollowerEvents', () => {
     });
   }
 
+  it('sendet den Token ausschließlich an die übergebene Session-Origin', async () => {
+    const stub = vi.fn(() => Promise.resolve(jsonResponse([])));
+    vi.stubGlobal('fetch', stub);
+
+    await fetchFollowerEvents('https://test.social', 'tok-1', new AbortController().signal);
+
+    const [url, init] = stub.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toMatch(/^https:\/\/test\.social\/api\/v1\/notifications\?/);
+    expect(new Headers(init.headers).get('Authorization')).toBe('Bearer tok-1');
+  });
+
   it('folgt dem max_id-Cursor bis zu einer unvollstaendigen Seite', async () => {
     const calls: string[] = [];
     vi.stubGlobal(
