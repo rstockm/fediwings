@@ -338,7 +338,14 @@
         height="30"
       />
     </span>
-    <img class="brand-logo brand-logo-emblem" src={emblemUrl} alt="" width="58" height="28" />
+  </a>
+  <a
+    class="brand-mobile-emblem"
+    href="./"
+    aria-label={$_('header.home')}
+    onclick={(event) => navClick(event, 'analyse')}
+  >
+    <img class="brand-logo" src={emblemUrl} alt="" width="58" height="28" />
   </a>
   <nav class="view-tabs" aria-label="Hauptnavigation">
     <a

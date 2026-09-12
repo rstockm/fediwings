@@ -103,10 +103,8 @@ footer {
   clip-path: inset(0 0 0 40%);
 }
 
-.brand-logo-emblem {
+.brand-mobile-emblem {
   display: none;
-  width: 58px;
-  height: auto;
 }
 
 .header-meta {
@@ -3543,9 +3541,8 @@ footer {
   }
 
   .site-header {
-    position: relative;
     min-height: 66px;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 10px 14px;
   }
 
@@ -3563,17 +3560,17 @@ footer {
     transform: translateX(-64px);
   }
 
-  .brand-logo-emblem {
+  .brand-mobile-emblem {
     display: block;
-    position: absolute;
-    top: 19px;
-    left: 50%;
+    grid-column: 2;
+    grid-row: 1;
     width: 58px;
     height: auto;
-    transform: translateX(-50%);
   }
 
   .header-right {
+    grid-column: 3;
+    grid-row: 1;
     justify-self: end;
   }
 
