@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">FediWings</title>
+  <defs>
+    <radialGradient id="background" cx="50%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#292437" />
+      <stop offset="1" stop-color="#17181b" />
+    </radialGradient>
+    <g id="wing" fill="#1e96f5">
+      <path d="M 640 412 C 745 388 858 308 940 208 C 905 300 790 420 600 490 C 612 464 626 438 640 412 Z" />
+      <path d="M 610 478 C 718 464 862 428 958 374 C 890 464 768 538 585 552 C 592 527 601 502 610 478 Z" />
+      <path d="M 590 560 C 700 550 830 544 928 514 C 850 580 742 610 600 605 C 594 590 592 575 590 560 Z" />
+    </g>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#background)" />
+  <circle cx="512" cy="500" r="360" fill="none" stroke="#8b7cff" stroke-opacity=".35" stroke-width="10" />
+  <circle cx="512" cy="500" r="275" fill="none" stroke="#c7f36b" stroke-opacity=".25" stroke-width="8" />
+  <g transform="translate(0 110)">
+    <use href="#wing" />
+    <use href="#wing" transform="translate(1024 0) scale(-1 1)" />
+    <g fill="none" stroke="#fff" stroke-linejoin="round" stroke-linecap="round" stroke-width="30">
+      <path d="M512 322L635.6 411.8L588.4 557.2L435.6 557.2L388.4 411.8Z" />
+      <path d="M512 322L588.4 557.2L388.4 411.8L635.6 411.8L435.6 557.2" />
+    </g>
+    <g fill="none" stroke="#5b4bc4" stroke-linejoin="round" stroke-linecap="round" stroke-width="16">
+      <path d="M512 322L635.6 411.8L588.4 557.2L435.6 557.2L388.4 411.8Z" />
+      <path d="M512 322L588.4 557.2L388.4 411.8L635.6 411.8L435.6 557.2" />
+    </g>
+    <g fill="#5b4bc4">
+      <circle cx="512" cy="322" r="30" />
+      <circle cx="635.6" cy="411.8" r="24" />
+      <circle cx="588.4" cy="557.2" r="24" />
+      <circle cx="435.6" cy="557.2" r="24" />
+      <circle cx="388.4" cy="411.8" r="24" />
+    </g>
+  </g>
+</svg>

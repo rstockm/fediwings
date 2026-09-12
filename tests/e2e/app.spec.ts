@@ -212,6 +212,14 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await mockMastodon(page);
   await page.goto('/');
 
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute(
+    'href',
+    './fediwings-icon.svg?v=2',
+  );
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    'href',
+    './apple-touch-icon.png?v=2',
+  );
   await expect(page.getByText('von Ralf Stockmann', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'GitHub' })).toHaveAttribute(
     'href',
