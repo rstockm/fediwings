@@ -52,31 +52,40 @@ export function parseHandle(value: string): ParsedHandle {
 type InstanceProbe = 'ok' | 'unreachable' | 'other';
 
 async function probeInstance(origin: string, signal?: AbortSignal): Promise<InstanceProbe> {
-  let response: Response;
+  const paths = ['/api/v2/instance', '/api/v1/instance'];
 
-  try {
-    response = (
-      await fetchWithTimeout(
-        `${origin}/api/v2/instance`,
-        { headers: { Accept: 'application/json' } },
-        signal,
-        INSTANCE_TIMEOUT_MS,
-      )
-    ).response;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
-      throw error;
-    return 'unreachable';
+  for (const [index, path] of paths.entries()) {
+    let response: Response;
+    try {
+      response = (
+        await fetchWithTimeout(
+          `${origin}${path}`,
+          { headers: { Accept: 'application/json' } },
+          signal,
+          INSTANCE_TIMEOUT_MS,
+        )
+      ).response;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
+        throw error;
+      return 'unreachable';
+    }
+
+    if (!response.ok) {
+      const endpointMissing = [404, 405, 501].includes(response.status);
+      if (index === 0 && endpointMissing) continue;
+      return 'other';
+    }
+
+    try {
+      instanceSchema.parse(await response.json());
+      return 'ok';
+    } catch {
+      return 'other';
+    }
   }
 
-  if (!response.ok) return 'other';
-
-  try {
-    instanceSchema.parse(await response.json());
-    return 'ok';
-  } catch {
-    return 'other';
-  }
+  return 'other';
 }
 
 export async function resolveHandle(value: string, signal?: AbortSignal): Promise<InstanceTarget> {

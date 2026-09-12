@@ -777,6 +777,25 @@ test('wechselt die Sprache zu Englisch und behält die Auswahl', async ({ page }
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('faellt bei Akkoma ohne v2-Instanzendpunkt auf die v1-API zurueck', async ({ page }) => {
+  await mockMastodon(page, 'akkoma');
+  await page.route('https://test.social/api/v2/instance', async (route) => {
+    await route.fulfill({ status: 404, json: { error: 'Not implemented' } });
+  });
+  await page.route('https://test.social/api/v1/instance', async (route) => {
+    await route.fulfill({
+      json: { version: '2.7.2 (compatible; Akkoma 3.20.0)', title: 'Akkoma Test' },
+    });
+  });
+  await page.goto('/');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Alice Example' })).toBeVisible();
+  await expect(page.getByText('· Akkoma', { exact: false })).toBeVisible();
+});
+
 test('erkennt einen Pixelfed-Server ueber NodeInfo und analysiert ihn wie gewohnt', async ({
   page,
 }) => {
