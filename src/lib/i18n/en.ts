@@ -247,7 +247,7 @@ export const en: Messages = {
     step2Title: 'Load account and posts',
     step2Endpoint: '/api/v1/accounts/lookup · /accounts/:id/statuses',
     step2Text:
-      'The account and its public posts are loaded anonymously. Replies to other accounts are discarded; connected self-replies are retained and grouped into threads. For Pixelfed the anonymous Pixelfed API path is used automatically.',
+      'The account and its public posts are loaded anonymously. The setting that controls this can only be changed by the operators of your instance. Any change would apply to everyone using that instance. The Fediverse has a legitimate tradition of critically questioning automated data analysis and restricting anonymous API access. This service respects that instance-level decision. We therefore do not try to circumvent the restriction, for example by introducing a login flow. Replies to other accounts are discarded; connected self-replies are retained and grouped into threads. For Pixelfed the anonymous Pixelfed API path is used automatically.',
     step3Title: 'Evaluate boosters',
     step3Endpoint: '/api/v1/statuses/:id/reblogged_by',
     step3Text:
@@ -365,7 +365,8 @@ export const en: Messages = {
   error: {
     apiUnreachable: 'The instance API is not reachable from the browser.',
     apiTimeout: 'The request took too long and was therefore cancelled.',
-    api401: 'This instance does not allow anonymous API access.',
+    api401:
+      'This instance does not allow anonymous API access. This setting can only be changed by the operators of your instance. Any change would apply to everyone using that instance. The Fediverse has a legitimate tradition of critically questioning automated data analysis and restricting anonymous API access. This service respects that instance-level decision. We therefore do not try to circumvent the restriction, for example by introducing a login flow.',
     api404: 'The requested account or post was not found.',
     api429: 'The instance rate limit was reached.',
     apiHttp: 'The instance responded with HTTP {status}.',

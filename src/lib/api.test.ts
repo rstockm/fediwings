@@ -57,6 +57,17 @@ describe('getAccount', () => {
       'Die Instanz antwortete mit HTTP 400.',
     );
   });
+
+  it('explains why anonymous API restrictions are not bypassed', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(jsonResponse({ error: 'Unauthorized' }, 401))),
+    );
+
+    await expect(getAccount('https://test.social', 'alice')).rejects.toThrow(
+      'Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen',
+    );
+  });
 });
 
 describe.each([

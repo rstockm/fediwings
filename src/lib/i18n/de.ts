@@ -246,7 +246,7 @@ export const de = {
     step2Title: 'Account und Posts laden',
     step2Endpoint: '/api/v1/accounts/lookup · /accounts/:id/statuses',
     step2Text:
-      'Der Account und seine öffentlichen Beiträge werden anonym geladen. Antworten auf fremde Beiträge werden verworfen; eigene zusammenhängende Antworten bleiben erhalten und werden zu Threads gruppiert. Bei Pixelfed wird automatisch der anonyme Pixelfed-API-Pfad genutzt.',
+      'Der Account und seine öffentlichen Beiträge werden anonym geladen. Die dafür maßgebliche Einstellung kann nur von den Betreibenden deiner Instanz geändert werden. Eine Änderung würde für alle Nutzenden dieser Instanz gelten. Im Fediverse gibt es eine berechtigte Tradition, automatisierte Datenanalyse kritisch zu betrachten und anonyme API-Zugriffe einzuschränken. Dieser Dienst respektiert die Entscheidung deiner Instanz. Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen, etwa durch eine vorgeschaltete Anmeldung. Antworten auf fremde Beiträge werden verworfen; eigene zusammenhängende Antworten bleiben erhalten und werden zu Threads gruppiert. Bei Pixelfed wird automatisch der anonyme Pixelfed-API-Pfad genutzt.',
     step3Title: 'Booster auswerten',
     step3Endpoint: '/api/v1/statuses/:id/reblogged_by',
     step3Text:
@@ -366,7 +366,8 @@ export const de = {
   error: {
     apiUnreachable: 'Die API der Instanz ist aus dem Browser nicht erreichbar.',
     apiTimeout: 'Die Anfrage hat zu lange gedauert und wurde deshalb abgebrochen.',
-    api401: 'Diese Instanz erlaubt keinen anonymen API-Zugriff.',
+    api401:
+      'Diese Instanz erlaubt keinen anonymen API-Zugriff. Diese Einstellung kann nur von den Betreibenden deiner Instanz geändert werden. Eine Änderung würde für alle Nutzenden dieser Instanz gelten. Im Fediverse gibt es eine berechtigte Tradition, automatisierte Datenanalyse kritisch zu betrachten und anonyme API-Zugriffe einzuschränken. Dieser Dienst respektiert die Entscheidung deiner Instanz. Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen, etwa durch eine vorgeschaltete Anmeldung.',
     api404: 'Der angeforderte Account oder Beitrag wurde nicht gefunden.',
     api429: 'Das Rate Limit der Instanz wurde erreicht.',
     apiHttp: 'Die Instanz antwortete mit HTTP {status}.',

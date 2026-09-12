@@ -725,6 +725,11 @@ test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ p
   await expect(page.getByRole('heading', { name: 'Was die Zahlen wirklich sagen.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Vom Handle zur Reichweite.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'So wenig Last wie möglich.' })).toBeVisible();
+  await expect(
+    page.getByText('Die dafür maßgebliche Einstellung kann nur von den Betreibenden', {
+      exact: false,
+    }),
+  ).toBeVisible();
   const curveChart = page.getByRole('img', {
     name: 'Netto-Reichweite nach Boosts für null, zehn und fünfzig Interaktionen',
   });
@@ -775,6 +780,34 @@ test('wechselt die Sprache zu Englisch und behält die Auswahl', async ({ page }
   await expect(
     page.getByRole('group', { name: 'Language' }).getByRole('button', { name: 'EN' }),
   ).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('link', { name: 'Methodology' }).click();
+  await expect(
+    page.getByText('The setting that controls this can only be changed by the operators', {
+      exact: false,
+    }),
+  ).toBeVisible();
+});
+
+test('explains blocked anonymous API access in both languages', async ({ page }) => {
+  await mockMastodon(page);
+  await page.route('https://test.social/api/v1/accounts/lookup?*', async (route) => {
+    await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+  });
+  await page.goto('/');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  const notice = page.locator('.notice.error-banner');
+  await expect(notice).toContainText(
+    'Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen',
+  );
+
+  await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
+  await page.getByRole('button', { name: 'Analyse' }).click();
+  await expect(notice).toContainText(
+    'We therefore do not try to circumvent the restriction, for example by introducing a login flow.',
+  );
 });
 
 test('faellt bei Akkoma ohne v2-Instanzendpunkt auf die v1-API zurueck', async ({ page }) => {
