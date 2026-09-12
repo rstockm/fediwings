@@ -3543,9 +3543,34 @@ footer {
   }
 
   .site-header {
+    position: relative;
     min-height: 66px;
     grid-template-columns: auto 1fr;
     gap: 10px 14px;
+  }
+
+  .brand-logo-lockup {
+    width: 96px;
+    overflow: hidden;
+  }
+
+  .brand-logo-lockup-mark {
+    display: none;
+  }
+
+  .brand-logo-lockup-word {
+    clip-path: none;
+    transform: translateX(-64px);
+  }
+
+  .brand-logo-emblem {
+    display: block;
+    position: absolute;
+    top: 19px;
+    left: 50%;
+    width: 58px;
+    height: auto;
+    transform: translateX(-50%);
   }
 
   .header-right {
@@ -3999,14 +4024,6 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .brand-logo-lockup {
-    display: none;
-  }
-
-  .brand-logo-emblem {
-    display: block;
-  }
-
   .view-tabs a {
     min-width: 74px;
     padding-inline: 8px;

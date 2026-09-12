@@ -649,6 +649,35 @@ test('bleibt auf einem mobilen Viewport ohne horizontalen Ueberlauf bedienbar', 
   await expect(page.getByRole('button', { name: 'Analysieren' })).toBeVisible();
 });
 
+test('zentriert das Emblem im mobilen Header und behaelt die Wortmarke links', async ({ page }) => {
+  await page.setViewportSize({ width: 412, height: 840 });
+  await page.goto('/');
+
+  const positions = await page.evaluate(() => {
+    const header = document.querySelector('.site-header')!.getBoundingClientRect();
+    const wordmark = document.querySelector('.brand-logo-lockup')!.getBoundingClientRect();
+    const emblem = document.querySelector('.brand-logo-emblem')!.getBoundingClientRect();
+    return {
+      headerLeft: header.left,
+      wordmarkLeft: wordmark.left,
+      wordmarkRight: wordmark.right,
+      emblemLeft: emblem.left,
+      emblemRight: emblem.right,
+      emblemCenter: emblem.left + emblem.width / 2,
+      viewportCenter: window.innerWidth / 2,
+    };
+  });
+
+  expect(positions.wordmarkLeft).toBeCloseTo(positions.headerLeft, 0);
+  expect(positions.wordmarkRight).toBeLessThan(positions.emblemLeft);
+  expect(positions.emblemCenter).toBeCloseTo(positions.viewportCenter, 0);
+
+  await page.setViewportSize({ width: 721, height: 840 });
+  await page.reload();
+  await expect(page.locator('.brand-logo-lockup')).toHaveCSS('width', '160px');
+  await expect(page.locator('.brand-logo-emblem')).toHaveCSS('display', 'none');
+});
+
 test('haelt das Hero-Emblem auch auf breiten Screens in der Textspalte', async ({ page }) => {
   await page.setViewportSize({ width: 2000, height: 965 });
   await page.goto('/');
