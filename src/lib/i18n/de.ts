@@ -19,7 +19,7 @@ export const de = {
     title: 'Wie weit trägt<br />dein Post im <em>Fediverse</em>?',
     intro:
       'Öffentliche Boosts werden dort ausgewertet, wo dein Beitrag zu Hause ist. Ohne Login, Tracking oder zentrale Datensammlung.',
-    handle: 'Vollständiger Fediverse-Handle',
+    handle: 'Fediverse- oder Bluesky-Handle',
     analyze: 'Analysieren',
     connecting: 'Verbinde…',
     abortConnection: 'Verbindung abbrechen',
@@ -115,10 +115,11 @@ export const de = {
     eyebrow: 'Analysierter Account',
     followersNote: 'aktuelle Follower',
     dataFrom: 'Daten von {host}',
-    platformTitle: 'Server-Software laut NodeInfo',
+    platformTitle: 'Erkannter Heimat-Server',
   },
   combobox: {
-    handle: 'Vollständiger Fediverse-Handle',
+    handle: 'Fediverse- oder Bluesky-Handle',
+    placeholder: '@name@server.social oder name.bsky.social',
     listbox: 'Zuletzt analysierte Handles',
     listLabel: 'Zuletzt analysiert',
   },
@@ -240,17 +241,20 @@ export const de = {
     apiIntro:
       'Alle Abrufe gehen direkt aus dem Browser an die Heimatinstanz des analysierten Accounts.',
     step1Title: 'Instanz auflösen',
-    step1Endpoint: '/.well-known/nodeinfo · /api/v2/instance · optional WebFinger',
+    step1Endpoint:
+      '/.well-known/nodeinfo · /api/v2/instance · optional WebFinger — oder com.atproto.identity.resolveHandle · DID-Dokument',
     step1Text:
-      'FediWings ist nicht Mastodon-only: Mastodon-API-kompatible Server wie Pixelfed, Pleroma, Akkoma, GoToSocial, Friendica, Glitch-Soc und Hometown werden direkt unterstützt. Misskey, Sharkey, Firefish und Iceshrimp werden erkannt und funktionieren, wenn die Instanz kompatible API-Endpunkte bereitstellt.',
+      'FediWings ist nicht Mastodon-only: Mastodon-API-kompatible Server wie Pixelfed, Pleroma, Akkoma, GoToSocial, Friendica, Glitch-Soc und Hometown werden direkt unterstützt. Misskey, Sharkey, Firefish und Iceshrimp werden erkannt und funktionieren, wenn die Instanz kompatible API-Endpunkte bereitstellt. Handles ohne zweites @ (etwa name.bsky.social) oder DIDs werden als AT Protocol behandelt: FediWings ermittelt die DID, liest den Personal Data Server aus dem DID-Dokument und zeigt ihn als Heimat-Server an.',
     step2Title: 'Account und Posts laden',
-    step2Endpoint: '/api/v1/accounts/lookup · /accounts/:id/statuses',
+    step2Endpoint:
+      '/api/v1/accounts/lookup · /accounts/:id/statuses — oder app.bsky.actor.getProfile · app.bsky.feed.getAuthorFeed',
     step2Text:
-      'Der Account und seine öffentlichen Beiträge werden anonym geladen. Die dafür maßgebliche Einstellung kann nur von den Betreibenden deiner Instanz geändert werden. Eine Änderung würde für alle Nutzenden dieser Instanz gelten. Im Fediverse gibt es eine berechtigte Tradition, automatisierte Datenanalyse kritisch zu betrachten und anonyme API-Zugriffe einzuschränken. Dieser Dienst respektiert die Entscheidung deiner Instanz. Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen, etwa durch eine vorgeschaltete Anmeldung. Antworten auf fremde Beiträge werden verworfen; eigene zusammenhängende Antworten bleiben erhalten und werden zu Threads gruppiert. Bei Pixelfed wird automatisch der anonyme Pixelfed-API-Pfad genutzt.',
+      'Der Account und seine öffentlichen Beiträge werden anonym geladen. Die dafür maßgebliche Einstellung kann nur von den Betreibenden deiner Instanz geändert werden. Eine Änderung würde für alle Nutzenden dieser Instanz gelten. Im Fediverse gibt es eine berechtigte Tradition, automatisierte Datenanalyse kritisch zu betrachten und anonyme API-Zugriffe einzuschränken. Dieser Dienst respektiert die Entscheidung deiner Instanz. Deshalb versuchen wir nicht, diese Einschränkung technisch zu umgehen, etwa durch eine vorgeschaltete Anmeldung. Antworten auf fremde Beiträge werden verworfen; eigene zusammenhängende Antworten bleiben erhalten und werden zu Threads gruppiert. Bei Pixelfed wird automatisch der anonyme Pixelfed-API-Pfad genutzt. Bei AT Protocol beantwortet der Personal Data Server anonyme Abfragen nicht; die Beiträge kommen deshalb aus der öffentlichen AppView public.api.bsky.app.',
     step3Title: 'Booster auswerten',
-    step3Endpoint: '/api/v1/statuses/:id/reblogged_by',
+    step3Endpoint:
+      '/api/v1/statuses/:id/reblogged_by — oder app.bsky.feed.getRepostedBy · app.bsky.actor.getProfiles',
     step3Text:
-      'Nur Posts mit Boosts lösen diese Abfrage aus. Öffentliche Booster werden über alle Thread-Teile dedupliziert und ihre bereits gelieferten Followerzahlen summiert.',
+      'Nur Posts mit Boosts lösen diese Abfrage aus. Öffentliche Booster werden über alle Thread-Teile dedupliziert und ihre Followerzahlen summiert. Bei AT Protocol liefert die Repost-Liste keine Followerzahlen; sie werden in Blöcken von 25 Konten nachgeladen. Bluesky-Zitate werden gezählt, fließen aber nicht in die Formel ein, damit die Werte zwischen den Protokollen vergleichbar bleiben.',
     step4Title: 'Progressiv berechnen',
     step4Endpoint: 'Netto-Reichweite · ergänzendes Brutto-Potenzial',
     step4Text:
@@ -259,7 +263,7 @@ export const de = {
     budgetValue: '≈ 85',
     budgetNote: 'Requests bei 80 Threads und je einer Booster-Seite',
     budgetCode:
-      '1 Instanzprüfung<br />+ 2 Server-Erkennung (NodeInfo)<br />+ 1 Account-Lookup<br />+ 1 Beitragsliste<br />+ bis zu 80 Booster-Abfragen',
+      '1 Instanzprüfung<br />+ 2 Server-Erkennung (NodeInfo bzw. DID-Auflösung)<br />+ 1 Account-Lookup<br />+ 1 Beitragsliste<br />+ bis zu 80 Booster-Abfragen',
     citizenSection: '03 / Good Fediverse Citizen',
     citizenTitle: 'So wenig Last wie möglich.',
     ruleParallel: 'maximal parallele API-Anfragen',
@@ -382,6 +386,14 @@ export const de = {
     handleWebfingerInvalid: 'WebFinger liefert keine gueltige Antwort.',
     handleWebfingerInsecure: 'WebFinger liefert keine sichere ActivityPub-Adresse.',
     handleNoApi: 'Fuer diesen Account wurde keine unterstuetzte Fediverse-API gefunden.',
+    atprotoHandle:
+      'Dieses Handle konnte im AT Protocol nicht aufgeloest werden. Beispiel: name.bsky.social.',
+    atprotoDid: 'Das DID-Dokument dieses Accounts konnte nicht geladen werden.',
+    atprotoNoPds: 'Das DID-Dokument nennt keinen erreichbaren Personal Data Server.',
+    atprotoUnreachable: 'Der AT-Protocol-Dienst ist nicht erreichbar oder antwortet nicht.',
+    atprotoRequest: 'Die Bluesky-API hat die Anfrage abgelehnt ({detail}).',
+    atprotoNoBoosters:
+      'Fuer diesen Beitrag ist keine oeffentliche Repost-Liste verfuegbar; Brutto zaehlt nur die Autor-Follower.',
     oauthRejected: 'Der Fediverse-Server hat die OAuth-Anfrage abgelehnt (HTTP {status}).',
     oauthInvalid: 'Der Fediverse-Server lieferte keine gueltige OAuth-Antwort.',
     oauthAppRegistration: 'Die App-Registrierung lieferte ungueltige Daten.',

@@ -226,7 +226,7 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     'https://github.com/rstockm/fediwings',
   );
   await expect(page.getByLabel('Threads')).toHaveValue('80');
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   await expect(page.getByRole('heading', { name: 'Alice Example' })).toBeVisible();
@@ -452,7 +452,7 @@ test('vergleicht gemeldete Interaktionen mit den 30 Tagen davor', async ({ page 
   });
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   const card = page.locator('.insight-card').filter({ hasText: 'Interaktionen' });
@@ -472,7 +472,7 @@ test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
   await expect(
     page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
@@ -485,7 +485,7 @@ test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async
   await expect(
     page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
   ).toBeVisible();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toHaveValue('@alice@test.social');
   await expect(page.getByText('1.000')).toBeVisible();
   const marker = await page.evaluate(
     () => (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload,
@@ -506,7 +506,7 @@ test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async 
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
   const threadCard = page.locator('.post-card').filter({
     hasText: 'Ein Testbeitrag aus dem Fediverse.',
@@ -599,7 +599,7 @@ test('erstellt und teilt eine individuelle Card ueber den konfigurierten Service
   });
   await mockMastodon(page);
   await page.goto('/');
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
   const threadCard = page.locator('.post-card').filter({
     hasText: 'Ein Testbeitrag aus dem Fediverse.',
@@ -636,7 +636,7 @@ test('zeigt fuer einen ungueltigen Share-Link einen sicheren Fehlerzustand', asy
     page.getByRole('heading', { name: 'Diese Analyse kann nicht geöffnet werden.' }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Zur FediWings-Startseite' })).toBeVisible();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveCount(0);
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toHaveCount(0);
 });
 
 test('bleibt auf einem mobilen Viewport ohne horizontalen Ueberlauf bedienbar', async ({
@@ -737,7 +737,7 @@ test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ p
   await expect(curveChart.locator('.reach-curve')).toHaveCount(3);
   await page.getByText('Technische Formel ansehen').click();
   await expect(page.getByText('0,0165 × G', { exact: false })).toBeVisible();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveCount(0);
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toHaveCount(0);
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -751,7 +751,7 @@ test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ p
   expect(blocking).toEqual([]);
 
   await analysisTab.click();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toBeVisible();
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toBeVisible();
 });
 
 test('wechselt die Sprache zu Englisch und behält die Auswahl', async ({ page }) => {
@@ -795,7 +795,7 @@ test('explains blocked anonymous API access in both languages', async ({ page })
   });
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   const notice = page.locator('.notice.error-banner');
@@ -822,7 +822,7 @@ test('faellt bei Akkoma ohne v2-Instanzendpunkt auf die v1-API zurueck', async (
   });
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   await expect(page.getByRole('heading', { name: 'Alice Example' })).toBeVisible();
@@ -869,7 +869,7 @@ test('erkennt einen Pixelfed-Server ueber NodeInfo und analysiert ihn wie gewohn
   );
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   await expect(page.getByRole('heading', { name: 'Alice Example' })).toBeVisible();
@@ -888,7 +888,7 @@ test('meldet eine haengende Instanz nach Zeitueberschreitung als Fehler', async 
   await page.route('https://hanging.example/api/v2/instance', () => {});
 
   await page.goto('/');
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@hanging.example');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@hanging.example');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   await expect(page.getByText('Der Server ist nicht erreichbar')).toBeVisible({ timeout: 15_000 });
@@ -899,7 +899,7 @@ test('kann die Verbindung waehrend der Aufloesung abbrechen', async ({ page }) =
   await page.route('https://hanging.example/api/v2/instance', () => {});
 
   await page.goto('/');
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@hanging.example');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@hanging.example');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
   await page.getByRole('button', { name: 'Verbindung abbrechen' }).click();
@@ -911,7 +911,7 @@ test('erfuehlt wesentliche Barrierefreiheitsregeln nach einer Analyse', async ({
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
   await expect(
     page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
@@ -929,7 +929,7 @@ test('speichert bei aktivem Merken den Handle und bietet ihn im Dropdown an', as
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByLabel('Merken').check();
   await page.getByRole('button', { name: 'Analysieren' }).click();
   await expect(
@@ -941,7 +941,7 @@ test('speichert bei aktivem Merken den Handle und bietet ihn im Dropdown an', as
   expect(stored).toContain('alice@test.social');
 
   await page.reload();
-  const input = page.getByLabel('Vollständiger Fediverse-Handle');
+  const input = page.getByLabel('Fediverse- oder Bluesky-Handle');
   await input.click();
   const option = page.locator('#saved-handles-listbox').getByRole('option', {
     name: 'alice@test.social',
@@ -956,7 +956,7 @@ test('Dropdown der gespeicherten Handles reagiert auf Tastatur', async ({ page }
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByLabel('Merken').check();
   await page.getByRole('button', { name: 'Analysieren' }).click();
   await expect(
@@ -964,7 +964,7 @@ test('Dropdown der gespeicherten Handles reagiert auf Tastatur', async ({ page }
   ).toBeVisible();
 
   await page.reload();
-  const input = page.getByLabel('Vollständiger Fediverse-Handle');
+  const input = page.getByLabel('Fediverse- oder Bluesky-Handle');
   await input.click();
   await input.press('ArrowDown');
   await input.press('Enter');
@@ -985,7 +985,7 @@ test('Dropdown zeigt alle gespeicherten Handles und wird nicht beschnitten', asy
   });
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').click();
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').click();
   const listbox = page.locator('#saved-handles-listbox');
   await expect(listbox.getByRole('option')).toHaveCount(3);
 
@@ -1010,7 +1010,7 @@ test('speichert ohne aktivem Merken keine Handles', async ({ page }) => {
   await mockMastodon(page);
   await page.goto('/');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Analysieren' }).click();
   await expect(
     page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
@@ -1059,7 +1059,7 @@ test('laedt weitere Statusseiten nach und Thread-Postings zaehlen nicht auf das 
   );
 
   await page.goto('/');
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByLabel('Threads').selectOption('80');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
@@ -1067,4 +1067,159 @@ test('laedt weitere Statusseiten nach und Thread-Postings zaehlen nicht auf das 
     page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
   ).toBeVisible();
   await expect(page.locator('.post-card')).toHaveCount(50);
+});
+
+const BSKY_DID = 'did:plc:ks6l7qs37543awud4jyfl7o3';
+const BSKY_POST = `at://${BSKY_DID}/app.bsky.feed.post/3mvcymhq6ou32`;
+
+function bskyProfile(did: string, handle: string, followersCount: number) {
+  return {
+    did,
+    handle,
+    displayName: handle,
+    followersCount,
+    followsCount: 0,
+    postsCount: 1,
+  };
+}
+
+/** Spiegelt den anonymen AT-Proto-Pfad: DID-Auflösung, DID-Dokument und öffentliche AppView. */
+async function mockAtproto(page: Page) {
+  await page.route(
+    'https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?*',
+    async (route) => {
+      await route.fulfill({ json: { did: BSKY_DID } });
+    },
+  );
+  await page.route(`https://plc.directory/${BSKY_DID}`, async (route) => {
+    await route.fulfill({
+      json: {
+        id: BSKY_DID,
+        alsoKnownAs: ['at://dracoblue.de'],
+        service: [
+          {
+            id: '#atproto_pds',
+            type: 'AtprotoPersonalDataServer',
+            serviceEndpoint: 'https://eurosky.social',
+          },
+        ],
+      },
+    });
+  });
+  await page.route(
+    'https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?*',
+    async (route) => {
+      await route.fulfill({
+        json: { ...bskyProfile(BSKY_DID, 'dracoblue.de', 176), displayName: 'dracoblue' },
+      });
+    },
+  );
+  await page.route(
+    'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?*',
+    async (route) => {
+      await route.fulfill({
+        json: {
+          feed: [
+            {
+              post: {
+                uri: BSKY_POST,
+                cid: 'bafy1',
+                author: { did: BSKY_DID, handle: 'dracoblue.de', displayName: 'dracoblue' },
+                record: { text: 'Ein Beitrag aus dem AT Protocol.', createdAt: daysAgo(2) },
+                replyCount: 1,
+                repostCount: 2,
+                likeCount: 4,
+                quoteCount: 0,
+                indexedAt: daysAgo(2),
+              },
+            },
+            {
+              // Ein Repost eines fremden Beitrags darf nicht als eigener Post zählen.
+              post: {
+                uri: 'at://did:plc:other/app.bsky.feed.post/xyz',
+                cid: 'bafy2',
+                author: { did: 'did:plc:other', handle: 'other.example' },
+                record: { text: 'Fremder Beitrag.', createdAt: daysAgo(1) },
+                replyCount: 0,
+                repostCount: 0,
+                likeCount: 0,
+                quoteCount: 0,
+                indexedAt: daysAgo(1),
+              },
+              reason: { $type: 'app.bsky.feed.defs#reasonRepost' },
+            },
+          ],
+        },
+      });
+    },
+  );
+  await page.route(
+    'https://public.api.bsky.app/xrpc/app.bsky.feed.getRepostedBy?*',
+    async (route) => {
+      await route.fulfill({
+        json: {
+          repostedBy: [
+            { did: 'did:plc:r1', handle: 'reposter-one.example' },
+            { did: 'did:plc:r2', handle: 'reposter-two.example' },
+          ],
+        },
+      });
+    },
+  );
+  await page.route(
+    'https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles?*',
+    async (route) => {
+      await route.fulfill({
+        json: {
+          profiles: [
+            bskyProfile('did:plc:r1', 'reposter-one.example', 300),
+            bskyProfile('did:plc:r2', 'reposter-two.example', 200),
+          ],
+        },
+      });
+    },
+  );
+}
+
+test('analysiert ein Bluesky-Handle ueber den aufgeloesten PDS', async ({ page }) => {
+  await mockAtproto(page);
+  let nodeInfoRequested = false;
+  await page.route('https://dracoblue.de/**', async (route) => {
+    nodeInfoRequested = true;
+    await route.abort();
+  });
+
+  await page.goto('/');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@dracoblue.de');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  await expect(page.getByRole('heading', { name: 'dracoblue' })).toBeVisible();
+  // Der Heimat-Server ist der PDS aus dem DID-Dokument, nicht bsky.social.
+  await expect(page.getByText('Daten von eurosky.social', { exact: false })).toBeVisible();
+  await expect(page.getByText('· Bluesky (AT Protocol)', { exact: false })).toBeVisible();
+  await expect(page.getByText('Analyse abgeschlossen.', { exact: false })).toBeVisible();
+  await expect(page.locator('.post-card')).toHaveCount(1);
+  await expect(page.locator('.post-card').first()).toContainText(
+    'Ein Beitrag aus dem AT Protocol.',
+  );
+  expect(nodeInfoRequested).toBe(false);
+});
+
+test('meldet ein unaufloesbares Bluesky-Handle verstaendlich', async ({ page }) => {
+  await page.route(
+    'https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?*',
+    async (route) => {
+      await route.fulfill({
+        status: 400,
+        json: { error: 'InvalidRequest', message: 'Unable to resolve handle' },
+      });
+    },
+  );
+
+  await page.goto('/');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('nicht-vorhanden.example');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  // Nackte Domain ohne AT-Proto-Eintrag: der Fediverse-Pfad braucht einen Benutzernamen.
+  await expect(page.getByText('Bitte einen vollstaendigen Handle', { exact: false })).toBeVisible();
 });

@@ -101,7 +101,7 @@ test('zeigt ohne Login die aktuellen Zahlen und kennzeichnet die Login-Grenze', 
     page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
   ).toHaveCount(0);
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
 
   await expect(page.getByText('1.000')).toBeVisible();
@@ -121,7 +121,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   await mockOAuthFlow(page);
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await expect(page.locator('.follower-hero')).toHaveClass(/follower-hero-collapsed/);
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
@@ -137,7 +137,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
 
   await expect(page.getByText('Kumuliert aus 162 Follow-Ereignissen')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Abmelden' })).toBeVisible();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toBeDisabled();
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toBeDisabled();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -158,7 +158,7 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
 
@@ -179,7 +179,7 @@ test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) 
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
   await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
@@ -205,7 +205,7 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
@@ -216,7 +216,7 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
   expect(stored).toBeNull();
 
   await page.reload();
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await expect(
     page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
@@ -231,7 +231,7 @@ test('warnt nach lokalem Abmelden vor fehlgeschlagenem Server-Widerruf', async (
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
@@ -262,7 +262,7 @@ test('verwirft den Token beim Login mit einem anderen Account', async ({ page })
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
 
@@ -300,7 +300,7 @@ test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus de
   });
   await page.goto('/?view=follower');
 
-  const input = page.getByLabel('Vollständiger Fediverse-Handle');
+  const input = page.getByLabel('Fediverse- oder Bluesky-Handle');
   await expect(input).toHaveValue('@alice@test.social');
   await expect(page.getByText('1.000')).toBeVisible();
   await expect(
@@ -321,7 +321,7 @@ test('uebergibt den im Follower-Tab geladenen Account ohne Reload an die Analyse
   await mockInstance(page);
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await expect(page.getByText('1.000')).toBeVisible();
 
@@ -330,7 +330,7 @@ test('uebergibt den im Follower-Tab geladenen Account ohne Reload an die Analyse
   });
   await page.getByRole('link', { name: 'Analyse' }).click();
   await expect(page.getByRole('button', { name: 'Analysieren' })).toBeVisible();
-  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
+  await expect(page.getByLabel('Fediverse- oder Bluesky-Handle')).toHaveValue('@alice@test.social');
   const marker = await page.evaluate(
     () => (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload,
   );
@@ -390,7 +390,7 @@ test('speichert nach einem Ansichtswechsel während der Anmeldung keinen Token',
   });
   await page.goto('/?view=follower');
 
-  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByLabel('Fediverse- oder Bluesky-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
   await expect.poll(() => verificationStarted).toBe(true);

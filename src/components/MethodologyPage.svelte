@@ -23,32 +23,13 @@
     }).join(' ');
   const areaPath = `${curvePath(50)} L${chart.right},${chart.bottom} L${chart.left},${chart.bottom} Z`;
 
-  const apiSteps = [
-    {
-      number: '01',
-      title: 'methodology.step1Title',
-      endpoint: '/.well-known/nodeinfo · /api/v2/instance · optional WebFinger',
-      text: 'methodology.step1Text',
-    },
-    {
-      number: '02',
-      title: 'methodology.step2Title',
-      endpoint: '/api/v1/accounts/lookup · /accounts/:id/statuses',
-      text: 'methodology.step2Text',
-    },
-    {
-      number: '03',
-      title: 'methodology.step3Title',
-      endpoint: '/api/v1/statuses/:id/reblogged_by',
-      text: 'methodology.step3Text',
-    },
-    {
-      number: '04',
-      title: 'methodology.step4Title',
-      endpoint: 'Netto-Reichweite · ergänzendes Brutto-Potenzial',
-      text: 'methodology.step4Text',
-    },
-  ];
+  // Endpunkte kommen aus dem Sprachkatalog, damit es nur eine Quelle dafuer gibt.
+  const apiSteps = [1, 2, 3, 4].map((step) => ({
+    number: String(step).padStart(2, '0'),
+    title: `methodology.step${step}Title`,
+    endpoint: `methodology.step${step}Endpoint`,
+    text: `methodology.step${step}Text`,
+  }));
 
   const citizenRules = [
     ['2', 'methodology.ruleParallel'],
@@ -212,7 +193,7 @@
           <span class="api-step-number">{step.number}</span>
           <div>
             <h3>{$_(step.title)}</h3>
-            <code>{step.endpoint}</code>
+            <code>{$_(step.endpoint)}</code>
             <p>{$_(step.text)}</p>
           </div>
         </li>

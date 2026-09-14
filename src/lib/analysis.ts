@@ -1,6 +1,6 @@
-import { getRebloggers, MastodonApiError } from './api';
+import { MastodonApiError } from './api';
+import { mastodonBoosterSource, type BoosterCursor, type BoosterSource } from './boosters';
 import { msg } from './i18n';
-import { nextLink } from './pagination';
 import { initialReach, updateReach } from './reach';
 import { groupStatusesIntoThreads } from './thread';
 import type {
@@ -22,6 +22,10 @@ interface AnalysisCallbacks {
 
 export interface AnalysisOptions {
   boosterLists?: boolean;
+  /** Backend-spezifische Booster-Quelle; ohne Angabe wird die Mastodon-API genutzt. */
+  boosterSource?: BoosterSource;
+  /** Meldung, wenn das Backend gar keine öffentliche Booster-Liste hat. */
+  noBoosterListMessage?: string;
 }
 
 function abortError(): DOMException {
@@ -85,6 +89,7 @@ export async function analyzePosts(
 ): Promise<PostReach[]> {
   const results = [...initial];
   const boosterLists = options.boosterLists ?? true;
+  const source = options.boosterSource ?? mastodonBoosterSource(origin);
   const queue = boosterLists
     ? results.map((_, index) => index).filter((index) => results[index].boosts > 0)
     : [];
@@ -100,7 +105,7 @@ export async function analyzePosts(
         return {
           ...result,
           state: 'partial' as const,
-          error: msg('error.pixelfedNoBoosters'),
+          error: options.noBoosterListMessage ?? msg('error.pixelfedNoBoosters'),
         };
       }
       return result.state === 'pending' ? { ...result, state: 'complete' as const } : result;
@@ -125,22 +130,21 @@ export async function analyzePosts(
 
     try {
       outer: for (const part of result.threadStatuses) {
-        let url: string | null =
-          `${origin}/api/v1/statuses/${encodeURIComponent(part.id)}/reblogged_by?limit=80`;
+        let cursor: BoosterCursor | null = { statusId: part.id, token: null };
 
-        while (url && pages < MAX_PAGES_PER_POST && requests < MAX_REQUESTS) {
+        while (cursor && pages < MAX_PAGES_PER_POST && requests < MAX_REQUESTS) {
           if (signal.aborted) throw abortError();
           requests += 1;
           progress();
 
           let page;
           try {
-            page = await getRebloggers(url, signal);
+            page = await source.page(cursor, signal);
           } catch (error) {
             if (error instanceof MastodonApiError && error.status === 429 && error.resetAt) {
               progress(error.resetAt);
               await waitUntil(error.resetAt, signal);
-              page = await getRebloggers(url, signal);
+              page = await source.page(cursor, signal);
               requests += 1;
             } else if (error instanceof MastodonApiError && error.status === 404) {
               noBoostList = true;
@@ -150,21 +154,22 @@ export async function analyzePosts(
             }
           }
 
-          for (const account of page.data) {
-            const key = account.uri ?? account.acct;
-            if (seen.has(key)) continue;
-            seen.add(key);
-            followerSum += account.followers_count;
+          requests += page.requests - 1;
+
+          for (const account of page.accounts) {
+            if (seen.has(account.key)) continue;
+            seen.add(account.key);
+            followerSum += account.followers;
           }
 
           pages += 1;
           result = updateReach(result, seen.size, followerSum, pages);
           results[index] = result;
           callbacks.onPost(index, result);
-          url = nextLink(page.link, origin);
+          cursor = page.next;
 
           if (
-            url &&
+            cursor &&
             page.rateLimit.remaining !== null &&
             page.rateLimit.remaining <= 1 &&
             page.rateLimit.resetAt &&
@@ -175,7 +180,7 @@ export async function analyzePosts(
           }
         }
 
-        if (!url) {
+        if (!cursor) {
           remainingParts += 1;
           if (pages >= MAX_PAGES_PER_POST || requests >= MAX_REQUESTS) {
             unfinished = remainingParts < result.threadStatuses.length;
@@ -192,7 +197,7 @@ export async function analyzePosts(
         ...result,
         state: noBoostList || unfinished ? 'partial' : 'complete',
         error: noBoostList
-          ? msg('error.serverNoBoosterList')
+          ? (options.noBoosterListMessage ?? msg('error.serverNoBoosterList'))
           : unfinished
             ? msg('error.analysisBudget')
             : undefined,
