@@ -70,7 +70,7 @@
   <input
     id={inputId}
     bind:value
-    placeholder="@name@server.social"
+    placeholder={$_('combobox.placeholder')}
     autocomplete="off"
     spellcheck="false"
     required

@@ -8,10 +8,37 @@ export interface InstanceTarget extends ParsedHandle {
   origin: string;
 }
 
+/** Identität eines AT-Protocol-Accounts: Handle, DID und der daraus aufgelöste PDS. */
+export interface AtprotoTarget {
+  did: string;
+  handle: string;
+  /** Origin des Personal Data Servers aus dem DID-Dokument, nur für Identität und Anzeige. */
+  pdsOrigin: string;
+  /** Origin der öffentlichen AppView, aus der alle Analysedaten stammen. */
+  appview: string;
+}
+
+/**
+ * Ergebnis der Handle-Auflösung. `acct` und `origin` sind backend-übergreifend gesetzt,
+ * damit die Oberfläche beide Protokolle gleich behandeln kann.
+ */
+export type ResolvedTarget =
+  | ({ backend: 'mastodon' } & InstanceTarget)
+  | {
+      backend: 'atproto';
+      username: string;
+      domain: string;
+      acct: string;
+      origin: string;
+      target: AtprotoTarget;
+    };
+
+export type ServerProtocol = 'mastodon' | 'atproto';
+
 export interface ServerPlatform {
   id: string;
   name: string;
-  mastodonApi: boolean;
+  protocol: ServerProtocol;
 }
 
 export interface MastodonAccount {
@@ -24,6 +51,8 @@ export interface MastodonAccount {
   avatar_static: string;
   followers_count: number;
   hide_collections?: boolean | null;
+  /** Nur gesetzt, wenn der Account nicht aus einer Mastodon-API stammt. */
+  protocol?: ServerProtocol;
 }
 
 export interface MastodonMediaAttachment {

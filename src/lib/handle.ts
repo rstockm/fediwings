@@ -1,7 +1,8 @@
+import { AtprotoError, parseAtprotoIdentifier, resolveAtprotoHandle } from './atproto/identity';
 import { fetchWithTimeout } from './http';
 import { msg } from './i18n';
 import { instanceSchema, webFingerSchema } from './schemas';
-import type { InstanceTarget, ParsedHandle } from './types';
+import type { InstanceTarget, ParsedHandle, ResolvedTarget } from './types';
 
 const USERNAME_PATTERN = /^[a-z0-9_][a-z0-9_.-]*$/i;
 export const INSTANCE_TIMEOUT_MS = 6_000;
@@ -86,6 +87,37 @@ async function probeInstance(origin: string, signal?: AbortSignal): Promise<Inst
   }
 
   return 'other';
+}
+
+/**
+ * Wählt das Backend anhand der Eingabeform: `@name@server` ist immer ein Fediverse-Handle,
+ * eine nackte Domain oder eine DID zuerst AT Protocol. Schlägt die AT-Proto-Auflösung fehl,
+ * greift der bisherige Mastodon-Pfad, damit Single-User-Instanzen weiter funktionieren.
+ */
+export async function resolveTarget(value: string, signal?: AbortSignal): Promise<ResolvedTarget> {
+  const atprotoIdentifier = parseAtprotoIdentifier(value);
+
+  if (atprotoIdentifier) {
+    try {
+      const target = await resolveAtprotoHandle(value, signal);
+      const [username, ...rest] = target.handle.split('.');
+      return {
+        backend: 'atproto',
+        username,
+        domain: rest.join('.') || target.handle,
+        acct: target.handle,
+        origin: target.pdsOrigin,
+        target,
+      };
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
+        throw error;
+      if (!(error instanceof AtprotoError)) throw error;
+      // Kein AT-Proto-Account unter dieser Domain: unten den Fediverse-Pfad versuchen.
+    }
+  }
+
+  return { backend: 'mastodon', ...(await resolveHandle(value, signal)) };
 }
 
 export async function resolveHandle(value: string, signal?: AbortSignal): Promise<InstanceTarget> {

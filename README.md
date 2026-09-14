@@ -41,6 +41,22 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
 
 **Misskey**, **Sharkey**, **Firefish** und **Iceshrimp** werden ebenfalls über NodeInfo erkannt. Ihre Auswertung funktioniert derzeit jedoch nur auf Instanzen, die die verwendeten Mastodon-API-Endpunkte kompatibel bereitstellen. Für Pixelfed nutzt FediWings automatisch den anonymen Pixelfed-API-Pfad (`/api/pixelfed/v1/...`); da Pixelfed keine öffentlichen Booster-Listen bereitstellt, basiert die Brutto-Reichweite dort auf den Autor-Followern. Server ohne öffentliche Booster-Liste liefern ein gekennzeichnetes Teilergebnis. PeerTube (eigene Video-Sicht mit echten Views) ist als späteres Modul geplant.
 
+### Bluesky / AT Protocol
+
+Neben dem Fediverse unterstützt FediWings **Bluesky** und andere AT-Protocol-Accounts. Die Unterscheidung erfolgt allein an der Eingabeform, ein Umschalter ist nicht nötig:
+
+| Eingabe | Backend |
+| --- | --- |
+| `@name@server.social` | Fediverse (Mastodon-API) |
+| `name.bsky.social`, `@dracoblue.de` | AT Protocol |
+| `did:plc:…`, `did:web:…` | AT Protocol |
+
+Eine nackte Domain wird zuerst als AT-Proto-Handle aufgelöst; scheitert das, greift der bisherige Fediverse-Pfad. Der Ablauf: Handle → DID (`com.atproto.identity.resolveHandle`) → DID-Dokument (`plc.directory` bzw. `/.well-known/did.json`) → Personal Data Server. Der PDS wird als Heimat-Server angezeigt — auch wenn er nicht von Bluesky betrieben wird (z. B. `eurosky.social`).
+
+Die Analysedaten selbst kommen aus der öffentlichen AppView `public.api.bsky.app`, weil der PDS `app.bsky.*` nur mit Login beantwortet. `app.bsky.feed.getRepostedBy` liefert Reposter ohne Followerzahlen; diese lädt FediWings in Blöcken von 25 Konten über `app.bsky.actor.getProfiles` nach, sodass die Brutto-Reichweite wie im Fediverse vollständig aufgelöst wird. Bluesky-Zitate werden erfasst, fließen aber nicht in die Netto-Formel ein, damit die Werte zwischen den Protokollen vergleichbar bleiben.
+
+Der „Follower“-Tab bleibt Fediverse-only: Er setzt einen Mastodon-OAuth-Login voraus, den AT Protocol so nicht kennt.
+
 ## Sicherheit und Datenschutz
 
 - Die FediWings-App ist eine Static App ohne eigene Accounts oder Cookies. Analysedaten bleiben im Browser; nur bewusst erstellte Share-Karten werden an den separaten Card Service übertragen.
@@ -52,6 +68,8 @@ FediWings analysiert Beiträge aus verschiedenen Teilen des Fediverse. Die App e
   - NodeInfo-Endpunkte derselben Domain (`.well-known/nodeinfo` und Profil-Link)
   - WebFinger-Endpunkt derselben Domain (`.well-known/webfinger`)
   - Instanz, die ein WebFinger-`self`-Link angibt
+  - Bei AT-Protocol-Handles: `https://public.api.bsky.app/xrpc/...` (Handle-Auflösung, Profil, Beiträge, Reposts), `https://plc.directory/<did>` bzw. `https://<domain>/.well-known/did.json` für das DID-Dokument
+  - Bilder und Avatare von `https://cdn.bsky.app` (nur Darstellung, per `img-src`)
   - Nur im „Follower“-Tab nach ausdrücklichem Login: OAuth-Endpunkte derselben Instanz (`/api/v1/apps`, `/oauth/authorize`, `/oauth/token`, `/oauth/revoke`, `/api/v1/accounts/verify_credentials`, `/api/v1/notifications`)
   - Nur nach Aktivierung der Share-Funktion: konfigurierte HTTPS-Domain des FediWings Card Service für Request-Token und Snapshot-Erstellung
   - Keine Abfragen an die Heimatserver der Booster, keine Tracking- oder Analyseanbieter.
