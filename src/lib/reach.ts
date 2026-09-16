@@ -5,14 +5,16 @@ const BOOST_EXPONENT = 0.7314;
 const INTERACTION_EXPONENT = 0.2214;
 const MASTODON_BOOST_WEIGHT = 2;
 
-function firstThreadImage(card: ThreadCard): MastodonMediaAttachment | null {
+function firstThreadThumbnail(card: ThreadCard): MastodonMediaAttachment | null {
+  let preview: MastodonMediaAttachment | null = null;
   for (const status of card.threadStatuses) {
     const image = status.media_attachments.find((attachment) =>
       attachment.type.startsWith('image'),
     );
     if (image) return image;
+    preview ??= status.media_attachments.find((attachment) => attachment.preview_url) ?? null;
   }
-  return null;
+  return preview;
 }
 
 export function initialReach(card: ThreadCard, authorFollowers: number): PostReach {
@@ -27,7 +29,7 @@ export function initialReach(card: ThreadCard, authorFollowers: number): PostRea
     threadStatuses: card.threadStatuses,
     threadTruncated: card.threadTruncated,
     threadSize: card.threadSize,
-    thumbnail: firstThreadImage(card),
+    thumbnail: firstThreadThumbnail(card),
     state: boosts > 0 ? 'pending' : 'complete',
     authorFollowers,
     likes,

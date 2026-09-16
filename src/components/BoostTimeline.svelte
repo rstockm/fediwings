@@ -14,6 +14,7 @@
   } = $props();
 
   const chart = { left: 50, right: 370, top: 16, bottom: 142 };
+  const minLabelDistance = 88;
   let hovered = $state<number | null>(null);
 
   const points = $derived.by(() => {
@@ -61,25 +62,31 @@
       months.push(month);
       monthTime = Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1);
     }
-    if (months.length > 1) {
-      const step = Math.max(1, Math.ceil(months.length / 4));
-      return months
-        .filter((_, index) => index % step === 0)
-        .map((date) => ({ date, unit: 'month' }));
+    let candidates = months.map((date) => ({ date, unit: 'month' }));
+    if (months.length <= 1) {
+      let dayTime = Date.UTC(
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate() + 1,
+      );
+      const days: Date[] = [];
+      while (dayTime < end) {
+        days.push(new Date(dayTime));
+        dayTime += 24 * 60 * 60 * 1000;
+      }
+      candidates = days.map((date) => ({ date, unit: 'day' }));
     }
 
-    let dayTime = Date.UTC(
-      startDate.getUTCFullYear(),
-      startDate.getUTCMonth(),
-      startDate.getUTCDate() + 1,
-    );
-    const days: Date[] = [];
-    while (dayTime < end) {
-      days.push(new Date(dayTime));
-      dayTime += 24 * 60 * 60 * 1000;
-    }
-    const step = Math.max(1, Math.ceil(days.length / 4));
-    return days.filter((_, index) => index % step === 0).map((date) => ({ date, unit: 'day' }));
+    const step = Math.max(1, Math.ceil(candidates.length / 3));
+    let previousX = chart.left;
+    return candidates.filter((tick, index) => {
+      if (index % step !== 0) return false;
+      const x =
+        chart.left + ((tick.date.getTime() - start) / (end - start)) * (chart.right - chart.left);
+      if (x - previousX < minLabelDistance || chart.right - x < minLabelDistance) return false;
+      previousX = x;
+      return true;
+    });
   });
   const positioned = $derived(
     points.map((point) => ({

@@ -55,6 +55,18 @@ describe('Reichweitenberechnung', () => {
     expect(result.state).toBe('pending');
   });
 
+  it('verwendet das Vorschaubild eines Videos als Thread-Thumbnail', () => {
+    const video = {
+      type: 'video',
+      url: 'https://media.example/video.mp4',
+      preview_url: 'https://media.example/video-preview.jpg',
+      description: 'Videovorschau',
+    };
+    const result = initialReach(card([status({ media_attachments: [video] })]), 1_000);
+
+    expect(result.thumbnail).toEqual(video);
+  });
+
   it('gewichtet Fediverse-Boosts doppelt und deckelt die Schaetzung am Brutto-Potenzial', () => {
     expect(calculateNetReach(1_000, 0, 0)).toBe(17);
     expect(calculateNetReach(1_000, 3, 18)).toBe(131);
