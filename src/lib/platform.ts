@@ -22,7 +22,14 @@ const KNOWN_SOFTWARE: Record<string, string> = {
 export const UNKNOWN_PLATFORM: ServerPlatform = {
   id: 'unknown',
   name: 'ActivityPub-Server',
-  mastodonApi: true,
+  protocol: 'mastodon',
+};
+
+/** Bluesky kennt kein NodeInfo; die Plattform steht mit der AT-Proto-Auflösung fest. */
+export const BLUESKY_PLATFORM: ServerPlatform = {
+  id: 'bluesky',
+  name: 'Bluesky (AT Protocol)',
+  protocol: 'atproto',
 };
 
 export async function detectPlatform(
@@ -55,7 +62,7 @@ export async function detectPlatform(
     const software = nodeInfoSchema.parse(await profile.response.json()).software;
     const name = KNOWN_SOFTWARE[software.name.toLowerCase()];
     if (!name) return UNKNOWN_PLATFORM;
-    return { id: software.name.toLowerCase(), name, mastodonApi: true };
+    return { id: software.name.toLowerCase(), name, protocol: 'mastodon' };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
       throw error;

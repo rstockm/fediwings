@@ -60,7 +60,11 @@
     platform =
       stored.platformId === 'unknown'
         ? null
-        : { id: stored.platformId, name: stored.platformName, mastodonApi: true };
+        : {
+            id: stored.platformId,
+            name: stored.platformName,
+            protocol: stored.platformId === 'bluesky' ? 'atproto' : 'mastodon',
+          };
     account = {
       id: '',
       username,

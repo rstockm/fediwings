@@ -45,7 +45,7 @@ describe('detectPlatform', () => {
     ]);
 
     const platform = await detectPlatform('https://pix.example');
-    expect(platform).toEqual({ id: 'pixelfed', name: 'Pixelfed', mastodonApi: true });
+    expect(platform).toEqual({ id: 'pixelfed', name: 'Pixelfed', protocol: 'mastodon' });
   });
 
   it('faellt auf NodeInfo 2.0 zurueck und erkennt Akkoma', async () => {

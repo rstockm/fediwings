@@ -18,12 +18,20 @@
     getStatusContext,
     getStatuses,
   } from '../lib/api';
-  import { analyzePosts, preparePosts, prepareSharedPost } from '../lib/analysis';
-  import { resolveHandle } from '../lib/handle';
+  import {
+    analyzePosts,
+    preparePosts,
+    prepareSharedPost,
+    type AnalysisOptions,
+  } from '../lib/analysis';
+  import { atprotoBoosterSource } from '../lib/atproto/boosters';
+  import { getAtprotoAccount, getAtprotoSharedPost, getAtprotoStatuses } from '../lib/atproto/api';
+  import { resolveAtprotoHandle } from '../lib/atproto/identity';
+  import { resolveTarget } from '../lib/handle';
   import { loadSavedHandles, saveHandleToHistory, type SavedHandle } from '../lib/history';
   import { readLastAccount, writeLastAccount } from '../lib/lastAccount';
   import { buildPostingInsights } from '../lib/insights';
-  import { detectPlatform } from '../lib/platform';
+  import { BLUESKY_PLATFORM, detectPlatform } from '../lib/platform';
   import { decodeSharedPost, hasSharedThreadHash } from '../lib/share';
   import { msg } from '../lib/i18n';
   import type {
@@ -102,6 +110,13 @@
     navigate(next);
   }
 
+  // Die Doku-Referenz folgt dem gerade analysierten Protokoll.
+  const apiReferenceUrl = $derived(
+    platform?.protocol === 'atproto'
+      ? 'https://docs.bsky.app/docs/api/app-bsky-feed-get-reposted-by'
+      : 'https://docs.joinmastodon.org/methods/statuses/#reblogged_by',
+  );
+
   const busy = $derived(phase === 'resolving' || phase === 'analyzing');
   const heroCollapsed = $derived(busy || posts.length > 0);
   const progressPercent = $derived(
@@ -134,6 +149,20 @@
     ),
   );
 
+  /** `https://bsky.app/profile/<handle>/post/<rkey>` → das Autoren-Handle, sonst null. */
+  function bskyAuthorFromUrl(value: string): string | null {
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      return null;
+    }
+    if (url.hostname !== 'bsky.app' && url.hostname !== 'staging.bsky.app') return null;
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length !== 4 || segments[0] !== 'profile' || segments[2] !== 'post') return null;
+    return decodeURIComponent(segments[1]);
+  }
+
   async function loadShareView(): Promise<void> {
     shareController?.abort();
     const hash = window.location.hash;
@@ -157,20 +186,49 @@
 
     try {
       const target = decodeSharedPost(hash);
-      const [status, context] = await Promise.all([
-        getStatus(target.origin, target.statusId, currentController.signal),
-        getStatusContext(target.origin, target.statusId, currentController.signal),
-      ]);
-      const initial = prepareSharedPost(status, context);
+      const atprotoAuthor = bskyAuthorFromUrl(target.url);
+
+      let initial: PostReach;
+      let analysisOrigin = target.origin;
+      let analysisOptions: AnalysisOptions = {};
+
+      if (atprotoAuthor) {
+        const identity = await resolveAtprotoHandle(atprotoAuthor, currentController.signal);
+        const shared = await getAtprotoSharedPost(
+          identity.appview,
+          identity.did,
+          target.statusId,
+          currentController.signal,
+        );
+        initial = prepareSharedPost(shared.status, shared.context);
+        analysisOrigin = identity.pdsOrigin;
+        analysisOptions = {
+          boosterSource: atprotoBoosterSource(identity.appview),
+          noBoosterListMessage: msg('error.atprotoNoBoosters'),
+        };
+      } else {
+        const [status, context] = await Promise.all([
+          getStatus(target.origin, target.statusId, currentController.signal),
+          getStatusContext(target.origin, target.statusId, currentController.signal),
+        ]);
+        initial = prepareSharedPost(status, context);
+      }
+
       sharedProgress = msg('shareView.analyzingBoosters');
-      const [result] = await analyzePosts(target.origin, [initial], currentController.signal, {
-        onPost: () => {},
-        onProgress: (next) => {
-          if (next.requests > 0) {
-            sharedProgress = msg('shareView.requests', { count: next.requests });
-          }
+      const [result] = await analyzePosts(
+        analysisOrigin,
+        [initial],
+        currentController.signal,
+        {
+          onPost: () => {},
+          onProgress: (next) => {
+            if (next.requests > 0) {
+              sharedProgress = msg('shareView.requests', { count: next.requests });
+            }
+          },
         },
-      });
+        analysisOptions,
+      );
       if (currentLoadId !== shareLoadId) return;
       sharedThread = result;
       sharedAnalyzedAt = new Date().toISOString();
@@ -215,18 +273,29 @@
     progress = { completedPosts: 0, totalPosts: 0, requests: 0 };
 
     try {
-      const target = await resolveHandle(handle, controller.signal);
+      const target = await resolveTarget(handle, controller.signal);
       origin = target.origin;
-      const [detectedPlatform, accountResult] = await Promise.all([
-        detectPlatform(target.origin, controller.signal),
-        getAccount(target.origin, target.acct, controller.signal),
-      ]);
-      platform = detectedPlatform;
-      account = accountResult;
+
+      let collection;
+      if (target.backend === 'atproto') {
+        // Bluesky kennt kein NodeInfo; alle Daten kommen aus der oeffentlichen AppView.
+        platform = BLUESKY_PLATFORM;
+        account = await getAtprotoAccount(target.target, controller.signal);
+        collection = await getAtprotoStatuses(target.target, controller.signal);
+      } else {
+        const [detectedPlatform, accountResult] = await Promise.all([
+          detectPlatform(target.origin, controller.signal),
+          getAccount(target.origin, target.acct, controller.signal),
+        ]);
+        platform = detectedPlatform;
+        account = accountResult;
+        collection =
+          detectedPlatform.id === 'pixelfed'
+            ? await getPixelfedStatuses(target.origin, account.id, controller.signal)
+            : await getStatuses(target.origin, account.id, controller.signal);
+      }
       const pixelfed = platform?.id === 'pixelfed';
-      const { statuses, requests, historyComplete, oldestFetchedAt } = pixelfed
-        ? await getPixelfedStatuses(target.origin, account.id, controller.signal)
-        : await getStatuses(target.origin, account.id, controller.signal);
+      const { statuses, requests, historyComplete, oldestFetchedAt } = collection;
 
       insightStatuses = statuses;
       insightHistoryComplete = historyComplete;
@@ -259,7 +328,12 @@
             progress = { ...next, requests: next.requests + 2 };
           },
         },
-        { boosterLists: !pixelfed },
+        target.backend === 'atproto'
+          ? {
+              boosterSource: atprotoBoosterSource(target.target.appview),
+              noBoosterListMessage: msg('error.atprotoNoBoosters'),
+            }
+          : { boosterLists: !pixelfed },
       );
 
       if (rememberHandles) {
@@ -272,16 +346,18 @@
       analyzedAt = new Date().toISOString();
       message = phase === 'partial' ? msg('notice.partial') : msg('notice.complete');
 
+      // Der Follower-Tab setzt einen Mastodon-OAuth-Login voraus und kennt AT Proto nicht.
       try {
-        writeLastAccount({
-          handle: `@${target.acct}`,
-          acct: target.acct,
-          followers: account?.followers_count ?? 0,
-          origin: target.origin,
-          platformId: platform?.id ?? 'unknown',
-          platformName: platform?.name ?? 'ActivityPub-Server',
-          source: 'analyse',
-        });
+        if (target.backend === 'mastodon')
+          writeLastAccount({
+            handle: `@${target.acct}`,
+            acct: target.acct,
+            followers: account?.followers_count ?? 0,
+            origin: target.origin,
+            platformId: platform?.id ?? 'unknown',
+            platformName: platform?.name ?? 'ActivityPub-Server',
+            source: 'analyse',
+          });
       } catch {
         // Sitzungsspeicher nicht verfügbar: Übergabe an den Follower-Tab entfällt.
       }
@@ -561,11 +637,7 @@
     </svg>
     GitHub
   </a>
-  <a
-    href="https://docs.joinmastodon.org/methods/statuses/#reblogged_by"
-    target="_blank"
-    rel="noreferrer"
-  >
+  <a href={apiReferenceUrl} target="_blank" rel="noreferrer">
     {$_('results.footerApiRef')}
   </a>
 </footer>

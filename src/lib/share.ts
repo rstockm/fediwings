@@ -105,7 +105,8 @@ export function cardServiceAvailable(): boolean {
 }
 
 export function fullHandle(account: MastodonAccount): string {
-  if (account.acct.includes('@')) return `@${account.acct}`;
+  // AT-Proto-Handles sind bereits vollstaendige Domains und brauchen keinen Server-Suffix.
+  if (account.protocol === 'atproto' || account.acct.includes('@')) return `@${account.acct}`;
   try {
     return `@${account.acct}@${new URL(account.url).hostname}`;
   } catch {
