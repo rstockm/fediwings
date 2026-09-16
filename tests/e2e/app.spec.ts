@@ -496,8 +496,10 @@ test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst b
   await page.getByRole('button', { name: 'Eigene Instanz', exact: true }).click();
   await page.getByRole('button', { name: 'Mit test.social verbinden' }).click();
 
-  await expect(page.getByText('2 datierte Boost-Benachrichtigungen gefunden')).toBeVisible();
-  await expect(page.getByText('Aktueller Stand: 3 Boosts')).toBeVisible();
+  await expect(
+    threadCard.getByRole('heading', { name: 'Boost-Dynamik - Long Tail' }),
+  ).toBeVisible();
+  await expect(threadCard.locator('.boost-curve')).toBeVisible();
   await expect(threadCard.locator('details.post-details')).toHaveAttribute('open', '');
   expect(statusRequests).toBe(1);
   expect(notificationRequests).toBe(1);
