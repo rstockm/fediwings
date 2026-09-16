@@ -15,6 +15,14 @@ describe('parseHandle', () => {
     });
   });
 
+  it('normalisiert eine Unicode-Domain zu Punycode', () => {
+    expect(parseHandle('@lfdi@BaWÜ.social')).toEqual({
+      username: 'lfdi',
+      domain: 'xn--baw-joa.social',
+      acct: 'lfdi@xn--baw-joa.social',
+    });
+  });
+
   it('lehnt Handles ohne Domain ab', () => {
     expect(() => parseHandle('@alice')).toThrow(HandleError);
   });
@@ -23,9 +31,32 @@ describe('parseHandle', () => {
     expect(() => parseHandle('@alice@example.social:8443')).toThrow(HandleError);
     expect(() => parseHandle('@alice@user:pass@example.social')).toThrow(HandleError);
   });
+
+  it('lehnt Pfade und Query-Parameter in der Domain ab', () => {
+    expect(() => parseHandle('@alice@example.social/path')).toThrow(HandleError);
+    expect(() => parseHandle('@alice@example.social?path')).toThrow(HandleError);
+  });
 });
 
 describe('resolveHandle', () => {
+  it('verwendet fuer Unicode-Domains den kanonischen Punycode-Origin', async () => {
+    const fetchMock = vi.fn(() =>
+      Promise.resolve(new Response(JSON.stringify({ version: '4.6.4' }))),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(resolveHandle('@lfdi@bawü.social')).resolves.toEqual({
+      username: 'lfdi',
+      domain: 'xn--baw-joa.social',
+      acct: 'lfdi@xn--baw-joa.social',
+      origin: 'https://xn--baw-joa.social',
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://xn--baw-joa.social/api/v2/instance',
+      expect.anything(),
+    );
+  });
+
   it('faellt fuer Akkoma ohne v2-Instanzendpunkt auf v1 zurueck', async () => {
     const calls: string[] = [];
     vi.stubGlobal(

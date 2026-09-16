@@ -4,6 +4,7 @@ import { instanceSchema, webFingerSchema } from './schemas';
 import type { InstanceTarget, ParsedHandle } from './types';
 
 const USERNAME_PATTERN = /^[a-z0-9_][a-z0-9_.-]*$/i;
+const DOMAIN_URL_SYNTAX_PATTERN = /[\s/:?#\\@%[\]]/u;
 export const INSTANCE_TIMEOUT_MS = 6_000;
 const WEBFINGER_TIMEOUT_MS = 8_000;
 
@@ -23,7 +24,7 @@ export function parseHandle(value: string): ParsedHandle {
   }
 
   const username = normalized.slice(0, separator);
-  const domain = normalized.slice(separator + 1).toLowerCase();
+  const domainInput = normalized.slice(separator + 1).toLowerCase();
 
   if (!USERNAME_PATTERN.test(username)) {
     throw new HandleError(msg('error.handleUsername'));
@@ -31,13 +32,15 @@ export function parseHandle(value: string): ParsedHandle {
 
   let origin: URL;
   try {
-    origin = new URL(`https://${domain}`);
+    origin = new URL(`https://${domainInput}`);
   } catch {
     throw new HandleError(msg('error.handleDomain'));
   }
 
+  const domain = origin.hostname;
+
   if (
-    origin.hostname !== domain ||
+    DOMAIN_URL_SYNTAX_PATTERN.test(domainInput) ||
     !domain.includes('.') ||
     origin.username ||
     origin.password ||
