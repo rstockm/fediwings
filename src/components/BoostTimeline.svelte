@@ -53,14 +53,13 @@
     if (points.length < 2) return [];
     const start = Date.parse(points[0]!.event.createdAt);
     const end = Date.parse(points[points.length - 1]!.event.createdAt);
-    const monthCursor = new Date(start);
-    monthCursor.setUTCDate(1);
-    monthCursor.setUTCHours(0, 0, 0, 0);
-    monthCursor.setUTCMonth(monthCursor.getUTCMonth() + 1);
+    const startDate = new Date(start);
+    let monthTime = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() + 1, 1);
     const months: Date[] = [];
-    while (monthCursor.getTime() < end) {
-      months.push(new Date(monthCursor));
-      monthCursor.setUTCMonth(monthCursor.getUTCMonth() + 1);
+    while (monthTime < end) {
+      const month = new Date(monthTime);
+      months.push(month);
+      monthTime = Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1);
     }
     if (months.length > 1) {
       const step = Math.max(1, Math.ceil(months.length / 4));
@@ -69,13 +68,15 @@
         .map((date) => ({ date, unit: 'month' }));
     }
 
-    const dayCursor = new Date(start);
-    dayCursor.setUTCHours(0, 0, 0, 0);
-    dayCursor.setUTCDate(dayCursor.getUTCDate() + 1);
+    let dayTime = Date.UTC(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      startDate.getUTCDate() + 1,
+    );
     const days: Date[] = [];
-    while (dayCursor.getTime() < end) {
-      days.push(new Date(dayCursor));
-      dayCursor.setUTCDate(dayCursor.getUTCDate() + 1);
+    while (dayTime < end) {
+      days.push(new Date(dayTime));
+      dayTime += 24 * 60 * 60 * 1000;
     }
     const step = Math.max(1, Math.ceil(days.length / 4));
     return days.filter((_, index) => index % step === 0).map((date) => ({ date, unit: 'day' }));
