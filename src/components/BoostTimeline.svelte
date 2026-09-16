@@ -64,7 +64,9 @@
     }
     if (months.length > 1) {
       const step = Math.max(1, Math.ceil(months.length / 4));
-      return months.filter((_, index) => index % step === 0).map((date) => ({ date, unit: 'month' }));
+      return months
+        .filter((_, index) => index % step === 0)
+        .map((date) => ({ date, unit: 'month' }));
     }
 
     const dayCursor = new Date(start);
@@ -76,9 +78,7 @@
       dayCursor.setUTCDate(dayCursor.getUTCDate() + 1);
     }
     const step = Math.max(1, Math.ceil(days.length / 4));
-    return days
-      .filter((_, index) => index % step === 0)
-      .map((date) => ({ date, unit: 'day' }));
+    return days.filter((_, index) => index % step === 0).map((date) => ({ date, unit: 'day' }));
   });
   const positioned = $derived(
     points.map((point) => ({
@@ -144,8 +144,8 @@
           {@const start = Date.parse(positioned[0]!.event.createdAt)}
           {@const end = Date.parse(positioned[positioned.length - 1]!.event.createdAt)}
           {@const x =
-             chart.left +
-             ((tick.date.getTime() - start) / (end - start)) * (chart.right - chart.left)}
+            chart.left +
+            ((tick.date.getTime() - start) / (end - start)) * (chart.right - chart.left)}
           <line class="boost-curve-grid" x1={x} x2={x} y1={chart.top} y2={chart.bottom}></line>
           <text class="boost-curve-label" {x} y="160" text-anchor="middle"
             >{$_date(tick.date, { format: tick.unit })}</text

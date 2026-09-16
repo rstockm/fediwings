@@ -204,7 +204,9 @@
         <p>{$_('methodology.longTailText')}</p>
       </div>
       <figure class="boost-timeline methodology-long-tail-chart">
-        <figcaption class="boost-timeline-heading">{$_('methodology.longTailChartTitle')}</figcaption>
+        <figcaption class="boost-timeline-heading">
+          {$_('methodology.longTailChartTitle')}
+        </figcaption>
         <svg
           class="boost-curve"
           viewBox="0 0 380 194"

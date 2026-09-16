@@ -1,5 +1,8 @@
 <script module lang="ts">
-  import type { AnchoredSeries as CachedAnchoredSeries, MonthlyPoint as CachedMonthlyPoint } from '../lib/followers';
+  import type {
+    AnchoredSeries as CachedAnchoredSeries,
+    MonthlyPoint as CachedMonthlyPoint,
+  } from '../lib/followers';
   import type { OAuthSession as CachedOAuthSession } from '../lib/oauth';
 
   interface HistoryCache {
