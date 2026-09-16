@@ -137,6 +137,15 @@ export const followerNotificationSchema = z.object({
 
 export const followerNotificationListSchema = z.array(followerNotificationSchema);
 
+export const reblogNotificationSchema = z.object({
+  id: z.string(),
+  type: z.literal('reblog'),
+  created_at: z.string().datetime({ offset: true }),
+  status: z.object({ id: z.string() }),
+});
+
+export const reblogNotificationListSchema = z.array(reblogNotificationSchema);
+
 export const cardShareTokenSchema = z.object({
   token: z.string().min(1),
   expiresIn: z.number().int().positive(),

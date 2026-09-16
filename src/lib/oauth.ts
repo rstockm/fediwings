@@ -21,6 +21,7 @@ export interface OAuthHandshake {
   state: string;
   accountId: string;
   acct: string;
+  returnView: 'analyse' | 'follower';
 }
 
 export class OAuthError extends Error {
@@ -32,6 +33,10 @@ export class OAuthError extends Error {
 
 export function redirectUri(): string {
   return `${window.location.origin}${window.location.pathname}`;
+}
+
+export function canonicalAcct(account: MastodonAccount, origin: string): string {
+  return account.acct.includes('@') ? account.acct : `${account.acct}@${new URL(origin).hostname}`;
 }
 
 function base64Url(bytes: Uint8Array): string {
@@ -237,11 +242,17 @@ export function loadHandshake(): OAuthHandshake | null {
       typeof (parsed as OAuthHandshake).verifier !== 'string' ||
       typeof (parsed as OAuthHandshake).state !== 'string' ||
       typeof (parsed as OAuthHandshake).accountId !== 'string' ||
-      typeof (parsed as OAuthHandshake).acct !== 'string'
+      typeof (parsed as OAuthHandshake).acct !== 'string' ||
+      ((parsed as OAuthHandshake).returnView !== undefined &&
+        (parsed as OAuthHandshake).returnView !== 'analyse' &&
+        (parsed as OAuthHandshake).returnView !== 'follower')
     ) {
       return null;
     }
-    return parsed as OAuthHandshake;
+    return {
+      ...(parsed as OAuthHandshake),
+      returnView: (parsed as OAuthHandshake).returnView === 'analyse' ? 'analyse' : 'follower',
+    };
   } catch {
     return null;
   }
@@ -267,6 +278,8 @@ export interface FollowerSession {
   account: MastodonAccount;
   savedAt: string;
 }
+
+export type OAuthSession = FollowerSession;
 
 export function saveFollowerSession(session: FollowerSession): void {
   try {

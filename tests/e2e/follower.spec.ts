@@ -89,6 +89,12 @@ async function mockOAuthFlow(page: Page) {
   });
 }
 
+async function connectOwnInstance(page: Page) {
+  await page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Eigene Daten ergänzen' })).toBeVisible();
+  await page.getByRole('button', { name: 'Mit test.social verbinden' }).click();
+}
+
 test('zeigt ohne Login die aktuellen Zahlen und kennzeichnet die Login-Grenze', async ({
   page,
 }) => {
@@ -96,9 +102,9 @@ test('zeigt ohne Login die aktuellen Zahlen und kennzeichnet die Login-Grenze', 
   await page.goto('/?view=follower');
 
   await expect(page.getByRole('heading', { name: 'Wie wächst dein Account?' })).toBeVisible();
-  await expect(page.getByText('ohne Login').first()).toBeVisible();
+  await expect(page.getByText('ohne Verbindung').first()).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+    page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toHaveCount(0);
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
@@ -107,7 +113,7 @@ test('zeigt ohne Login die aktuellen Zahlen und kennzeichnet die Login-Grenze', 
   await expect(page.getByText('1.000')).toBeVisible();
   await expect(page.getByText('Mastodon', { exact: true })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+    page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toBeVisible();
 
   const overflow = await page.evaluate(
@@ -124,7 +130,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await expect(page.locator('.follower-hero')).toHaveClass(/follower-hero-collapsed/);
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
 
   await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
 
@@ -136,7 +142,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   await expect(anchoredChart).toBeVisible();
 
   await expect(page.getByText('Kumuliert aus 162 Follow-Ereignissen')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Abmelden' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '@alice · verbunden' })).toBeVisible();
   await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toBeDisabled();
 
   const overflow = await page.evaluate(
@@ -160,7 +166,7 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
 
   const progress = page.getByRole('progressbar', { name: 'Follower-Verlauf wird geladen' });
   await expect(progress).toBeVisible();
@@ -181,7 +187,7 @@ test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) 
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
   await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
 
@@ -207,10 +213,11 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Abmelden' }).click();
+  await page.getByRole('button', { name: '@alice · verbunden' }).click();
+  await page.getByRole('button', { name: 'Verbindung trennen' }).click();
   await expect.poll(() => revocations).toBe(1);
   const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
   expect(stored).toBeNull();
@@ -219,7 +226,7 @@ test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async (
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
   await expect(
-    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+    page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toBeVisible();
 });
 
@@ -233,9 +240,10 @@ test('warnt nach lokalem Abmelden vor fehlgeschlagenem Server-Widerruf', async (
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
-  await page.getByRole('button', { name: 'Abmelden' }).click();
+  await page.getByRole('button', { name: '@alice · verbunden' }).click();
+  await page.getByRole('button', { name: 'Verbindung trennen' }).click();
 
   await expect(
     page.getByText(/Serverzugriff konnte nicht automatisch widerrufen werden/),
@@ -264,7 +272,7 @@ test('verwirft den Token beim Login mit einem anderen Account', async ({ page })
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
 
   await expect(page.getByText(/Angemeldet wurde @mallory/)).toBeVisible();
   await expect(
@@ -304,7 +312,7 @@ test('übernimmt den zuletzt analysierten Account und dessen Followerzahl aus de
   await expect(input).toHaveValue('@alice@test.social');
   await expect(page.getByText('1.000')).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+    page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toBeVisible();
 
   await input.click();
@@ -350,6 +358,7 @@ test('meldet einen abgebrochenen Login verstaendlich', async ({ page }) => {
         state: 'state-1',
         accountId: 'account-1',
         acct: 'alice@test.social',
+        returnView: 'follower',
       }),
     );
   });
@@ -364,9 +373,7 @@ test('meldet einen abgebrochenen Login verstaendlich', async ({ page }) => {
   expect(handshake).toBeNull();
 });
 
-test('speichert nach einem Ansichtswechsel während der Anmeldung keinen Token', async ({
-  page,
-}) => {
+test('schließt die appweite Verbindung auch nach einem Ansichtswechsel ab', async ({ page }) => {
   await mockInstance(page);
   await mockOAuthFlow(page);
   let verificationStarted = false;
@@ -392,13 +399,14 @@ test('speichert nach einem Ansichtswechsel während der Anmeldung keinen Token',
 
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
   await page.getByRole('button', { name: 'Laden' }).click();
-  await page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }).click();
+  await connectOwnInstance(page);
   await expect.poll(() => verificationStarted).toBe(true);
   await page.getByRole('link', { name: 'Analyse' }).click();
   releaseVerification();
 
   await expect(page.getByRole('button', { name: 'Analysieren' })).toBeVisible();
-  await expect.poll(() => revocations).toBe(1);
+  await expect(page.getByRole('button', { name: '@alice · verbunden' })).toBeVisible();
+  expect(revocations).toBe(0);
   const stored = await page.evaluate(() => sessionStorage.getItem('fediscope:follower-session-v2'));
-  expect(stored).toBeNull();
+  expect(stored).not.toBeNull();
 });

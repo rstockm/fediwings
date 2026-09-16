@@ -171,6 +171,7 @@ describe('Handshake im Sitzungsspeicher', () => {
       state: 's',
       accountId: 'account-1',
       acct: 'alice@test.social',
+      returnView: 'follower' as const,
     };
     saveHandshake(handshake);
     expect(loadHandshake()).toEqual(handshake);

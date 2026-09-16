@@ -197,6 +197,57 @@
       </div>
       <p>{$_('methodology.boostWeightNote')}</p>
     </div>
+
+    <aside class="long-tail-explanation">
+      <div>
+        <p class="eyebrow">{$_('methodology.longTailTitle')}</p>
+        <p>{$_('methodology.longTailText')}</p>
+      </div>
+      <figure class="boost-timeline methodology-long-tail-chart">
+        <figcaption class="boost-timeline-heading">{$_('methodology.longTailChartTitle')}</figcaption>
+        <svg
+          class="boost-curve"
+          viewBox="0 0 380 194"
+          role="img"
+          aria-label={$_('methodology.longTailChartAria')}
+        >
+          <line class="boost-curve-grid" x1="50" x2="370" y1="16" y2="16"></line>
+          <line class="boost-curve-grid" x1="50" x2="370" y1="79" y2="79"></line>
+          <line class="boost-curve-grid" x1="50" x2="370" y1="142" y2="142"></line>
+          <line class="boost-curve-grid" x1="50" x2="50" y1="16" y2="142"></line>
+          <line class="boost-curve-grid" x1="130" x2="130" y1="16" y2="142"></line>
+          <line class="boost-curve-grid" x1="250" x2="250" y1="16" y2="142"></line>
+          <line class="boost-curve-grid" x1="370" x2="370" y1="16" y2="142"></line>
+          <line class="boost-curve-baseline" x1="50" x2="370" y1="142" y2="142"></line>
+          <path
+            class="boost-curve-area"
+            d="M50,142 L78,99 L102,80 L130,70 L178,58 L250,43 L310,32 L370,22 L370,142 L50,142 Z"
+          ></path>
+          <path
+            class="boost-curve-line"
+            d="M50,142 L78,99 L102,80 L130,70 L178,58 L250,43 L310,32 L370,22"
+          ></path>
+          <circle class="boost-curve-dot" cx="78" cy="99" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="102" cy="80" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="130" cy="70" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="178" cy="58" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="250" cy="43" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="310" cy="32" r="3.5"></circle>
+          <circle class="boost-curve-dot" cx="370" cy="22" r="3.5"></circle>
+          <text class="boost-curve-label" x="50" y="160">{$_('methodology.longTailDayOne')}</text>
+          <text class="boost-curve-label" x="130" y="160" text-anchor="middle"
+            >{$_('methodology.longTailWeekTwo')}</text
+          >
+          <text class="boost-curve-label" x="370" y="160" text-anchor="end"
+            >{$_('methodology.longTailMonthThree')}</text
+          >
+          <text class="boost-curve-axis-title" x="370" y="181" text-anchor="end"
+            >{$_('methodology.longTailAxis')}</text
+          >
+        </svg>
+      </figure>
+      <p>{$_('methodology.longTailAlgorithmText')}</p>
+    </aside>
   </section>
 
   <section class="methodology-section methodology-api" id="api" aria-labelledby="api-title">

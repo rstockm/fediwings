@@ -9,6 +9,35 @@ export const de = {
     metaFollower: 'Verlauf · Login',
     language: 'Sprache',
   },
+  connection: {
+    trigger: 'Eigene Instanz',
+    triggerConnected: '@{account} · verbunden',
+    triggerDisabled: 'Nach Abschluss der Analyse verfügbar',
+    title: 'Eigene Daten ergänzen',
+    intro:
+      'FediWings funktioniert vollständig ohne Anmeldung. Eine Verbindung ergänzt persönliche Auswertungen für deinen eigenen Account.',
+    benefitBoosts: 'Boost-Zeitpunkte deiner Beiträge',
+    benefitFollowers: 'Follower-Verlauf aus deinen Benachrichtigungen',
+    privacy:
+      'Die Daten kommen direkt von deiner Instanz, bleiben in diesem Tab und werden nicht an einen FediWings-Server übertragen.',
+    details: 'Welche Daten werden gelesen?',
+    detailsText:
+      'FediWings erhält ausschließlich Lesezugriff auf deine Accountdaten und Benachrichtigungen. Beiträge werden weiterhin über die öffentliche API analysiert.',
+    selectedAccount: 'Ist @{account} dein eigener Account?',
+    connectTo: 'Mit {host} verbinden',
+    connecting: 'Verbindung wird vorbereitet…',
+    close: 'Verbindungs-Panel schließen',
+    cancel: 'Nicht jetzt',
+    connected: 'Verbunden mit',
+    tabOnly: 'Gültig nur in diesem Browser-Tab',
+    disconnect: 'Verbindung trennen',
+    manage: 'Verbindung verwalten',
+    otherAccount: 'Die aktuelle Analyse betrifft einen anderen Account.',
+    chooseHandle: 'Welchen eigenen Account möchtest du verbinden?',
+    resolve: 'Account prüfen',
+    storageError:
+      'Die Analyse kann in diesem Browser-Modus nicht sicher für die Rückkehr zwischengespeichert werden.',
+  },
   title: {
     analyse: 'FediWings | Fediverse Reichweite',
     methodology: 'Methodik | FediWings',
@@ -156,6 +185,20 @@ export const de = {
     shareTitle: 'FediWings Thread-Analyse',
     shareText: 'Geteilte Reichweitenanalyse eines Fediverse-Threads',
   },
+  boostHistory: {
+    title: 'Boost-Dynamik - Long Tail',
+    loading: 'Boost-Zeitpunkte werden geladen…',
+    empty:
+      'In den geladenen Benachrichtigungen wurden keine Zeitpunkte für diesen Beitrag gefunden.',
+    partial: 'Ältere Benachrichtigungen sind noch nicht geladen.',
+    loadOlder: 'Ältere Ereignisse laden',
+    budget: 'Das Abrufbudget für Boost-Zeitpunkte ist erreicht.',
+    unavailable: 'Dieser Server stellt die Boost-Zeitpunkte nicht bereit.',
+    list: 'Gefundene Zeitpunkte anzeigen',
+    chart: 'Zeitliche Verteilung der gefundenen Boost-Benachrichtigungen',
+    tooltip: 'Reichweite {reach} · +{added}',
+    xAxis: 'Zeitpunkt des Boosts',
+  },
   shared: {
     kicker: 'Geteilte Analyse / 01',
     titlePost: 'Ein Fediverse-Post.',
@@ -235,6 +278,18 @@ export const de = {
     boostWeightText: 'Ein Boost zählt als zwei effektive Shares.',
     boostWeightNote:
       'Dahinter steht die Produkthypothese, dass ein Boost in einer chronologisch geprägten Timeline länger und unmittelbarer sichtbar sein kann als ein Share in einem algorithmischen Feed. Der Faktor ist bewusst einfach und noch nicht mit echten Fediverse-Impressionsdaten kalibriert.',
+    longTailTitle: 'Boost-Dynamik / Long Tail',
+    longTailText:
+      'Der Graph zeigt, wann öffentlich sichtbare Boosts eintreffen und wie die daraus abgeleitete Reichweite kumuliert wächst. Späte Punkte machen den Long Tail sichtbar: In einer nicht oder nur leicht algorithmisch sortierten Timeline kann ein Beitrag über Follows, Profile, Hashtags oder einen späteren Boost erneut in den Blick kommen. Das ist keine Messung von Impressionen und keine Zusage, dass jeder Follower ihn noch einmal sieht.',
+    longTailChartTitle: 'Beispiel: kumulative Boost-Dynamik',
+    longTailChartAria:
+      'Illustrative kumulative Boost-Kurve mit schnellem Anstieg am ersten Tag und weiterem Wachstum über drei Monate',
+    longTailDayOne: 'Tag 1',
+    longTailWeekTwo: 'Woche 2',
+    longTailMonthThree: 'Monat 3',
+    longTailAxis: 'Zeit nach Veröffentlichung',
+    longTailAlgorithmText:
+      'In stark algorithmischen Feeds wie Instagram oder X entscheidet ein begrenztes Ranking-Fenster, ob ein Beitrag empfohlen wird. Fällt er dort heraus, wird er ohne neue Signale häufig nicht erneut vorgelegt oder wiedergefunden. Der Long Tail ist deshalb keine Eigenschaft jedes Netzwerks, sondern eine begründete Annahme für chronologisch geprägte Fediverse-Nutzung, die der Graph anhand tatsächlicher Boost-Zeitpunkte einordnet.',
     apiSection: '02 / API-Nutzung',
     apiTitle: 'Vom Handle zur Reichweite.',
     apiIntro:
@@ -283,7 +338,8 @@ export const de = {
     ledgerYes: 'Was verarbeitet wird',
     ledgerYes1: 'Öffentliche Account- und Beitragsdaten',
     ledgerYes2: 'Öffentliche Booster und deren Followerzahlen',
-    ledgerYes3: 'Optional bis zu drei Handles im lokalen Browserspeicher',
+    ledgerYes3:
+      'Optional eigene Follow- und Boost-Benachrichtigungen im Tab sowie bis zu drei gemerkte Handles',
     ledgerNo: 'Was nicht stattfindet',
     ledgerNo1: 'Kein verpflichtender Login und keine zentral gespeicherten Nutzerprofile',
     ledgerNo2: 'Keine persistente Speicherung von Ergebnissen oder Boosterprofilen',
@@ -303,7 +359,7 @@ export const de = {
     limit4:
       'Server ohne öffentliche Booster-Listen (etwa Pixelfed) liefern eine Brutto-Untergrenze aus allein den Autor-Followern.',
     limit5:
-      'Der Follower-Verlauf im „Follower“-Tab stammt aus Follow-Benachrichtigungen des eigenen Accounts: gelöschte Benachrichtigungen und Unfollows bleiben unsichtbar.',
+      'Follower-Verlauf und Boost-Zeitpunkte stammen aus Benachrichtigungen des eigenen Accounts: gelöschte, gefilterte oder noch nicht geladene Ereignisse bleiben unsichtbar.',
     limit6: 'Stummschaltungen, Filter, Domainblocks und tatsächlich gelesene Posts sind unbekannt.',
     limit7: 'Die Netto-Formel stammt aus Instagram-Stories, nicht aus Fediverse-Impressions.',
     limit8: 'Likes und Antworten sind zugleich Folge und Signal bereits vorhandener Sichtbarkeit.',
@@ -315,18 +371,18 @@ export const de = {
   follower: {
     titleHtml: 'Wie wächst<br />dein Account?',
     intro:
-      'Die aktuelle Followerzahl ist ohne Login öffentlich. Den Verlauf über Zeit liefert nur dein eigener Account – über Follow-Benachrichtigungen, abgerufen mit einem separaten Login bei deinem Fediverse-Server. FediWings prüft den angemeldeten Account und bindet den Token fest an dessen Server. Der Token liegt im Sitzungsspeicher dieses Browser-Tabs und wird beim Ende der Tab-Sitzung gelöscht; beim Abmelden wird er zusätzlich beim Server widerrufen.',
-    stepAnon: 'Schritt 1 · aktuelle Zahlen · ohne Login',
+      'Die aktuelle Followerzahl ist öffentlich. Deinen persönlichen Verlauf kann FediWings optional aus den Follow-Benachrichtigungen deines eigenen Accounts rekonstruieren. Die Instanz-Verbindung gilt nur für diesen Browser-Tab.',
+    stepAnon: 'Öffentlicher Stand · ohne Verbindung',
     load: 'Laden',
     loading: 'Lädt…',
     followersNote: 'aktuelle Follower',
     serverSoftware: 'Server-Software',
-    loginButton: 'Follower-Verlauf mit Login abrufen',
+    loginButton: 'Eigene Instanz verbinden',
     stepLogin: 'Schritt 2 · Login',
     redirecting: 'Weiterleitung zum Server …',
     authorizeNote:
       'Der Authorize-Bildschirm deines Fediverse-Servers öffnet sich. Melde dich mit dem zuvor ausgewählten Account an.',
-    stepHistory: 'Schritt 2 · Follower-Verlauf · mit Login',
+    stepHistory: 'Persönlicher Verlauf · optional',
     accessDenied: 'Login im Server-Interface abgebrochen. Es wurden keine Daten übertragen.',
     loginRejected: 'Der Server hat den Login abgelehnt ({error}).',
     loginInvalid: 'Der Login ist ungültig oder abgelaufen. Bitte verbinde den Account erneut.',
@@ -359,7 +415,7 @@ export const de = {
     signOut: 'Abmelden',
     revokeFailed:
       'Die lokale Sitzung wurde gelöscht, aber der Serverzugriff konnte nicht automatisch widerrufen werden. Bitte entferne FediWings in den App-Einstellungen deines Servers.',
-    idle: 'Nach dem Login lädt FediWings deine Follow-Benachrichtigungen und baut daraus beide Verlaufskurven.',
+    idle: 'Lade deine Follow-Benachrichtigungen, um daraus beide Verlaufskurven zu erstellen.',
     emptyHistory:
       'Keine Follow-Benachrichtigungen gefunden. Wenn sie gelöscht wurden, ist der Verlauf kürzer.',
   },

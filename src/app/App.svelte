@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import emblemUrl from '../assets/fediwings-emblem.png';
   import logoUrl from '../assets/fediwings-logo.png';
   import { _, locale } from 'svelte-i18n';
   import { setLocale } from '../lib/i18n';
   import AccountHeader from '../components/AccountHeader.svelte';
+  import ConnectionPanel, { type ConnectionCandidate } from '../components/ConnectionPanel.svelte';
   import FollowerPage from '../components/FollowerPage.svelte';
   import HandleCombobox from '../components/HandleCombobox.svelte';
   import MethodologyPage from '../components/MethodologyPage.svelte';
@@ -26,8 +27,40 @@
   import { detectPlatform } from '../lib/platform';
   import { decodeSharedPost, hasSharedThreadHash } from '../lib/share';
   import { msg } from '../lib/i18n';
+  import {
+    buildAuthorizeUrl,
+    canonicalAcct,
+    clearFollowerSession,
+    clearHandshake,
+    createPkcePair,
+    exchangeCode,
+    loadFollowerSession,
+    loadHandshake,
+    OAuthError,
+    parseCallback,
+    randomState,
+    registerApp,
+    revokeToken,
+    saveFollowerSession,
+    saveHandshake,
+    verifyCredentials,
+    type OAuthClient,
+    type OAuthHandshake,
+    type OAuthSession,
+  } from '../lib/oauth';
+  import {
+    clearOAuthReturn,
+    consumeOAuthReturn,
+    saveOAuthReturn,
+    type OAuthReturnAnalysis,
+  } from '../lib/oauthReturn';
+  import {
+    AuthenticatedNotificationError,
+    ReblogNotificationCache,
+  } from '../lib/reblogNotifications';
   import type {
     AnalysisProgress,
+    BoostHistoryState,
     MastodonAccount,
     MastodonStatus,
     PostReach,
@@ -38,12 +71,15 @@
   type Sort = 'date' | 'reach' | 'likes' | 'boosts';
   type ShareView = 'none' | 'loading' | 'ready' | 'error';
   type View = 'analyse' | 'methodik' | 'follower';
+  type AuthPhase = 'idle' | 'connecting' | 'connected' | 'error';
 
   function readView(): View {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get('view');
     if (requested === 'methodik' || requested === 'follower') return requested;
-    if (params.get('code') !== null || params.get('error') !== null) return 'follower';
+    if (params.get('code') !== null || params.get('error') !== null) {
+      return loadHandshake()?.returnView ?? 'follower';
+    }
     return 'analyse';
   }
 
@@ -75,6 +111,18 @@
   let sharedThreadError = $state('');
   let shareController: AbortController | null = null;
   let shareLoadId = 0;
+  let authSession = $state<OAuthSession | null>(null);
+  let authPhase = $state<AuthPhase>('idle');
+  let authMessage = $state('');
+  let connectionOpen = $state(false);
+  let connectionCandidate = $state<ConnectionCandidate | null>(null);
+  let expandedStatusIds = $state<string[]>([]);
+  let loginController: AbortController | null = null;
+  let pendingLogin: { origin: string; client: OAuthClient; token: string } | null = null;
+  let reblogCache: ReblogNotificationCache | null = null;
+  let reblogCacheKey = '';
+  let boostHistories = $state<Record<string, BoostHistoryState>>({});
+  let boostController: AbortController | null = null;
 
   $effect(() => {
     if (view !== 'analyse') return;
@@ -100,6 +148,230 @@
     }
     event.preventDefault();
     navigate(next);
+  }
+
+  function currentConnectionCandidate(): ConnectionCandidate | null {
+    return account && origin ? { account, origin } : null;
+  }
+
+  function openConnection(
+    candidate: ConnectionCandidate | null = currentConnectionCandidate(),
+  ): void {
+    connectionCandidate = candidate;
+    authMessage = '';
+    connectionOpen = true;
+  }
+
+  function closeConnection(): void {
+    if (authPhase === 'connecting') return;
+    connectionOpen = false;
+  }
+
+  function buildReturnAnalysis(): OAuthReturnAnalysis | null {
+    if (
+      !account ||
+      !origin ||
+      (phase !== 'complete' && phase !== 'partial' && phase !== 'cancelled')
+    ) {
+      return null;
+    }
+    return {
+      handle,
+      postLimit,
+      rememberHandles,
+      phase,
+      message,
+      origin,
+      account,
+      platform,
+      posts,
+      insightStatuses,
+      insightReferenceTime,
+      analyzedAt,
+      insightHistoryComplete,
+      insightOldestFetchedAt,
+      insightReachSelectionComplete,
+      progress,
+      sort,
+      expandedStatusIds,
+      scrollY: Math.max(0, window.scrollY),
+    };
+  }
+
+  async function startConnection(candidate: ConnectionCandidate): Promise<void> {
+    if (busy || authSession) return;
+    authPhase = 'connecting';
+    authMessage = '';
+    loginController?.abort();
+    loginController = new AbortController();
+    const signal = loginController.signal;
+    try {
+      const selectedAccount = candidate.account.id
+        ? candidate.account
+        : await getAccount(
+            candidate.origin,
+            canonicalAcct(candidate.account, candidate.origin),
+            signal,
+          );
+      const { verifier, challenge } = await createPkcePair();
+      const state = randomState();
+      saveOAuthReturn({
+        version: 1,
+        state,
+        savedAt: new Date().toISOString(),
+        view: view === 'follower' ? 'follower' : 'analyse',
+        analysis: buildReturnAnalysis(),
+      });
+      const client = await registerApp(candidate.origin, signal);
+      saveHandshake({
+        origin: candidate.origin,
+        clientId: client.clientId,
+        clientSecret: client.clientSecret,
+        verifier,
+        state,
+        accountId: selectedAccount.id,
+        acct: canonicalAcct(selectedAccount, candidate.origin),
+        returnView: view === 'follower' ? 'follower' : 'analyse',
+      });
+      window.location.assign(
+        buildAuthorizeUrl(candidate.origin, client.clientId, challenge, state),
+      );
+    } catch (error) {
+      clearOAuthReturn();
+      clearHandshake();
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      authPhase = 'error';
+      authMessage =
+        error instanceof Error && error.message === 'oauth-return-storage'
+          ? msg('connection.storageError')
+          : error instanceof Error
+            ? error.message
+            : msg('follower.loginStartFailed');
+    }
+  }
+
+  function restoreReturnAnalysis(snapshot: OAuthReturnAnalysis | null): void {
+    if (!snapshot) return;
+    handle = snapshot.handle;
+    postLimit = snapshot.postLimit;
+    rememberHandles = snapshot.rememberHandles;
+    phase = snapshot.phase;
+    message = snapshot.message;
+    origin = snapshot.origin;
+    account = snapshot.account;
+    platform = snapshot.platform;
+    posts = snapshot.posts;
+    insightStatuses = snapshot.insightStatuses;
+    insightReferenceTime = snapshot.insightReferenceTime;
+    analyzedAt = snapshot.analyzedAt;
+    insightHistoryComplete = snapshot.insightHistoryComplete;
+    insightOldestFetchedAt = snapshot.insightOldestFetchedAt;
+    insightReachSelectionComplete = snapshot.insightReachSelectionComplete;
+    progress = snapshot.progress;
+    sort = snapshot.sort;
+    expandedStatusIds = snapshot.expandedStatusIds;
+    void tick().then(() => window.scrollTo({ top: snapshot.scrollY }));
+  }
+
+  function cleanCallbackUrl(target: 'analyse' | 'follower'): void {
+    window.history.replaceState(null, '', target === 'follower' ? './?view=follower' : './');
+    view = target;
+  }
+
+  async function completeLogin(handshake: OAuthHandshake, code: string): Promise<void> {
+    authPhase = 'connecting';
+    const client = { clientId: handshake.clientId, clientSecret: handshake.clientSecret };
+    loginController?.abort();
+    loginController = new AbortController();
+    const signal = loginController.signal;
+    let issuedToken = '';
+    let revocationFailed = false;
+    try {
+      issuedToken = await exchangeCode(handshake.origin, client, code, handshake.verifier, signal);
+      pendingLogin = { origin: handshake.origin, client, token: issuedToken };
+      const verifiedAccount = await verifyCredentials(handshake.origin, issuedToken, signal);
+      if (verifiedAccount.id !== handshake.accountId) {
+        throw new OAuthError(
+          msg('follower.accountMismatch', {
+            account: canonicalAcct(verifiedAccount, handshake.origin),
+          }),
+        );
+      }
+      const session: OAuthSession = {
+        token: issuedToken,
+        origin: handshake.origin,
+        clientId: handshake.clientId,
+        clientSecret: handshake.clientSecret,
+        account: verifiedAccount,
+        savedAt: new Date().toISOString(),
+      };
+      saveFollowerSession(session);
+      pendingLogin = null;
+      authSession = session;
+      authPhase = 'connected';
+      authMessage = '';
+      connectionOpen = false;
+      for (const post of posts) {
+        if (expandedStatusIds.includes(post.status.id)) void loadBoostHistory(post);
+      }
+
+      const acct = canonicalAcct(verifiedAccount, handshake.origin);
+      const previous = readLastAccount();
+      const sameAccount = previous?.acct === acct;
+      writeLastAccount({
+        handle: `@${acct}`,
+        acct,
+        origin: handshake.origin,
+        followers: verifiedAccount.followers_count,
+        platformId: sameAccount ? (previous?.platformId ?? 'unknown') : 'unknown',
+        platformName: sameAccount
+          ? (previous?.platformName ?? 'ActivityPub-Server')
+          : 'ActivityPub-Server',
+        source: 'follower',
+      });
+    } catch (error) {
+      const pending = pendingLogin;
+      pendingLogin = null;
+      if (pending) {
+        try {
+          await revokeToken(pending.origin, pending.client, pending.token);
+        } catch {
+          revocationFailed = true;
+        }
+      }
+      clearFollowerSession();
+      authSession = null;
+      authPhase = 'error';
+      const detail = error instanceof Error ? error.message : msg('follower.loginFailed');
+      authMessage = revocationFailed ? `${detail} ${msg('follower.revokeFailed')}` : detail;
+      connectionOpen = true;
+    }
+  }
+
+  async function disconnect(): Promise<void> {
+    const session = authSession;
+    clearFollowerSession();
+    authSession = null;
+    authPhase = 'idle';
+    authMessage = '';
+    if (!session) return;
+    try {
+      await revokeToken(
+        session.origin,
+        { clientId: session.clientId, clientSecret: session.clientSecret },
+        session.token,
+      );
+    } catch {
+      authMessage = msg('follower.revokeFailed');
+      authPhase = 'error';
+    }
+  }
+
+  function invalidateSession(message: string): void {
+    clearFollowerSession();
+    authSession = null;
+    authPhase = 'idle';
+    authMessage = message;
   }
 
   const busy = $derived(phase === 'resolving' || phase === 'analyzing');
@@ -133,6 +405,113 @@
       })),
     ),
   );
+
+  $effect(() => {
+    const nextKey = authSession
+      ? `${authSession.origin}|${authSession.account.id}|${authSession.token}`
+      : '';
+    if (nextKey === reblogCacheKey) return;
+    boostController?.abort();
+    reblogCache = null;
+    reblogCacheKey = nextKey;
+    boostHistories = {};
+  });
+
+  function canLoadBoostHistory(post: PostReach): boolean {
+    return Boolean(
+      authSession &&
+      account &&
+      post.boosts > 0 &&
+      authSession.origin === origin &&
+      authSession.account.id === account.id,
+    );
+  }
+
+  function emptyBoostHistory(): BoostHistoryState {
+    return { phase: 'idle', events: [], canLoadMore: false, budgetReached: false };
+  }
+
+  function boostHistoryFor(post: PostReach): BoostHistoryState | null {
+    if (!canLoadBoostHistory(post)) return null;
+    return boostHistories[post.status.id] ?? emptyBoostHistory();
+  }
+
+  function refreshBoostHistories(): void {
+    const cache = reblogCache;
+    if (!cache) return;
+    const next = { ...boostHistories };
+    for (const post of posts) {
+      if (!(post.status.id in next)) continue;
+      const ids = post.threadStatuses.map((status) => status.id);
+      const publishedAt = post.threadStatuses.reduce(
+        (oldest, status) =>
+          Date.parse(status.created_at) < Date.parse(oldest) ? status.created_at : oldest,
+        post.threadStatuses[0]?.created_at ?? post.status.created_at,
+      );
+      const covered = cache.covers(publishedAt);
+      next[post.status.id] = {
+        phase: covered ? 'ready' : 'partial',
+        events: cache.eventsFor(ids),
+        canLoadMore: !covered && !cache.exhausted && !cache.budgetReached,
+        budgetReached: cache.budgetReached,
+      };
+    }
+    boostHistories = next;
+  }
+
+  async function loadBoostHistory(post: PostReach): Promise<void> {
+    const session = authSession;
+    if (!session || !canLoadBoostHistory(post)) return;
+    const sessionKey = `${session.origin}|${session.account.id}|${session.token}`;
+    if (sessionKey !== reblogCacheKey) {
+      boostController?.abort();
+      reblogCache = null;
+      reblogCacheKey = sessionKey;
+      boostHistories = {};
+    }
+    if (!reblogCache) reblogCache = new ReblogNotificationCache(session.origin, session.token);
+    const current = boostHistories[post.status.id];
+    if (current?.phase === 'loading' || current?.phase === 'ready') return;
+
+    boostHistories = {
+      ...boostHistories,
+      [post.status.id]: {
+        ...(current ?? emptyBoostHistory()),
+        phase: 'loading',
+      },
+    };
+    boostController?.abort();
+    boostController = new AbortController();
+    try {
+      await reblogCache.loadNext(boostController.signal);
+      refreshBoostHistories();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof AuthenticatedNotificationError && error.status === 401) {
+        invalidateSession(msg('error.followersExpired'));
+      }
+      boostHistories = {
+        ...boostHistories,
+        [post.status.id]: {
+          phase: 'error',
+          events: current?.events ?? [],
+          canLoadMore: false,
+          budgetReached: false,
+          error:
+            error instanceof AuthenticatedNotificationError && error.status === 403
+              ? msg('boostHistory.unavailable')
+              : msg('error.followersInvalidResponse'),
+        },
+      };
+    }
+  }
+
+  function setPostExpanded(post: PostReach, open: boolean): void {
+    expandedStatusIds = open
+      ? [...new Set([...expandedStatusIds, post.status.id])]
+      : expandedStatusIds.filter((id) => id !== post.status.id);
+    if (open) void loadBoostHistory(post);
+  }
 
   async function loadShareView(): Promise<void> {
     shareController?.abort();
@@ -184,6 +563,47 @@
   }
 
   onMount(() => {
+    const storedSession = loadFollowerSession();
+    if (storedSession) {
+      authSession = storedSession;
+      authPhase = 'connected';
+    }
+
+    const callback = parseCallback(window.location);
+    if (callback) {
+      const handshake = loadHandshake();
+      const callbackState = 'invalid' in callback ? null : callback.state;
+      const restored =
+        handshake && callbackState && handshake.state === callbackState
+          ? consumeOAuthReturn(handshake.state)
+          : null;
+      clearHandshake();
+      if (restored) restoreReturnAnalysis(restored.analysis);
+      const returnView = restored?.view ?? handshake?.returnView ?? 'follower';
+      cleanCallbackUrl(returnView);
+
+      if (
+        'invalid' in callback ||
+        !handshake ||
+        !callbackState ||
+        handshake.state !== callbackState
+      ) {
+        clearOAuthReturn();
+        authPhase = 'error';
+        authMessage = msg('follower.loginInvalid');
+        connectionOpen = true;
+      } else if ('error' in callback) {
+        authPhase = 'error';
+        authMessage =
+          callback.error === 'access_denied'
+            ? msg('follower.accessDenied')
+            : msg('follower.loginRejected', { error: callback.error });
+        connectionOpen = true;
+      } else {
+        void completeLogin(handshake, callback.code);
+      }
+    }
+
     const onHashChange = () => void loadShareView();
     const onPopState = () => {
       view = readView();
@@ -193,6 +613,11 @@
     window.addEventListener('popstate', onPopState);
     return () => {
       shareController?.abort();
+      loginController?.abort();
+      const pending = pendingLogin;
+      pendingLogin = null;
+      if (pending)
+        void revokeToken(pending.origin, pending.client, pending.token).catch(() => undefined);
       window.removeEventListener('hashchange', onHashChange);
       window.removeEventListener('popstate', onPopState);
     };
@@ -213,6 +638,10 @@
     insightOldestFetchedAt = null;
     insightReachSelectionComplete = false;
     progress = { completedPosts: 0, totalPosts: 0, requests: 0 };
+    boostController?.abort();
+    reblogCache = null;
+    boostHistories = {};
+    expandedStatusIds = [];
 
     try {
       const target = await resolveHandle(handle, controller.signal);
@@ -373,18 +802,50 @@
         >EN</button
       >
     </div>
-    <div class="header-meta">
-      <span></span>
-      {$_(
-        view === 'methodik'
-          ? 'header.metaMethodology'
-          : view === 'follower'
-            ? 'header.metaFollower'
-            : 'header.metaLive',
-      )}
-    </div>
+    {#if (view === 'analyse' || view === 'follower') && shareView === 'none'}
+      <button
+        type="button"
+        class="connection-trigger"
+        class:connection-trigger-active={authSession !== null}
+        aria-expanded={connectionOpen}
+        aria-controls="instance-connection-panel"
+        title={busy
+          ? $_('connection.triggerDisabled')
+          : authSession
+            ? $_('connection.triggerConnected', {
+                values: { account: authSession.account.username },
+              })
+            : $_('connection.trigger')}
+        disabled={busy}
+        onclick={() => openConnection()}
+      >
+        <span aria-hidden="true"></span>
+        {authSession
+          ? $_('connection.triggerConnected', { values: { account: authSession.account.username } })
+          : $_('connection.trigger')}
+      </button>
+    {:else}
+      <div class="header-meta">
+        <span></span>
+        {$_(view === 'methodik' ? 'header.metaMethodology' : 'header.metaLive')}
+      </div>
+    {/if}
   </div>
 </header>
+
+<div id="instance-connection-panel">
+  <ConnectionPanel
+    open={connectionOpen}
+    phase={authPhase}
+    message={authMessage}
+    session={authSession}
+    candidate={connectionCandidate ?? currentConnectionCandidate()}
+    {savedHandles}
+    onclose={closeConnection}
+    onconnect={startConnection}
+    ondisconnect={disconnect}
+  />
+</div>
 
 {#if view === 'methodik'}
   <MethodologyPage />
@@ -393,6 +854,10 @@
     prefillHandle={handle}
     {savedHandles}
     snapshot={account ? { account, platform, origin } : null}
+    {authSession}
+    {authPhase}
+    onopenconnection={openConnection}
+    oninvalidatesession={invalidateSession}
   />
 {:else if shareView === 'ready' && sharedThread}
   <SharedThreadPage result={sharedThread} analyzedAt={sharedAnalyzedAt} />
@@ -538,7 +1003,17 @@
 
           <div class="post-list">
             {#each sortedPosts as post, index (post.status.id)}
-              <PostCard result={post} {maxNetReach} {index} {account} {analyzedAt} />
+              <PostCard
+                result={post}
+                {maxNetReach}
+                {index}
+                {account}
+                {analyzedAt}
+                expanded={expandedStatusIds.includes(post.status.id)}
+                boostHistory={boostHistoryFor(post)}
+                onexpandedchange={(open) => setPostExpanded(post, open)}
+                onloadolderboosts={() => void loadBoostHistory(post)}
+              />
             {/each}
           </div>
         {/if}

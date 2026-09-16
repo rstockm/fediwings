@@ -107,6 +107,22 @@ export interface AnalysisProgress {
   waitingUntil?: number;
 }
 
+export interface BoostEvent {
+  id: string;
+  statusId: string;
+  createdAt: string;
+}
+
+export type BoostHistoryPhase = 'idle' | 'loading' | 'ready' | 'partial' | 'error';
+
+export interface BoostHistoryState {
+  phase: BoostHistoryPhase;
+  events: BoostEvent[];
+  canLoadMore: boolean;
+  budgetReached: boolean;
+  error?: string;
+}
+
 export interface CardSnapshot {
   version: 1;
   sourceUrl: string;

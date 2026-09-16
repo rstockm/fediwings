@@ -11,6 +11,35 @@ export const en: Messages = {
     metaFollower: 'History · login',
     language: 'Language',
   },
+  connection: {
+    trigger: 'Your instance',
+    triggerConnected: '@{account} · connected',
+    triggerDisabled: 'Available after the analysis finishes',
+    title: 'Add your own data',
+    intro:
+      'FediWings works fully without signing in. A connection adds personal insights for your own account.',
+    benefitBoosts: 'Boost times for your posts',
+    benefitFollowers: 'Follower history from your notifications',
+    privacy:
+      'Data comes directly from your instance, stays in this tab and is not sent to a FediWings server.',
+    details: 'Which data is read?',
+    detailsText:
+      'FediWings receives read-only access to your account data and notifications. Posts continue to be analysed through the public API.',
+    selectedAccount: 'Is @{account} your own account?',
+    connectTo: 'Connect to {host}',
+    connecting: 'Preparing connection…',
+    close: 'Close connection panel',
+    cancel: 'Not now',
+    connected: 'Connected to',
+    tabOnly: 'Valid only in this browser tab',
+    disconnect: 'Disconnect',
+    manage: 'Manage connection',
+    otherAccount: 'The current analysis concerns a different account.',
+    chooseHandle: 'Which of your accounts would you like to connect?',
+    resolve: 'Check account',
+    storageError:
+      'The analysis cannot be stored safely for the return journey in this browser mode.',
+  },
   title: {
     analyse: 'FediWings | Fediverse Reach',
     methodology: 'Methodology | FediWings',
@@ -158,6 +187,19 @@ export const en: Messages = {
     shareTitle: 'FediWings thread analysis',
     shareText: 'Shared reach analysis of a Fediverse thread',
   },
+  boostHistory: {
+    title: 'Boost dynamics - Long tail',
+    loading: 'Loading boost times…',
+    empty: 'No times for this post were found in the loaded notifications.',
+    partial: 'Older notifications have not been loaded yet.',
+    loadOlder: 'Load older events',
+    budget: 'The request budget for boost times has been reached.',
+    unavailable: 'This server does not provide boost times.',
+    list: 'Show times found',
+    chart: 'Timeline of the boost notifications found',
+    tooltip: 'Reach {reach} · +{added}',
+    xAxis: 'Boost time',
+  },
   shared: {
     kicker: 'Shared analysis / 01',
     titlePost: 'A Fediverse post.',
@@ -236,6 +278,18 @@ export const en: Messages = {
     boostWeightText: 'A boost counts as two effective shares.',
     boostWeightNote:
       'Behind this is the product hypothesis that a boost in a chronologically shaped timeline can remain visible longer and more immediately than a share in an algorithmic feed. The factor is deliberately simple and not yet calibrated with real Fediverse impressions data.',
+    longTailTitle: 'Boost dynamics / long tail',
+    longTailText:
+      'The graph shows when publicly visible boosts arrive and how the reach derived from them accumulates. Later points make the long tail visible: in a timeline with no or only light algorithmic sorting, a post can come back into view through follows, profiles, hashtags or a later boost. This does not measure impressions and does not promise that every follower sees the post again.',
+    longTailChartTitle: 'Example: cumulative boost dynamics',
+    longTailChartAria:
+      'Illustrative cumulative boost curve with a rapid increase on day one and continued growth over three months',
+    longTailDayOne: 'Day 1',
+    longTailWeekTwo: 'Week 2',
+    longTailMonthThree: 'Month 3',
+    longTailAxis: 'Time since publication',
+    longTailAlgorithmText:
+      'In heavily algorithmic feeds such as Instagram or X, a limited ranking window determines whether a post is recommended. Once it falls out of that window, it often is not shown again or rediscovered without new signals. The long tail is therefore not a property of every network, but a reasoned assumption for chronologically shaped Fediverse use, which the graph contextualises with actual boost times.',
     apiSection: '02 / API usage',
     apiTitle: 'From handle to reach.',
     apiIntro:
@@ -284,7 +338,8 @@ export const en: Messages = {
     ledgerYes: 'What is processed',
     ledgerYes1: 'Public account and post data',
     ledgerYes2: 'Public boosters and their follower counts',
-    ledgerYes3: 'Optionally up to three handles in local browser storage',
+    ledgerYes3:
+      'Optionally your own follow and boost notifications in the tab, plus up to three remembered handles',
     ledgerNo: 'What does not happen',
     ledgerNo1: 'No mandatory login and no centrally stored user profiles',
     ledgerNo2: 'No persistent storage of results or booster profiles',
@@ -303,7 +358,7 @@ export const en: Messages = {
     limit4:
       'Servers without public booster lists (such as Pixelfed) deliver a gross lower bound from the author followers alone.',
     limit5:
-      'The follower history in the “Followers” tab comes from follow notifications of your own account: deleted notifications and unfollows stay invisible.',
+      'Follower history and boost times come from notifications on your own account: deleted, filtered or not-yet-loaded events remain invisible.',
     limit6: 'Mutes, filters, domain blocks and actually read posts are unknown.',
     limit7: 'The net formula originates from Instagram stories, not from Fediverse impressions.',
     limit8: 'Likes and replies are both consequence and signal of existing visibility.',
@@ -315,18 +370,18 @@ export const en: Messages = {
   follower: {
     titleHtml: 'How is your<br />account growing?',
     intro:
-      'The current follower count is public without login. The history over time comes only from your own account – via follow notifications, retrieved with a separate login on your Fediverse server. FediWings verifies the signed-in account and binds the token to its server. The token lives in this browser tab’s session storage and is deleted when the tab session ends; signing out also revokes it at the server.',
-    stepAnon: 'Step 1 · current numbers · no login',
+      'The current follower count is public. FediWings can optionally reconstruct your personal history from your own account’s follow notifications. The instance connection applies only to this browser tab.',
+    stepAnon: 'Public snapshot · no connection',
     load: 'Load',
     loading: 'Loading…',
     followersNote: 'current followers',
     serverSoftware: 'Server software',
-    loginButton: 'Get follower history with login',
+    loginButton: 'Connect your instance',
     stepLogin: 'Step 2 · login',
     redirecting: 'Redirecting to the server …',
     authorizeNote:
       'The authorize screen of your Fediverse server is opening. Sign in with the account selected before.',
-    stepHistory: 'Step 2 · follower history · with login',
+    stepHistory: 'Personal history · optional',
     accessDenied: 'Login in the server interface was cancelled. No data was transferred.',
     loginRejected: 'The server rejected the login ({error}).',
     loginInvalid: 'The login is invalid or expired. Please connect the account again.',
@@ -359,7 +414,7 @@ export const en: Messages = {
     signOut: 'Sign out',
     revokeFailed:
       'The local session was deleted, but server access could not be revoked automatically. Please remove FediWings in your server’s app settings.',
-    idle: 'After login, FediWings loads your follow notifications and builds both history curves from them.',
+    idle: 'Load your follow notifications to build both history curves.',
     emptyHistory: 'No follow notifications found. If they were deleted, the history is shorter.',
   },
   error: {

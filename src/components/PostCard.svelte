@@ -3,9 +3,10 @@
   import { onDestroy } from 'svelte';
   import { _, date as _date, number as _number } from 'svelte-i18n';
   import ShareDialog from './ShareDialog.svelte';
+  import BoostTimeline from './BoostTimeline.svelte';
   import { cardServiceAvailable, createSharedThreadUrl } from '../lib/share';
   import { msg } from '../lib/i18n';
-  import type { MastodonAccount, PostReach } from '../lib/types';
+  import type { BoostHistoryState, MastodonAccount, PostReach } from '../lib/types';
 
   let {
     result,
@@ -13,14 +14,21 @@
     index,
     account,
     analyzedAt,
+    expanded = false,
+    boostHistory = null,
+    onexpandedchange = () => {},
+    onloadolderboosts = () => {},
   }: {
     result: PostReach;
     maxNetReach: number;
     index: number;
     account: MastodonAccount;
     analyzedAt: string;
+    expanded?: boolean;
+    boostHistory?: BoostHistoryState | null;
+    onexpandedchange?: (open: boolean) => void;
+    onloadolderboosts?: () => void;
   } = $props();
-  let expanded = $state(false);
   let shareDialogOpen = $state(false);
   let shareFeedback = $state('');
   let shareResetTimer: number | undefined;
@@ -224,55 +232,64 @@
       {/if}
     </div>
 
-    <dl class="post-metrics">
-      <div class="reach-metric reach-metric-net">
-        <dt class="reach-label">
-          <span>{$_('post.netReach')}</span>
-          {#if maxNetReach > 0}
-            <small class="reach-level-max" aria-hidden="true"
-              >{$_('post.maxLabel', {
-                values: { value: $_number(maxNetReach, { format: 'int' }) },
-              })}</small
-            >
-          {/if}
-        </dt>
-        <dd class="metric-primary-value">{$_number(result.netReach, { format: 'int' })}</dd>
-        <dd
-          class="reach-level"
-          class:reach-level-empty={netReachRatio === 0}
-          style={`--reach-level: ${netReachRatio}%`}
-        >
-          <div
-            class="reach-level-track"
-            role="progressbar"
-            aria-label={$_('post.progressbar')}
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow={netReachRatio}
-            aria-valuetext={$_('post.progressValue', { values: { percent: netReachRatio } })}
+    <div class="post-analysis">
+      <dl class="post-metrics">
+        <div class="reach-metric reach-metric-net">
+          <dt class="reach-label">
+            <span>{$_('post.netReach')}</span>
+            {#if maxNetReach > 0}
+              <small class="reach-level-max" aria-hidden="true"
+                >{$_('post.maxLabel', {
+                  values: { value: $_number(maxNetReach, { format: 'int' }) },
+                })}</small
+              >
+            {/if}
+          </dt>
+          <dd class="metric-primary-value">{$_number(result.netReach, { format: 'int' })}</dd>
+          <dd
+            class="reach-level"
+            class:reach-level-empty={netReachRatio === 0}
+            style={`--reach-level: ${netReachRatio}%`}
           >
-            <span class="reach-level-fill" class:reach-level-fill-complete={netReachRatio === 100}
-            ></span>
-          </div>
-        </dd>
-      </div>
-      <div class="metric-secondary metric-likes">
-        <dt>{$_('post.likes')}</dt>
-        <dd>{$_number(result.likes, { format: 'int' })}</dd>
-      </div>
-      <div class="metric-secondary metric-boosts">
-        <dt>{$_('post.boosts')}</dt>
-        <dd>{$_number(result.boosts, { format: 'int' })}</dd>
-      </div>
-      <div class="metric-secondary metric-gross">
-        <dt title={$_('post.grossTitle')}>{$_('post.gross')}</dt>
-        <dd>{$_number(result.grossReach, { format: 'int' })}</dd>
-      </div>
-    </dl>
+            <div
+              class="reach-level-track"
+              role="progressbar"
+              aria-label={$_('post.progressbar')}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={netReachRatio}
+              aria-valuetext={$_('post.progressValue', { values: { percent: netReachRatio } })}
+            >
+              <span class="reach-level-fill" class:reach-level-fill-complete={netReachRatio === 100}
+              ></span>
+            </div>
+          </dd>
+        </div>
+        <div class="metric-secondary metric-likes">
+          <dt>{$_('post.likes')}</dt>
+          <dd>{$_number(result.likes, { format: 'int' })}</dd>
+        </div>
+        <div class="metric-secondary metric-boosts">
+          <dt>{$_('post.boosts')}</dt>
+          <dd>{$_number(result.boosts, { format: 'int' })}</dd>
+        </div>
+        <div class="metric-secondary metric-gross">
+          <dt title={$_('post.grossTitle')}>{$_('post.gross')}</dt>
+          <dd>{$_number(result.grossReach, { format: 'int' })}</dd>
+        </div>
+      </dl>
+      {#if expanded && boostHistory}
+        <BoostTimeline history={boostHistory} {result} onloadmore={onloadolderboosts} />
+      {/if}
+    </div>
   </div>
 
   <div class="post-details-bar">
-    <details class="post-details" bind:open={expanded}>
+    <details
+      class="post-details"
+      open={expanded}
+      ontoggle={(event) => onexpandedchange((event.currentTarget as HTMLDetailsElement).open)}
+    >
       <summary aria-label={detailsLabel}>
         <svg class="details-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="m5 9 7 7 7-7"></path>

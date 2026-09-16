@@ -208,6 +208,30 @@ async function mockMastodon(page: Page, software = 'mastodon') {
   );
 }
 
+async function mockInstanceConnection(page: Page) {
+  await page.route('https://test.social/api/v1/apps', async (route) => {
+    await route.fulfill({ json: { client_id: 'cid', client_secret: 'cs' } });
+  });
+  await page.route('https://test.social/oauth/authorize?*', async (route) => {
+    const url = new URL(route.request().url());
+    const redirect = url.searchParams.get('redirect_uri') ?? 'http://127.0.0.1:4173/';
+    const state = url.searchParams.get('state') ?? '';
+    await route.fulfill({
+      status: 302,
+      headers: { Location: `${redirect}?code=analysis-code&state=${state}` },
+    });
+  });
+  await page.route('https://test.social/oauth/token', async (route) => {
+    await route.fulfill({ json: { access_token: 'analysis-token' } });
+  });
+  await page.route('https://test.social/api/v1/accounts/verify_credentials', async (route) => {
+    await route.fulfill({ json: account });
+  });
+  await page.route('https://test.social/oauth/revoke', async (route) => {
+    await route.fulfill({ json: {} });
+  });
+}
+
 test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) => {
   await mockMastodon(page);
   await page.goto('/');
@@ -421,6 +445,67 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   expect(overflow).toBe(false);
 });
 
+test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst beim geöffneten Beitrag', async ({
+  page,
+}) => {
+  await mockMastodon(page);
+  await mockInstanceConnection(page);
+  let statusRequests = 0;
+  let notificationRequests = 0;
+  await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
+    statusRequests += 1;
+    await route.fulfill({ json: statuses });
+  });
+  await page.route('https://test.social/api/v1/notifications?*', async (route) => {
+    notificationRequests += 1;
+    expect(route.request().headers().authorization).toBe('Bearer analysis-token');
+    const url = new URL(route.request().url());
+    expect(url.searchParams.getAll('types[]')).toEqual(['reblog']);
+    await route.fulfill({
+      json: [
+        {
+          id: 'notification-2',
+          type: 'reblog',
+          created_at: daysAgo(1, 14),
+          status: { id: 'status-1' },
+          account: { id: 'booster-2' },
+        },
+        {
+          id: 'notification-1',
+          type: 'reblog',
+          created_at: daysAgo(2, 12),
+          status: { id: 'status-1' },
+          account: { id: 'booster-1' },
+        },
+      ],
+    });
+  });
+  await page.goto('/');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  await expect(
+    page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
+  ).toBeVisible();
+  expect(notificationRequests).toBe(0);
+
+  const threadCard = page.locator('.post-card').filter({ hasText: 'Ein Testbeitrag' });
+  await threadCard.locator('summary').click();
+  await expect(threadCard.locator('details.post-details')).toHaveAttribute('open', '');
+  expect(notificationRequests).toBe(0);
+
+  await page.getByRole('button', { name: 'Eigene Instanz', exact: true }).click();
+  await page.getByRole('button', { name: 'Mit test.social verbinden' }).click();
+
+  await expect(page.getByText('2 datierte Boost-Benachrichtigungen gefunden')).toBeVisible();
+  await expect(page.getByText('Aktueller Stand: 3 Boosts')).toBeVisible();
+  await expect(threadCard.locator('details.post-details')).toHaveAttribute('open', '');
+  expect(statusRequests).toBe(1);
+  expect(notificationRequests).toBe(1);
+  await expect
+    .poll(() => page.evaluate(() => sessionStorage.getItem('fediscope:oauth-return-v1')))
+    .toBeNull();
+});
+
 test('vergleicht gemeldete Interaktionen mit den 30 Tagen davor', async ({ page }) => {
   await mockMastodon(page);
   await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
@@ -483,7 +568,7 @@ test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async
   });
   await page.getByRole('link', { name: 'Follower' }).click();
   await expect(
-    page.getByRole('button', { name: 'Follower-Verlauf mit Login abrufen' }),
+    page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
   await expect(page.getByText('1.000')).toBeVisible();
