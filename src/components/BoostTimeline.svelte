@@ -94,13 +94,29 @@
       y: chart.bottom - (point.reach / maxReach) * (chart.bottom - chart.top),
     })),
   );
-  const linePath = $derived(
-    positioned
-      .map(
-        (point, index) => `${index === 0 ? 'M' : 'L'}${point.x.toFixed(1)},${point.y.toFixed(1)}`,
-      )
-      .join(' '),
-  );
+  function smoothPath(points: { x: number; y: number }[]): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) {
+      return `M${points[0]!.x.toFixed(1)},${points[0]!.y.toFixed(1)}`;
+    }
+    const commands = [`M${points[0]!.x.toFixed(1)},${points[0]!.y.toFixed(1)}`];
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const previous = points[Math.max(0, index - 1)]!;
+      const current = points[index]!;
+      const next = points[index + 1]!;
+      const afterNext = points[Math.min(points.length - 1, index + 2)]!;
+      const control1X = current.x + (next.x - previous.x) / 6;
+      const control1Y = current.y + (next.y - previous.y) / 6;
+      const control2X = next.x - (afterNext.x - current.x) / 6;
+      const control2Y = next.y - (afterNext.y - current.y) / 6;
+      commands.push(
+        `C${control1X.toFixed(1)},${control1Y.toFixed(1)} ${control2X.toFixed(1)},${control2Y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`,
+      );
+    }
+    return commands.join(' ');
+  }
+
+  const linePath = $derived(smoothPath(positioned));
   const areaPath = $derived(
     positioned.length > 0
       ? `${linePath} L${positioned[positioned.length - 1]!.x.toFixed(1)},${chart.bottom} L${positioned[0]!.x.toFixed(1)},${chart.bottom} Z`
@@ -176,6 +192,9 @@
           stroke-width="2.5"
           d={linePath}
         ></path>
+        {#each positioned as point (point.event.id)}
+          <circle class="boost-curve-event" cx={point.x} cy={point.y} r="2.5"></circle>
+        {/each}
         {#if active}
           {@const tooltipX = Math.min(Math.max(active.x, 91), 289)}
           <line

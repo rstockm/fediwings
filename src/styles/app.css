@@ -458,6 +458,11 @@ footer {
   stroke-width: 2;
 }
 
+.boost-curve-event {
+  fill: #5d4cf0;
+  opacity: 0.5;
+}
+
 .boost-curve-tooltip rect {
   fill: #282434;
 }

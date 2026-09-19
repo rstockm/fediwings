@@ -500,6 +500,7 @@ test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst b
     threadCard.getByRole('heading', { name: 'Boost-Dynamik - Long Tail' }),
   ).toBeVisible();
   await expect(threadCard.locator('.boost-curve')).toBeVisible();
+  await expect(threadCard.locator('.boost-curve-event')).toHaveCount(2);
   const labelBoxes = await threadCard.locator('.boost-curve-label').evaluateAll((labels) =>
     labels
       .map((label) => label.getBoundingClientRect())
