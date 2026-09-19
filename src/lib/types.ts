@@ -91,6 +91,7 @@ export interface PostReach {
   likes: number;
   interactions: number;
   boosts: number;
+  quotes: number;
   visibleBoosters: number;
   boosterFollowers: number;
   grossReach: number;

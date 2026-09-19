@@ -67,18 +67,36 @@ describe('Reichweitenberechnung', () => {
     expect(result.thumbnail).toEqual(video);
   });
 
+  it('aggregiert Zitate ueber alle Thread-Teile', () => {
+    const result = initialReach(
+      card([status({ quotes_count: 2 }), status({ id: 'post-2', quotes_count: 1 })]),
+      1_000,
+    );
+    expect(result.quotes).toBe(3);
+  });
+
   it('gewichtet Fediverse-Boosts doppelt und deckelt die Schaetzung am Brutto-Potenzial', () => {
-    expect(calculateNetReach(1_000, 0, 0)).toBe(17);
-    expect(calculateNetReach(1_000, 3, 18)).toBe(131);
-    expect(calculateNetReach(1_000, 10_000, 10_000)).toBe(1_000);
+    expect(calculateNetReach(1_000, 0, 0, 0)).toBe(17);
+    expect(calculateNetReach(1_000, 3, 18, 0)).toBe(131);
+    expect(calculateNetReach(1_000, 10_000, 10_000, 10_000)).toBe(1_000);
+  });
+
+  it('gewichtet Zitate genau wie Boosts', () => {
+    expect(calculateNetReach(1_000, 0, 0, 3)).toBe(calculateNetReach(1_000, 3, 0, 0));
+    expect(calculateNetReach(1_000, 2, 5, 3)).toBeGreaterThan(calculateNetReach(1_000, 2, 5, 0));
+  });
+
+  it('hebt Zitate auf die Likes-Boosts-Quote-Untergrenze', () => {
+    expect(calculateNetReach(10, 0, 0, 2, 2)).toBe(2);
+    expect(calculateNetReach(10, 0, 0, 1, 3)).toBe(3);
   });
 
   it('faellt nie unter die Summe aus Likes und Boosts', () => {
-    expect(calculateNetReach(1_000, 0, 0, 16)).toBe(17);
-    expect(calculateNetReach(100, 0, 0, 80)).toBe(80);
-    expect(calculateNetReach(50, 2, 10, 16)).toBe(16);
-    expect(calculateNetReach(10, 2, 10, 16)).toBe(10);
-    expect(calculateNetReach(67, 2, 14, 16)).toBe(16);
+    expect(calculateNetReach(1_000, 0, 0, 0, 16)).toBe(17);
+    expect(calculateNetReach(100, 0, 0, 0, 80)).toBe(80);
+    expect(calculateNetReach(50, 2, 10, 0, 16)).toBe(16);
+    expect(calculateNetReach(10, 2, 10, 0, 16)).toBe(10);
+    expect(calculateNetReach(67, 2, 14, 0, 16)).toBe(16);
   });
 
   it('hebt kleine Netto-Ergebnisse auf die Likes-Boosts-Untergrenze', () => {

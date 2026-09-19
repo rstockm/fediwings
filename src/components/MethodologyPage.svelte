@@ -15,7 +15,7 @@
   const chartY = (percentage: number) =>
     chart.bottom - (percentage / 100) * (chart.bottom - chart.top);
   const reachPercentage = (boosts: number, interactions: number) =>
-    calculateNetReach(100_000, boosts, interactions, boosts + interactions) / 1_000;
+    calculateNetReach(100_000, boosts, interactions, 0, boosts + interactions) / 1_000;
   const curvePath = (interactions: number) =>
     Array.from({ length: 51 }, (_, boosts) => {
       const command = boosts === 0 ? 'M' : 'L';

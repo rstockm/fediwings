@@ -51,6 +51,7 @@ const result: PostReach = {
   likes: 12,
   interactions: 13,
   boosts: 3,
+  quotes: 0,
   visibleBoosters: 2,
   boosterFollowers: 240,
   grossReach: 1240,

@@ -21,6 +21,10 @@ export function initialReach(card: ThreadCard, authorFollowers: number): PostRea
   const likes = card.threadStatuses.reduce((sum, status) => sum + status.favourites_count, 0);
   const replies = card.threadStatuses.reduce((sum, status) => sum + status.replies_count, 0);
   const boosts = card.threadStatuses.reduce((sum, status) => sum + status.reblogs_count, 0);
+  const quotes = card.threadStatuses.reduce(
+    (sum, status) => sum + Math.max(0, status.quotes_count ?? 0),
+    0,
+  );
   const interactions = likes + replies;
   const grossReach = authorFollowers;
 
@@ -35,10 +39,11 @@ export function initialReach(card: ThreadCard, authorFollowers: number): PostRea
     likes,
     interactions,
     boosts,
+    quotes,
     visibleBoosters: 0,
     boosterFollowers: 0,
     grossReach,
-    netReach: calculateNetReach(grossReach, boosts, interactions, likes + boosts),
+    netReach: calculateNetReach(grossReach, boosts, interactions, quotes, likes + boosts + quotes),
     unattributedBoosts: boosts,
     pagesLoaded: 0,
   };
@@ -48,13 +53,19 @@ export function calculateNetReach(
   grossReach: number,
   boosts: number,
   interactions: number,
+  quotes: number,
   engagementFloor = 0,
 ): number {
   const potential = Math.max(0, grossReach);
   const estimate = Math.round(
     INSTAGRAM_BASE_RATE *
       potential *
-      Math.pow(1 + MASTODON_BOOST_WEIGHT * Math.max(0, boosts), BOOST_EXPONENT) *
+      Math.pow(
+        1 +
+          MASTODON_BOOST_WEIGHT * Math.max(0, boosts) +
+          MASTODON_BOOST_WEIGHT * Math.max(0, quotes),
+        BOOST_EXPONENT,
+      ) *
       Math.pow(1 + Math.max(0, interactions), INTERACTION_EXPONENT),
   );
   const floor = Math.max(0, engagementFloor);
@@ -78,7 +89,8 @@ export function updateReach(
       grossReach,
       current.boosts,
       current.interactions,
-      current.likes + current.boosts,
+      current.quotes,
+      current.likes + current.boosts + current.quotes,
     ),
     unattributedBoosts: Math.max(0, current.boosts - visibleBoosters),
     pagesLoaded,

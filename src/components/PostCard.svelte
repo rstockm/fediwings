@@ -273,6 +273,10 @@
           <dt>{$_('post.boosts')}</dt>
           <dd>{$_number(result.boosts, { format: 'int' })}</dd>
         </div>
+        <div class="metric-secondary metric-quotes">
+          <dt>{$_('post.quotes')}</dt>
+          <dd>{$_number(result.quotes, { format: 'int' })}</dd>
+        </div>
         <div class="metric-secondary metric-gross">
           <dt title={$_('post.grossTitle')}>{$_('post.gross')}</dt>
           <dd>{$_number(result.grossReach, { format: 'int' })}</dd>

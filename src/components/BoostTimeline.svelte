@@ -35,7 +35,8 @@
               result.grossReach,
               boostCount,
               result.interactions,
-              result.likes + boostCount,
+              result.quotes,
+              result.likes + boostCount + result.quotes,
             );
       const point = {
         event,

@@ -1662,7 +1662,7 @@ footer {
   display: grid;
   align-items: center;
   align-content: center;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: auto auto;
   max-width: none;
   width: 100%;
@@ -1796,8 +1796,12 @@ footer {
   grid-column: 2;
 }
 
-.metric-gross {
+.metric-quotes {
   grid-column: 3;
+}
+
+.metric-gross {
+  grid-column: 4;
 }
 
 .metric-secondary:not(:last-child) {
@@ -4124,10 +4128,27 @@ footer {
   }
 
   .post-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
     max-width: 100%;
     min-height: 0;
     padding: 8px 12px;
+  }
+
+  .metric-likes,
+  .metric-boosts,
+  .metric-quotes,
+  .metric-gross {
+    grid-column: auto;
+  }
+
+  .metric-secondary {
+    grid-row: auto;
+    border-right: 0;
+  }
+
+  .metric-secondary:nth-child(even) {
+    border-right: 1px solid var(--line-light);
   }
 
   .post-analysis {

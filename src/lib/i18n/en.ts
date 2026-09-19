@@ -171,6 +171,7 @@ export const en: Messages = {
     progressValue: '{percent} percent of the highest net reach',
     likes: 'Likes',
     boosts: 'Boosts',
+    quotes: 'Quotes',
     gross: 'Gross',
     grossTitle: 'Gross reach',
     expand: 'Show full post',
@@ -246,8 +247,8 @@ export const en: Messages = {
     curveNote: 'More reactions shift the same boost curve upward.',
     formulaSummary: 'View technical formula',
     formulaCodeHtml:
-      'min(G, max(0.0165 × G × (1 + 2B)<sup>0.7314</sup> × (1 + I)<sup>0.2214</sup>, B + L))',
-    formulaLegend: 'G = gross reach · B = boosts · I = likes + replies · L = likes',
+      'min(G, max(0.0165 × G × (1 + 2B + 2Q)<sup>0.7314</sup> × (1 + I)<sup>0.2214</sup>, B + Q + L))',
+    formulaLegend: 'G = gross reach · B = boosts · Q = quotes · I = likes + replies · L = likes',
     indexAria: 'On this page',
     indexModel: 'Calculation',
     indexApi: 'API usage',
@@ -266,7 +267,7 @@ export const en: Messages = {
     flowNet: 'Net',
     flowNetDetail: 'at most gross',
     netText:
-      'This curve originates from 510 Instagram stories. In the Fediverse, the specifically determined gross network replaces the pure author follower count. The result is always capped at G and never falls below the sum of likes and boosts – anyone who reacted has seen the post.',
+      'This curve originates from 510 Instagram stories. In the Fediverse, the specifically determined gross network replaces the pure author follower count. The result is always capped at G and never falls below the sum of likes, boosts and quotes – anyone who reacted has seen the post.',
     netStrong: 'The operative reach value in FediWings',
     grossEyebrow: 'Supplementary upper bound',
     grossTitle: 'Gross reach',
@@ -275,9 +276,9 @@ export const en: Messages = {
       'Adds the current follower count of the author and the follower counts of all publicly visible, uniquely attributable boosters. In threads, each booster is counted only once.',
     grossStrong: 'Supplementary context for the network potential',
     boostWeight: 'Boost weighting',
-    boostWeightText: 'A boost counts as two effective shares.',
+    boostWeightText: 'A boost or a quote counts as two effective shares.',
     boostWeightNote:
-      'Behind this is the product hypothesis that a boost in a chronologically shaped timeline can remain visible longer and more immediately than a share in an algorithmic feed. The factor is deliberately simple and not yet calibrated with real Fediverse impressions data.',
+      'Behind this is the product hypothesis that a boost in a chronologically shaped timeline can remain visible longer and more immediately than a share in an algorithmic feed. Quotes are included with the same weight. The follower circles of quoting accounts are not part of the gross potential; the estimate therefore stays deliberately conservative. The factor is deliberately simple and not yet calibrated with real Fediverse impressions data.',
     longTailTitle: 'Boost dynamics / long tail',
     longTailText:
       'The graph shows when publicly visible boosts arrive and how the reach derived from them accumulates. Later points make the long tail visible: in a timeline with no or only light algorithmic sorting, a post can come back into view through follows, profiles, hashtags or a later boost. This does not measure impressions and does not promise that every follower sees the post again.',

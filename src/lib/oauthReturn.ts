@@ -28,6 +28,7 @@ const postReachSchema = z.object({
   likes: z.number().int().nonnegative(),
   interactions: z.number().int().nonnegative(),
   boosts: z.number().int().nonnegative(),
+  quotes: z.number().int().nonnegative().default(0),
   visibleBoosters: z.number().int().nonnegative(),
   boosterFollowers: z.number().int().nonnegative(),
   grossReach: z.number().int().nonnegative(),

@@ -52,6 +52,7 @@ function snapshot(savedAt = new Date().toISOString()): OAuthReturnSnapshot {
           likes: 2,
           interactions: 3,
           boosts: 3,
+          quotes: 0,
           visibleBoosters: 3,
           boosterFollowers: 50,
           grossReach: 150,

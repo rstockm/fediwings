@@ -169,6 +169,7 @@ export const de = {
     progressValue: '{percent} Prozent der höchsten Netto-Reichweite',
     likes: 'Likes',
     boosts: 'Boosts',
+    quotes: 'Zitate',
     gross: 'Brutto',
     grossTitle: 'Brutto-Reichweite',
     expand: 'Vollständigen Beitrag anzeigen',
@@ -246,8 +247,9 @@ export const de = {
     curveNote: 'Mehr Reaktionen verschieben dieselbe Boost-Kurve nach oben.',
     formulaSummary: 'Technische Formel ansehen',
     formulaCodeHtml:
-      'min(G, max(0,0165 × G × (1 + 2B)<sup>0,7314</sup> × (1 + I)<sup>0,2214</sup>, B + L))',
-    formulaLegend: 'G = Brutto-Reichweite · B = Boosts · I = Likes + Antworten · L = Likes',
+      'min(G, max(0,0165 × G × (1 + 2B + 2Q)<sup>0,7314</sup> × (1 + I)<sup>0,2214</sup>, B + Q + L))',
+    formulaLegend:
+      'G = Brutto-Reichweite · B = Boosts · Q = Zitate · I = Likes + Antworten · L = Likes',
     indexAria: 'Inhalte dieser Seite',
     indexModel: 'Berechnung',
     indexApi: 'API-Nutzung',
@@ -266,7 +268,7 @@ export const de = {
     flowNet: 'Netto',
     flowNetDetail: 'höchstens Brutto',
     netText:
-      'Diese Kurve stammt aus 510 Instagram-Stories. Im Fediverse ersetzt das konkret ermittelte Brutto-Netzwerk die reine Autor-Followerzahl. Das Ergebnis wird immer bei G gedeckelt und fällt nie unter die Summe aus Likes und Boosts – wer reagiert hat, hat den Beitrag jedenfalls gesehen.',
+      'Diese Kurve stammt aus 510 Instagram-Stories. Im Fediverse ersetzt das konkret ermittelte Brutto-Netzwerk die reine Autor-Followerzahl. Das Ergebnis wird immer bei G gedeckelt und fällt nie unter die Summe aus Likes, Boosts und Zitaten – wer reagiert hat, hat den Beitrag jedenfalls gesehen.',
     netStrong: 'Der operative Reichweitenwert in FediWings',
     grossEyebrow: 'Ergänzende Obergrenze',
     grossTitle: 'Brutto-Reichweite',
@@ -275,9 +277,9 @@ export const de = {
       'Addiert werden die aktuelle Followerzahl des Autors und die Followerzahlen aller öffentlich sichtbaren, eindeutig zuordenbaren Booster. Bei Threads wird jeder Booster nur einmal gezählt.',
     grossStrong: 'Ergänzung zur Einordnung des Netzwerkpotenzials',
     boostWeight: 'Boost-Gewichtung',
-    boostWeightText: 'Ein Boost zählt als zwei effektive Shares.',
+    boostWeightText: 'Ein Boost oder ein Zitat zählt als zwei effektive Shares.',
     boostWeightNote:
-      'Dahinter steht die Produkthypothese, dass ein Boost in einer chronologisch geprägten Timeline länger und unmittelbarer sichtbar sein kann als ein Share in einem algorithmischen Feed. Der Faktor ist bewusst einfach und noch nicht mit echten Fediverse-Impressionsdaten kalibriert.',
+      'Dahinter steht die Produkthypothese, dass ein Boost in einer chronologisch geprägten Timeline länger und unmittelbarer sichtbar sein kann als ein Share in einem algorithmischen Feed. Zitate gehen mit demselben Gewicht in die Schätzung ein. Die Followerkreise der Zitierenden sind im Brutto-Potenzial nicht enthalten; die Schätzung bleibt daher bewusst konservativ. Der Faktor ist bewusst einfach und noch nicht mit echten Fediverse-Impressionsdaten kalibriert.',
     longTailTitle: 'Boost-Dynamik / Long Tail',
     longTailText:
       'Der Graph zeigt, wann öffentlich sichtbare Boosts eintreffen und wie die daraus abgeleitete Reichweite kumuliert wächst. Späte Punkte machen den Long Tail sichtbar: In einer nicht oder nur leicht algorithmisch sortierten Timeline kann ein Beitrag über Follows, Profile, Hashtags oder einen späteren Boost erneut in den Blick kommen. Das ist keine Messung von Impressionen und keine Zusage, dass jeder Follower ihn noch einmal sieht.',
