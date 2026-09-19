@@ -99,16 +99,39 @@
     if (points.length === 1) {
       return `M${points[0]!.x.toFixed(1)},${points[0]!.y.toFixed(1)}`;
     }
+    // Monotone kubische Interpolation (Fritsch-Carlson): verlaeuft exakt durch alle
+    // Punkte und erzeugt bei monotonen x-Werten keine Ueberschwinger oder Schleifen.
+    const delta: number[] = [];
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const stepX = points[index + 1]!.x - points[index]!.x;
+      delta.push(stepX > 0 ? (points[index + 1]!.y - points[index]!.y) / stepX : 0);
+    }
+    const slopes: number[] = [delta[0]!];
+    for (let index = 1; index < points.length - 1; index += 1) {
+      const previous = delta[index - 1]!;
+      const next = delta[index]!;
+      if (previous * next <= 0) {
+        slopes.push(0);
+        continue;
+      }
+      const slope = (previous + next) / 2;
+      const limit = 3 * Math.min(Math.abs(previous), Math.abs(next));
+      slopes.push(Math.abs(slope) > limit ? Math.sign(slope) * limit : slope);
+    }
+    slopes.push(delta[delta.length - 1]!);
     const commands = [`M${points[0]!.x.toFixed(1)},${points[0]!.y.toFixed(1)}`];
     for (let index = 0; index < points.length - 1; index += 1) {
-      const previous = points[Math.max(0, index - 1)]!;
       const current = points[index]!;
       const next = points[index + 1]!;
-      const afterNext = points[Math.min(points.length - 1, index + 2)]!;
-      const control1X = current.x + (next.x - previous.x) / 6;
-      const control1Y = current.y + (next.y - previous.y) / 6;
-      const control2X = next.x - (afterNext.x - current.x) / 6;
-      const control2Y = next.y - (afterNext.y - current.y) / 6;
+      const stepX = next.x - current.x;
+      if (stepX <= 0) {
+        commands.push(`L${next.x.toFixed(1)},${next.y.toFixed(1)}`);
+        continue;
+      }
+      const control1X = current.x + stepX / 3;
+      const control1Y = current.y + (slopes[index]! * stepX) / 3;
+      const control2X = next.x - stepX / 3;
+      const control2Y = next.y - (slopes[index + 1]! * stepX) / 3;
       commands.push(
         `C${control1X.toFixed(1)},${control1Y.toFixed(1)} ${control2X.toFixed(1)},${control2Y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`,
       );
