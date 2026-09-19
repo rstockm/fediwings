@@ -428,7 +428,7 @@
   }
 
   function emptyBoostHistory(): BoostHistoryState {
-    return { phase: 'idle', events: [], canLoadMore: false, budgetReached: false };
+    return { phase: 'idle', events: [], pages: 0, canLoadMore: false, budgetReached: false };
   }
 
   function boostHistoryFor(post: PostReach): BoostHistoryState | null {
@@ -452,6 +452,7 @@
       next[post.status.id] = {
         phase: covered ? 'ready' : 'partial',
         events: cache.eventsFor(ids),
+        pages: cache.requests,
         canLoadMore: !covered && !cache.exhausted && !cache.budgetReached,
         budgetReached: cache.budgetReached,
       };
@@ -495,6 +496,7 @@
         [post.status.id]: {
           phase: 'error',
           events: current?.events ?? [],
+          pages: current?.pages ?? 0,
           canLoadMore: false,
           budgetReached: false,
           error:

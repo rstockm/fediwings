@@ -119,6 +119,7 @@ export type BoostHistoryPhase = 'idle' | 'loading' | 'ready' | 'partial' | 'erro
 export interface BoostHistoryState {
   phase: BoostHistoryPhase;
   events: BoostEvent[];
+  pages: number;
   canLoadMore: boolean;
   budgetReached: boolean;
   error?: string;

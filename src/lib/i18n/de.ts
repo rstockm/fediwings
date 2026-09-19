@@ -191,7 +191,8 @@ export const de = {
     loading: 'Boost-Zeitpunkte werden geladen…',
     empty:
       'In den geladenen Benachrichtigungen wurden keine Zeitpunkte für diesen Beitrag gefunden.',
-    partial: 'Ältere Benachrichtigungen sind noch nicht geladen.',
+    partialProgress:
+      '{pages} Seiten Benachrichtigungen geladen · {events} Zeitpunkte für diesen Beitrag gefunden.',
     loadOlder: 'Ältere Ereignisse laden',
     budget: 'Das Abrufbudget für Boost-Zeitpunkte ist erreicht.',
     unavailable: 'Dieser Server stellt die Boost-Zeitpunkte nicht bereit.',

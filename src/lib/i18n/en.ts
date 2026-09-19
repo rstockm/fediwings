@@ -192,7 +192,8 @@ export const en: Messages = {
     title: 'Boost dynamics - Long tail',
     loading: 'Loading boost times…',
     empty: 'No times for this post were found in the loaded notifications.',
-    partial: 'Older notifications have not been loaded yet.',
+    partialProgress:
+      '{pages} pages of notifications loaded · {events} timestamps found for this post.',
     loadOlder: 'Load older events',
     budget: 'The request budget for boost times has been reached.',
     unavailable: 'This server does not provide boost times.',

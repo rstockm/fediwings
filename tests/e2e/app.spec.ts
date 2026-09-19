@@ -518,6 +518,78 @@ test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst b
     .toBeNull();
 });
 
+test('haengt beim Laden aelterer Boost-Zeitpunkte neue Kurvenpunkte an', async ({ page }) => {
+  await mockMastodon(page);
+  await mockInstanceConnection(page);
+  let notificationRequests = 0;
+  await page.route('https://test.social/api/v1/notifications?*', async (route) => {
+    notificationRequests += 1;
+    const url = new URL(route.request().url());
+    if (!url.searchParams.has('max_id')) {
+      await route.fulfill({
+        json: [
+          {
+            id: 'notification-newest',
+            type: 'reblog',
+            created_at: daysAgo(1, 14),
+            status: { id: 'status-1' },
+            account: { id: 'booster-2' },
+          },
+          {
+            id: 'notification-older',
+            type: 'reblog',
+            created_at: daysAgo(2, 12),
+            status: { id: 'status-1' },
+            account: { id: 'booster-1' },
+          },
+        ],
+        headers: {
+          Link: '<https://test.social/api/v1/notifications?limit=80&types%5B%5D=reblog&max_id=notification-older>; rel="next"',
+          'Access-Control-Expose-Headers': 'Link, X-RateLimit-Limit, X-RateLimit-Remaining',
+        },
+      });
+      return;
+    }
+    await route.fulfill({
+      json: [
+        {
+          id: 'notification-oldest',
+          type: 'reblog',
+          created_at: daysAgo(6, 9),
+          status: { id: 'status-1' },
+          account: { id: 'booster-3' },
+        },
+      ],
+    });
+  });
+  await page.goto('/');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  await expect(
+    page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
+  ).toBeVisible();
+
+  const threadCard = page.locator('.post-card').filter({ hasText: 'Ein Testbeitrag' });
+  await threadCard.locator('summary').click();
+  await page.getByRole('button', { name: 'Eigene Instanz', exact: true }).click();
+  await page.getByRole('button', { name: 'Mit test.social verbinden' }).click();
+
+  await expect(threadCard.locator('.boost-curve')).toBeVisible();
+  await expect(threadCard.locator('.boost-curve-event')).toHaveCount(2);
+  await expect(
+    threadCard.getByText('1 Seiten Benachrichtigungen geladen · 2 Zeitpunkte', {
+      exact: false,
+    }),
+  ).toBeVisible();
+  expect(notificationRequests).toBe(1);
+
+  await threadCard.getByRole('button', { name: 'Ältere Ereignisse laden' }).click();
+
+  await expect(threadCard.locator('.boost-curve-event')).toHaveCount(3);
+  await expect(threadCard.locator('.boost-timeline-more')).toBeHidden();
+  expect(notificationRequests).toBe(2);
+});
+
 test('vergleicht gemeldete Interaktionen mit den 30 Tagen davor', async ({ page }) => {
   await mockMastodon(page);
   await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {

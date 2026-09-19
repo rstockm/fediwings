@@ -280,7 +280,11 @@
 
     {#if history.canLoadMore}
       <div class="boost-timeline-more">
-        <p>{$_('boostHistory.partial')}</p>
+        <p>
+          {$_('boostHistory.partialProgress', {
+            values: { pages: history.pages, events: history.events.length },
+          })}
+        </p>
         <button type="button" disabled={history.phase === 'loading'} onclick={onloadmore}>
           {history.phase === 'loading' ? $_('boostHistory.loading') : $_('boostHistory.loadOlder')}
         </button>
