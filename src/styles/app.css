@@ -3912,17 +3912,17 @@ footer {
   .site-header,
   main,
   footer {
-    width: 100%;
+    width: min(100% - 28px, 1440px);
   }
 
   .site-header {
     min-height: 66px;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 10px 14px;
+    gap: 10px 6px;
   }
 
   .brand-logo-lockup {
-    width: 96px;
+    width: 90px;
     overflow: hidden;
   }
 
@@ -3950,14 +3950,22 @@ footer {
     justify-self: end;
   }
 
+  .header-lang button {
+    min-width: 40px;
+    min-height: 44px;
+    padding: 4px;
+    font-size: 0.65rem;
+  }
+
   .header-meta {
     display: none;
   }
 
   .connection-trigger {
-    width: 30px;
-    min-width: 30px;
-    max-width: 30px;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    min-height: 44px;
     justify-content: center;
     padding: 7px;
     overflow: hidden;
@@ -4014,7 +4022,7 @@ footer {
   }
 
   .hero h1 {
-    font-size: clamp(3.05rem, 16vw, 5rem);
+    font-size: clamp(2.05rem, 10.7vw, 3.35rem);
   }
 
   .intro {
@@ -4054,9 +4062,11 @@ footer {
 
   .notice {
     margin-top: 24px;
+    margin-inline: -14px;
   }
 
   .results {
+    margin-inline: -14px;
     padding: 28px 20px;
   }
 
@@ -4241,7 +4251,7 @@ footer {
   }
 
   .shared-intro h1 {
-    font-size: clamp(2.7rem, 14vw, 4.6rem);
+    font-size: clamp(1.8rem, 9.35vw, 3.1rem);
   }
 
   .shared-layout {
@@ -4308,7 +4318,7 @@ footer {
   }
 
   .methodology-hero-copy h1 {
-    font-size: clamp(3.05rem, 16vw, 5rem);
+    font-size: clamp(2.05rem, 10.7vw, 3.35rem);
   }
 
   .methodology-hero-copy > p:last-child {
@@ -4322,6 +4332,10 @@ footer {
 
   .follower-page {
     padding: 30px 0 80px;
+  }
+
+  .follower-hero h1 {
+    font-size: 2rem;
   }
 
   .follower-snapshot {
