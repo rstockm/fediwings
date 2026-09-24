@@ -626,7 +626,10 @@ footer {
 
 .hero h1 em {
   font-style: normal;
-  color: var(--violet);
+  color: transparent;
+  background: linear-gradient(135deg, #5bc8f5, #a78bfa 65%);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .intro {
