@@ -303,7 +303,7 @@ export const en: Messages = {
     step2Title: 'Load account and posts',
     step2Endpoint: '/api/v1/accounts/lookup · /accounts/:id/statuses',
     step2Text:
-      'The account and its public posts are loaded anonymously. The setting that controls this can only be changed by the operators of your instance. Any change would apply to everyone using that instance. The Fediverse has a legitimate tradition of critically questioning automated data analysis and restricting anonymous API access. This service respects that instance-level decision. We therefore do not try to circumvent the restriction, for example by introducing a login flow. Replies to other accounts are discarded; connected self-replies are retained and grouped into threads. For Pixelfed the anonymous Pixelfed API path is used automatically.',
+      'The account and its public posts are loaded anonymously. The setting that controls this can only be changed by the operators of your instance. Any change would apply to everyone using that instance. The Fediverse has a legitimate tradition of critically questioning automated data analysis and restricting anonymous API access. This service respects that instance-level decision. We therefore do not try to circumvent the restriction, for example by introducing a login flow. Replies to other accounts are discarded; connected self-replies are retained and grouped into threads. For Pixelfed the anonymous Pixelfed API path is used automatically. Friendica requires a login for lookup; FediWings therefore resolves the account directly via the anonymous /accounts/{name} endpoint. Only public and unlisted posts are anonymously visible there – posts restricted to circles stay outside the analysis.',
     step3Title: 'Evaluate boosters',
     step3Endpoint: '/api/v1/statuses/:id/reblogged_by',
     step3Text:
@@ -368,6 +368,13 @@ export const en: Messages = {
     interpretationHtml:
       '<strong>Net reach</strong> is the central operative estimate. <strong>Gross reach</strong> supplementarily describes the theoretical size of the known network. The distance between both values matters more than apparent precision down to the individual person.',
     startAnalysis: 'Start your own analysis',
+    keynoteLabel: 'Keynote · FediDay 2026',
+    keynoteTitle: 'The service in its keynote.',
+    keynoteText:
+      'In this keynote from FediDay 2026, FediWings is presented: the core idea behind the service and the method documented on this page.',
+    keynoteLink: 'Open the video on fair.tube',
+    keynoteVideoTitle:
+      'Keynote “Die Vermessung des Ponyhofs” – FediWings presented at FediDay 2026',
   },
   follower: {
     titleHtml: 'How is your<br />account growing?',
@@ -424,6 +431,8 @@ export const en: Messages = {
     apiTimeout: 'The request took too long and was therefore cancelled.',
     api401:
       'This instance does not allow anonymous API access. This setting can only be changed by the operators of your instance. Any change would apply to everyone using that instance. The Fediverse has a legitimate tradition of critically questioning automated data analysis and restricting anonymous API access. This service respects that instance-level decision. We therefore do not try to circumvent the restriction, for example by introducing a login flow.',
+    apiLoginRequired:
+      'This instance requires a login for public analysis. It most likely blocks anonymous profile and post data (e.g. block_public). This setting can only be changed by the operators of your instance. FediWings respects that decision and does not try to circumvent it.',
     api404: 'The requested account or post was not found.',
     api429: 'The instance rate limit was reached.',
     apiHttp: 'The instance responded with HTTP {status}.',

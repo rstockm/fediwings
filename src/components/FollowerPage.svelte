@@ -200,10 +200,13 @@
     try {
       const target = await resolveHandle(handle);
       origin = target.origin;
-      const [accountResult, platformResult] = await Promise.all([
-        getAccount(target.origin, target.acct),
-        detectPlatform(target.origin),
-      ]);
+      const platformResult = await detectPlatform(target.origin);
+      const accountResult = await getAccount(
+        target.origin,
+        target.acct,
+        undefined,
+        platformResult.id,
+      );
       account = accountResult;
       platform = platformResult;
       writeLastAccount({

@@ -70,6 +70,89 @@ describe('getAccount', () => {
   });
 });
 
+describe('getAccount (Friendica)', () => {
+  it('loest Friendica-Accounts direkt ueber /accounts/{name} auf, ohne den login-pflichtigen Lookup zu beruehren', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        calls.push(url);
+        return Promise.resolve(jsonResponse(account));
+      }),
+    );
+
+    const result = await getAccount(
+      'https://test.social',
+      'alice@test.social',
+      undefined,
+      'friendica',
+    );
+
+    expect(result.followers_count).toBe(67);
+    expect(calls).toEqual(['https://test.social/api/v1/accounts/alice']);
+  });
+
+  it('meldet bei Friendica 401 die Login-Pflicht mit einer verstaendlichen Meldung', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(jsonResponse({ error: 'Unauthorized' }, 401))),
+    );
+
+    await expect(
+      getAccount('https://test.social', 'alice@test.social', undefined, 'friendica'),
+    ).rejects.toThrow('Diese Instanz verlangt eine Anmeldung für die öffentliche Analyse.');
+  });
+
+  it('meldet bei Friendica 403 dieselbe verstaendliche Meldung', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(jsonResponse({ error: 'Forbidden' }, 403))),
+    );
+
+    await expect(
+      getAccount('https://test.social', 'alice@test.social', undefined, 'friendica'),
+    ).rejects.toThrow('Diese Instanz verlangt eine Anmeldung für die öffentliche Analyse.');
+  });
+
+  it('reicht andere Friendica-Fehler unverändert weiter', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(jsonResponse({ error: 'Record not found' }, 404))),
+    );
+
+    await expect(
+      getAccount('https://test.social', 'alice@test.social', undefined, 'friendica'),
+    ).rejects.toThrow('Der angeforderte Account oder Beitrag wurde nicht gefunden.');
+  });
+
+  it('behält Mastodon das Lookup-Verhalten bei (Regression)', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        calls.push(url);
+        if (url.includes('acct=alice%40test.social')) {
+          return Promise.resolve(jsonResponse({ error: 'Record not found' }, 400));
+        }
+        return Promise.resolve(jsonResponse(account));
+      }),
+    );
+
+    const result = await getAccount(
+      'https://test.social',
+      'alice@test.social',
+      undefined,
+      'mastodon',
+    );
+
+    expect(result.followers_count).toBe(67);
+    expect(calls).toEqual([
+      'https://test.social/api/v1/accounts/lookup?acct=alice%40test.social',
+      'https://test.social/api/v1/accounts/lookup?acct=alice',
+    ]);
+  });
+});
+
 describe.each([
   ['Mastodon', getStatuses, '/api/v1/accounts/account-1/statuses'],
   ['Pixelfed', getPixelfedStatuses, '/api/pixelfed/v1/accounts/account-1/statuses'],

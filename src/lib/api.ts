@@ -103,6 +103,7 @@ export async function getAccount(
   origin: string,
   acct: string,
   signal?: AbortSignal,
+  platformId?: string,
 ): Promise<MastodonAccount> {
   const lookup = (candidate: string) =>
     get(
@@ -110,6 +111,27 @@ export async function getAccount(
       accountSchema,
       signal,
     );
+
+  if (platformId === 'friendica') {
+    // Friendica requires a login for /accounts/lookup (unlike Mastodon), so a
+    // lookup attempt would always fail with 401. The Mastodon-compatible
+    // route /accounts/{name} resolves the local nickname anonymously instead.
+    const localName = acct.split('@')[0];
+    try {
+      return (
+        await get(
+          `${origin}/api/v1/accounts/${encodeURIComponent(localName)}`,
+          accountSchema,
+          signal,
+        )
+      ).data;
+    } catch (error) {
+      if (error instanceof MastodonApiError && (error.status === 401 || error.status === 403)) {
+        throw new MastodonApiError(msg('error.apiLoginRequired'), error.status);
+      }
+      throw error;
+    }
+  }
 
   try {
     return (await lookup(acct)).data;

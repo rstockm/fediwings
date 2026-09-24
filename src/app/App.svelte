@@ -648,10 +648,13 @@
     try {
       const target = await resolveHandle(handle, controller.signal);
       origin = target.origin;
-      const [detectedPlatform, accountResult] = await Promise.all([
-        detectPlatform(target.origin, controller.signal),
-        getAccount(target.origin, target.acct, controller.signal),
-      ]);
+      const detectedPlatform = await detectPlatform(target.origin, controller.signal);
+      const accountResult = await getAccount(
+        target.origin,
+        target.acct,
+        controller.signal,
+        detectedPlatform.id,
+      );
       platform = detectedPlatform;
       account = accountResult;
       const pixelfed = platform?.id === 'pixelfed';

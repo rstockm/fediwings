@@ -4,6 +4,7 @@
   import HandleCombobox from './HandleCombobox.svelte';
   import { getAccount } from '../lib/api';
   import { resolveHandle } from '../lib/handle';
+  import { detectPlatform } from '../lib/platform';
   import type { SavedHandle } from '../lib/history';
   import { canonicalAcct, type OAuthSession } from '../lib/oauth';
   import type { MastodonAccount } from '../lib/types';
@@ -57,7 +58,8 @@
     resolveError = '';
     try {
       const target = await resolveHandle(handle);
-      const account = await getAccount(target.origin, target.acct);
+      const platform = await detectPlatform(target.origin);
+      const account = await getAccount(target.origin, target.acct, undefined, platform.id);
       selected = { account, origin: target.origin };
       handle = `@${canonicalAcct(account, target.origin)}`;
     } catch (error) {

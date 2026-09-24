@@ -208,6 +208,29 @@ async function mockMastodon(page: Page, software = 'mastodon') {
   );
 }
 
+async function mockFriendica(page: Page) {
+  await mockMastodon(page, 'friendica');
+  await page.route('https://test.social/api/v1/accounts/lookup?*', async (route) => {
+    await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+  });
+  await page.route('https://test.social/api/v1/accounts/alice', async (route) => {
+    await route.fulfill({ json: account });
+  });
+  await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
+    if (route.request().url().includes('max_id=')) {
+      await route.fulfill({ json: [statuses[1], statuses[2], statuses[3]] });
+      return;
+    }
+    await route.fulfill({
+      json: [statuses[0]],
+      headers: {
+        Link: '<https://test.social/api/v1/accounts/account-1/statuses?limit=40&exclude_reblogs=true&exclude_replies=true&max_id=status-1>; rel="next"',
+        'Access-Control-Expose-Headers': 'Link, X-RateLimit-Limit, X-RateLimit-Remaining',
+      },
+    });
+  });
+}
+
 async function mockInstanceConnection(page: Page) {
   await page.route('https://test.social/api/v1/apps', async (route) => {
     await route.fulfill({ json: { client_id: 'cid', client_secret: 'cs' } });
@@ -1051,6 +1074,63 @@ test('erkennt einen Pixelfed-Server ueber NodeInfo und analysiert ihn wie gewohn
   ).toBeVisible();
   await expect(page.locator('.post-card').first()).toContainText('Ein Pixelfed-Beitrag.');
   expect(rebloggedByRequested).toBe(false);
+});
+
+test('analysiert einen Friendica-Account ohne Lookup ueber den Namen-Endpunkt', async ({
+  page,
+}) => {
+  await mockFriendica(page);
+  let lookupRequests = 0;
+  await page.route('https://test.social/api/v1/accounts/lookup?*', async (route) => {
+    lookupRequests += 1;
+    await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+  });
+  await page.goto('/');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Alice Example' })).toBeVisible();
+  await expect(page.getByText('· Friendica', { exact: false })).toBeVisible();
+  expect(lookupRequests).toBe(0);
+  await expect(page.getByText('Ein Testbeitrag aus dem Fediverse.')).toBeVisible();
+  await expect(page.getByText('Thread · 2 Postings')).toBeVisible();
+  const quoteCard = page.locator('.post-card').filter({ hasText: 'Re: Ein Beitrag ohne Boosts.' });
+  await expect(quoteCard.locator('.quote-badge')).toHaveText('Quote');
+  await expect(page.getByText('Antwort auf einen fremden Beitrag.')).toHaveCount(0);
+  const threadCard = page.locator('.post-card').filter({ hasText: 'Ein Testbeitrag' });
+  await expect(threadCard.locator('.post-metrics')).toContainText('2.050');
+  await expect(threadCard.locator('.post-metrics')).toContainText('269');
+  await expect(
+    page.getByText('Analyse abgeschlossen. Alle öffentlich auswertbaren Booster'),
+  ).toBeVisible();
+});
+
+test('meldet Friendica-Instanzen ohne anonymen Accountzugriff verstaendlich', async ({ page }) => {
+  await mockFriendica(page);
+  let statusesRequested = 0;
+  await page.route('https://test.social/api/v1/accounts/alice', async (route) => {
+    await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+  });
+  await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
+    statusesRequested += 1;
+    await route.abort();
+  });
+  await page.goto('/');
+
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  const notice = page.locator('.notice.error-banner');
+  await expect(notice).toContainText(
+    'Diese Instanz verlangt eine Anmeldung für die öffentliche Analyse.',
+  );
+  expect(statusesRequested).toBe(0);
+  await expect(page.getByRole('button', { name: 'Analysieren' })).toBeEnabled();
+
+  await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
+  await page.getByRole('button', { name: 'Analyse' }).click();
+  await expect(notice).toContainText('This instance requires a login for public analysis.');
 });
 
 test('meldet eine haengende Instanz nach Zeitueberschreitung als Fehler', async ({ page }) => {
