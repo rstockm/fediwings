@@ -148,6 +148,30 @@
     <a href="#limits"><span>05</span> {$_('methodology.indexLimits')}</a>
   </nav>
 
+  <section class="methodology-section methodology-keynote" aria-labelledby="keynote-title">
+    <div class="keynote-copy">
+      <p class="eyebrow">{$_('methodology.keynoteLabel')}</p>
+      <h2 id="keynote-title">{$_('methodology.keynoteTitle')}</h2>
+      <p>{$_('methodology.keynoteText')}</p>
+      <a
+        class="keynote-link"
+        href="https://fair.tube/w/wQ39EtLE5byALEZ158ZQzT"
+        target="_blank"
+        rel="noopener noreferrer"
+        >{$_('methodology.keynoteLink')} <span aria-hidden="true">↗</span></a
+      >
+    </div>
+    <figure class="keynote-video">
+      <iframe
+        src="https://fair.tube/videos/embed/wQ39EtLE5byALEZ158ZQzT"
+        title={$_('methodology.keynoteVideoTitle')}
+        loading="lazy"
+        allowfullscreen
+        sandbox="allow-same-origin allow-scripts allow-popups"
+      ></iframe>
+    </figure>
+  </section>
+
   <section class="methodology-section methodology-model" id="modell" aria-labelledby="model-title">
     <header class="methodology-section-head">
       <span>{$_('methodology.modelSection')}</span>

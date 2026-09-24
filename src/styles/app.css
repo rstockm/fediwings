@@ -2934,6 +2934,63 @@ footer {
   color: var(--ink);
 }
 
+.methodology-keynote {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.45fr);
+  gap: clamp(40px, 7vw, 110px);
+  align-items: center;
+}
+
+.keynote-copy h2 {
+  max-width: 520px;
+  margin: 0;
+  font-size: clamp(1.9rem, 3.2vw, 3.4rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.keynote-copy > p:not(.eyebrow) {
+  margin: 22px 0 0;
+  color: #aaa79f;
+  line-height: 1.7;
+}
+
+.keynote-link {
+  display: inline-block;
+  margin-top: 26px;
+  color: var(--lime);
+  font: 700 0.65rem var(--mono);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.keynote-link:hover,
+.keynote-link:focus-visible {
+  text-decoration: underline;
+}
+
+.keynote-link span {
+  margin-left: 6px;
+}
+
+.keynote-video {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius);
+  background: #202125;
+  box-shadow: 18px 18px 0 rgba(139, 124, 255, 0.14);
+}
+
+.keynote-video iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
 .methodology-section {
   scroll-margin-top: 92px;
   margin-bottom: 120px;
@@ -3842,6 +3899,11 @@ footer {
     gap: 55px;
   }
 
+  .methodology-keynote {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+
   .curve-card {
     width: min(100%, 620px);
     margin-left: auto;
@@ -4327,6 +4389,10 @@ footer {
 
   .curve-card {
     margin-left: 0;
+    box-shadow: 10px 10px 0 rgba(139, 124, 255, 0.14);
+  }
+
+  .keynote-video {
     box-shadow: 10px 10px 0 rgba(139, 124, 255, 0.14);
   }
 

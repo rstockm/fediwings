@@ -3,7 +3,8 @@ import { defineConfig, type Plugin } from 'vite';
 
 /**
  * Injects a strict Content-Security-Policy meta tag.
- * - Production: only same-origin scripts/styles, HTTPS for images and API calls.
+ * - Production: only same-origin scripts/styles, HTTPS for images and API calls,
+ *   single external frame for the PeerTube keynote video.
  * - Development: additionally allows inline styles and WebSocket HMR endpoints.
  */
 function cspPlugin(): Plugin {
@@ -19,6 +20,7 @@ function cspPlugin(): Plugin {
         `style-src ${styleSrc}`,
         "img-src 'self' https: data:",
         `connect-src ${connectSrc}`,
+        'frame-src https://fair.tube',
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'none'",
