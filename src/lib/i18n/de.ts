@@ -106,6 +106,7 @@ export const de = {
     sortLikes: 'Likes',
     sortBoosts: 'Boosts',
     footerApiRef: 'API-Referenz ↗',
+    footerFedisuite: 'Erfolg im Fediverse dauerhaft messen: FediSuite',
   },
   insights: {
     kicker: 'Posting insights / 02',
@@ -377,6 +378,13 @@ export const de = {
     keynoteLink: 'Video auf fair.tube öffnen',
     keynoteVideoTitle:
       'Keynote „Die Vermessung des Ponyhofs“ – FediWings vorgestellt auf dem FediDay 2026',
+    fedisuiteSection: 'Verwandtes Projekt / FediSuite',
+    fedisuiteTitle: 'Erfolg im Fediverse dauerhaft messen.',
+    fedisuiteText:
+      'FediSuite ist das verwandte Schwesterprojekt: Es misst Erfolg im Fediverse systematisch und dauerhaft – nach denselben Grundsätzen und Kennzahlen wie FediWings. Die Reichweitenanalysen im Dashboard bauen auf dem FediWings-Modell für Netto- und Brutto-Reichweite auf und führen die einmalige Analyse zu einer fortlaufenden Erfolgsmessung.',
+    fedisuiteLink: 'FediSuite entdecken',
+    fedisuiteImageAlt:
+      'FediSuite-Dashboard mit täglichem Engagement, Engagement-Rate und Aufschlüsselung nach Favoriten, Boosts und Antworten',
   },
   follower: {
     titleHtml: 'Wie wächst<br />dein Account?',

@@ -1041,6 +1041,9 @@
     </svg>
     GitHub
   </a>
+  <a href="https://www.fedisuite.com/" target="_blank" rel="noreferrer">
+    {$_('results.footerFedisuite')}
+  </a>
   <a
     href="https://docs.joinmastodon.org/methods/statuses/#reblogged_by"
     target="_blank"

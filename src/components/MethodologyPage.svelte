@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { calculateNetReach } from '../lib/reach';
+  import fedisuiteDashboardUrl from '../assets/fedisuite-dashboard.png';
 
   const chart = { left: 38, right: 348, top: 14, bottom: 208 };
   const boostTicks = [0, 10, 20, 30, 40, 50];
@@ -409,6 +410,29 @@
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
       <p>{@html $_('methodology.interpretationHtml')}</p>
       <a href="./">{$_('methodology.startAnalysis')} <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <section class="methodology-section methodology-fedisuite" aria-labelledby="fedisuite-title">
+    <header class="methodology-section-head">
+      <span>{$_('methodology.fedisuiteSection')}</span>
+      <h2 id="fedisuite-title">{$_('methodology.fedisuiteTitle')}</h2>
+    </header>
+
+    <div class="fedisuite-layout">
+      <div class="fedisuite-copy">
+        <p>{$_('methodology.fedisuiteText')}</p>
+        <a
+          class="fedisuite-link"
+          href="https://www.fedisuite.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{$_('methodology.fedisuiteLink')} <span aria-hidden="true">↗</span></a
+        >
+      </div>
+      <figure class="fedisuite-shot">
+        <img src={fedisuiteDashboardUrl} alt={$_('methodology.fedisuiteImageAlt')} loading="lazy" />
+      </figure>
     </div>
   </section>
 </main>

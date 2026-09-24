@@ -108,6 +108,7 @@ export const en: Messages = {
     sortLikes: 'Likes',
     sortBoosts: 'Boosts',
     footerApiRef: 'API reference ↗',
+    footerFedisuite: 'Measuring lasting success in the Fediverse: FediSuite',
   },
   insights: {
     kicker: 'Posting insights / 02',
@@ -375,6 +376,13 @@ export const en: Messages = {
     keynoteLink: 'Open the video on fair.tube',
     keynoteVideoTitle:
       'Keynote “Die Vermessung des Ponyhofs” – FediWings presented at FediDay 2026',
+    fedisuiteSection: 'Related project / FediSuite',
+    fedisuiteTitle: 'Measuring success in the Fediverse for good.',
+    fedisuiteText:
+      'FediSuite is the related sister project: it measures success in the Fediverse systematically and durably — following the same principles and metrics as FediWings. The reach analytics in its dashboard build on the FediWings model for net and gross reach, turning the one-off analysis into a continuous success measurement.',
+    fedisuiteLink: 'Discover FediSuite',
+    fedisuiteImageAlt:
+      'FediSuite dashboard showing daily engagement, engagement rate and a breakdown by favourites, boosts and replies',
   },
   follower: {
     titleHtml: 'How is your<br />account growing?',

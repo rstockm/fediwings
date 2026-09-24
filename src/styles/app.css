@@ -2991,6 +2991,49 @@ footer {
   border: 0;
 }
 
+.fedisuite-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.35fr);
+  gap: clamp(40px, 7vw, 110px);
+  align-items: center;
+}
+
+.fedisuite-copy > p {
+  max-width: 620px;
+  margin: 0;
+  color: #aaa79f;
+  line-height: 1.7;
+}
+
+.fedisuite-link {
+  display: inline-block;
+  margin-top: 26px;
+  color: var(--lime);
+  font: 700 0.65rem var(--mono);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.fedisuite-link:hover,
+.fedisuite-link:focus-visible {
+  text-decoration: underline;
+}
+
+.fedisuite-link span {
+  margin-left: 6px;
+}
+
+.fedisuite-shot {
+  margin: 0;
+}
+
+.fedisuite-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .methodology-section {
   scroll-margin-top: 92px;
   margin-bottom: 120px;
@@ -3900,6 +3943,11 @@ footer {
   }
 
   .methodology-keynote {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+
+  .fedisuite-layout {
     grid-template-columns: 1fr;
     gap: 42px;
   }
