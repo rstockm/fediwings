@@ -540,7 +540,7 @@ footer {
   position: absolute;
   top: 6%;
   right: 2%;
-  z-index: 0;
+  z-index: -1;
   width: clamp(280px, 34vw, 540px);
   opacity: 0.17;
   filter: drop-shadow(0 18px 60px rgba(30, 150, 245, 0.25));
@@ -568,6 +568,7 @@ footer {
 }
 
 .hero-copy {
+  isolation: isolate;
   max-height: 900px;
   overflow: hidden;
   opacity: 1;
