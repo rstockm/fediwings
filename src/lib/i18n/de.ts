@@ -378,7 +378,9 @@ export const de = {
     keynoteLink: 'Video auf fair.tube öffnen',
     keynoteVideoTitle:
       'Keynote „Die Vermessung des Ponyhofs“ – FediWings vorgestellt auf dem FediDay 2026',
-    sectionLink: 'Link zu diesem Abschnitt',
+    sectionLink: 'Link zu diesem Abschnitt kopieren',
+    sectionLinkCopied: 'Link kopiert',
+    sectionLinkCopyFailed: 'Link konnte nicht kopiert werden',
     audienceSection: 'Für wen',
     audienceTitle: 'Für Teams, die das Fediverse strategisch bespielen.',
     audienceText1:

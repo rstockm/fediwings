@@ -3105,13 +3105,16 @@ footer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.45em;
-  height: 1.45em;
-  margin-top: 0.06em;
+  width: 24px;
+  height: 24px;
+  margin-top: 4px;
+  padding: 0;
   border: 1px solid currentColor;
   border-radius: 50%;
+  background: transparent;
   color: #77746f;
   opacity: 0.55;
+  cursor: pointer;
 }
 
 .section-anchor:hover,
@@ -3126,13 +3129,38 @@ footer {
 }
 
 .section-anchor svg {
-  width: 0.62em;
-  height: 0.62em;
+  width: 12px;
+  height: 12px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
+}
+
+.section-copy-feedback {
+  position: fixed;
+  z-index: 100;
+  bottom: 24px;
+  left: 50%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--paper);
+  font: 0.64rem var(--mono);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 14px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.section-copy-feedback.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .methodology-section-head > p {
