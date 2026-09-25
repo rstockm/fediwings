@@ -626,6 +626,7 @@ footer {
 }
 
 .hero h1 em {
+  margin-right: 0.08em;
   font-style: normal;
   color: transparent;
   background: linear-gradient(135deg, #5bc8f5, #a78bfa 65%);
