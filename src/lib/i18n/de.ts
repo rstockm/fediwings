@@ -378,6 +378,16 @@ export const de = {
     keynoteLink: 'Video auf fair.tube öffnen',
     keynoteVideoTitle:
       'Keynote „Die Vermessung des Ponyhofs“ – FediWings vorgestellt auf dem FediDay 2026',
+    audienceSection: 'Für wen',
+    audienceTitle: 'Für Teams, die das Fediverse strategisch bespielen.',
+    audienceText1:
+      'FediWings richtet sich nicht an einzelne Menschen, die vor allem ihre persönliche Reichweite prüfen möchten. Der Dienst ist für Social-Media-Teams gedacht, die das +1-Prinzip bereits umsetzen: Neben ihren kommerziellen Kanälen veröffentlichen sie mindestens auch auf einem freien, föderierten Kanal.',
+    audienceText2:
+      'Damit entsteht eine wiederkehrende Frage im Arbeitsalltag: Was bewirkt dieser zusätzliche Kanal eigentlich? Und wie lässt sich der Aufwand für Redaktion, Community-Management und technische Pflege gegenüber dem Management begründen?',
+    audienceText3:
+      'FediWings macht die öffentlich sichtbare Verbreitung im Fediverse nachvollziehbar. Es zeigt, wie weit Beiträge über das eigene Netzwerk hinausgetragen werden und welches Potenzial darin liegt.',
+    audienceText4:
+      'So wird aus dem Anspruch, freie digitale Öffentlichkeiten zu stärken, auch eine argumentierbare Investition: mit transparenten Kennzahlen, klar benannten Grenzen und einer offen dokumentierten Methode. Ein bewusster Kontrast zu kommerziellen Plattformen, deren Reichweitenzahlen und Verteilungslogiken weitgehend intransparent bleiben.',
     fedisuiteSection: 'Verwandtes Projekt / FediSuite',
     fedisuiteTitle: 'Erfolg im Fediverse dauerhaft messen.',
     fedisuiteText:

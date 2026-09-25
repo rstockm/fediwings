@@ -173,6 +173,20 @@
     </figure>
   </section>
 
+  <section class="methodology-section methodology-audience" aria-labelledby="audience-title">
+    <header class="methodology-section-head">
+      <span>{$_('methodology.audienceSection')}</span>
+      <h2 id="audience-title">{$_('methodology.audienceTitle')}</h2>
+    </header>
+
+    <div class="audience-copy">
+      <p>{$_('methodology.audienceText1')}</p>
+      <p>{$_('methodology.audienceText2')}</p>
+      <p>{$_('methodology.audienceText3')}</p>
+      <p>{$_('methodology.audienceText4')}</p>
+    </div>
+  </section>
+
   <section class="methodology-section methodology-model" id="modell" aria-labelledby="model-title">
     <header class="methodology-section-head">
       <span>{$_('methodology.modelSection')}</span>

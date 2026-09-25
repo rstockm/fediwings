@@ -376,6 +376,16 @@ export const en: Messages = {
     keynoteLink: 'Open the video on fair.tube',
     keynoteVideoTitle:
       'Keynote “Die Vermessung des Ponyhofs” – FediWings presented at FediDay 2026',
+    audienceSection: 'Who it is for',
+    audienceTitle: 'For teams using the Fediverse strategically.',
+    audienceText1:
+      'FediWings is not aimed at individuals who primarily want to check their personal reach. The service is for social media teams already following the +1 principle: alongside their commercial channels, they publish on at least one free, federated channel.',
+    audienceText2:
+      'That creates a recurring question in day-to-day work: What is this additional channel actually achieving? And how can the time spent on editorial work, community management and technical maintenance be justified to management?',
+    audienceText3:
+      'FediWings makes the publicly visible distribution in the Fediverse comprehensible. It shows how far posts travel beyond an account’s own network and what potential that represents.',
+    audienceText4:
+      'This turns the goal of strengthening free digital public spaces into an investment that can be argued for: with transparent metrics, clearly stated limits and an openly documented method. It is a deliberate contrast to commercial platforms, whose reach figures and distribution logic largely remain opaque.',
     fedisuiteSection: 'Related project / FediSuite',
     fedisuiteTitle: 'Measuring success in the Fediverse for good.',
     fedisuiteText:
