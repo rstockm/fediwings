@@ -376,6 +376,7 @@ export const en: Messages = {
     keynoteLink: 'Open the video on fair.tube',
     keynoteVideoTitle:
       'Keynote “Die Vermessung des Ponyhofs” – FediWings presented at FediDay 2026',
+    sectionLink: 'Link to this section',
     audienceSection: 'Who it is for',
     audienceTitle: 'For teams using the Fediverse strategically.',
     audienceText1:

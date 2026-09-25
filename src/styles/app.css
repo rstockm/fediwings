@@ -2947,6 +2947,9 @@ footer {
 .keynote-copy h2 {
   max-width: 520px;
   margin: 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
   font-size: clamp(1.9rem, 3.2vw, 3.4rem);
   font-weight: 500;
   letter-spacing: -0.05em;
@@ -3083,10 +3086,53 @@ footer {
 .methodology-section-head h2 {
   max-width: 850px;
   margin: 0;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
   font-size: clamp(2.7rem, 5vw, 5.4rem);
   font-weight: 500;
   letter-spacing: -0.065em;
   line-height: 0.94;
+}
+
+.keynote-copy h2 > span,
+.methodology-section-head h2 > span {
+  min-width: 0;
+}
+
+.section-anchor {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45em;
+  height: 1.45em;
+  margin-top: 0.06em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: #77746f;
+  opacity: 0.55;
+}
+
+.section-anchor:hover,
+.section-anchor:focus-visible {
+  color: var(--lime);
+  opacity: 1;
+}
+
+.section-anchor:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 3px;
+}
+
+.section-anchor svg {
+  width: 0.62em;
+  height: 0.62em;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .methodology-section-head > p {

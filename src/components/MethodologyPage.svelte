@@ -149,10 +149,23 @@
     <a href="#limits"><span>05</span> {$_('methodology.indexLimits')}</a>
   </nav>
 
-  <section class="methodology-section methodology-keynote" aria-labelledby="keynote-title">
+  <section
+    id="keynote"
+    class="methodology-section methodology-keynote"
+    aria-labelledby="keynote-title"
+  >
     <div class="keynote-copy">
       <p class="eyebrow">{$_('methodology.keynoteLabel')}</p>
-      <h2 id="keynote-title">{$_('methodology.keynoteTitle')}</h2>
+      <h2 id="keynote-title">
+        <span>{$_('methodology.keynoteTitle')}</span>
+        <a class="section-anchor" href="#keynote" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
       <p>{$_('methodology.keynoteText')}</p>
       <a
         class="keynote-link"
@@ -173,10 +186,23 @@
     </figure>
   </section>
 
-  <section class="methodology-section methodology-audience" aria-labelledby="audience-title">
+  <section
+    id="audience"
+    class="methodology-section methodology-audience"
+    aria-labelledby="audience-title"
+  >
     <header class="methodology-section-head">
       <span>{$_('methodology.audienceSection')}</span>
-      <h2 id="audience-title">{$_('methodology.audienceTitle')}</h2>
+      <h2 id="audience-title">
+        <span>{$_('methodology.audienceTitle')}</span>
+        <a class="section-anchor" href="#audience" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="audience-copy">
@@ -190,7 +216,16 @@
   <section class="methodology-section methodology-model" id="modell" aria-labelledby="model-title">
     <header class="methodology-section-head">
       <span>{$_('methodology.modelSection')}</span>
-      <h2 id="model-title">{$_('methodology.modelTitle')}</h2>
+      <h2 id="model-title">
+        <span>{$_('methodology.modelTitle')}</span>
+        <a class="section-anchor" href="#modell" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="model-columns">
@@ -294,7 +329,16 @@
   <section class="methodology-section methodology-api" id="api" aria-labelledby="api-title">
     <header class="methodology-section-head">
       <span>{$_('methodology.apiSection')}</span>
-      <h2 id="api-title">{$_('methodology.apiTitle')}</h2>
+      <h2 id="api-title">
+        <span>{$_('methodology.apiTitle')}</span>
+        <a class="section-anchor" href="#api" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
       <p>{$_('methodology.apiIntro')}</p>
     </header>
 
@@ -329,7 +373,16 @@
   >
     <header class="methodology-section-head">
       <span>{$_('methodology.citizenSection')}</span>
-      <h2 id="citizen-title">{$_('methodology.citizenTitle')}</h2>
+      <h2 id="citizen-title">
+        <span>{$_('methodology.citizenTitle')}</span>
+        <a class="section-anchor" href="#citizen" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="citizen-metrics">
@@ -365,7 +418,16 @@
   >
     <header class="methodology-section-head">
       <span>{$_('methodology.privacySection')}</span>
-      <h2 id="privacy-title">{$_('methodology.privacyTitle')}</h2>
+      <h2 id="privacy-title">
+        <span>{$_('methodology.privacyTitle')}</span>
+        <a class="section-anchor" href="#privacy" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="privacy-ledger">
@@ -402,7 +464,16 @@
   >
     <header class="methodology-section-head">
       <span>{$_('methodology.limitsSection')}</span>
-      <h2 id="limits-title">{$_('methodology.limitsTitle')}</h2>
+      <h2 id="limits-title">
+        <span>{$_('methodology.limitsTitle')}</span>
+        <a class="section-anchor" href="#limits" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="limits-layout">
@@ -427,10 +498,23 @@
     </div>
   </section>
 
-  <section class="methodology-section methodology-fedisuite" aria-labelledby="fedisuite-title">
+  <section
+    id="fedisuite"
+    class="methodology-section methodology-fedisuite"
+    aria-labelledby="fedisuite-title"
+  >
     <header class="methodology-section-head">
       <span>{$_('methodology.fedisuiteSection')}</span>
-      <h2 id="fedisuite-title">{$_('methodology.fedisuiteTitle')}</h2>
+      <h2 id="fedisuite-title">
+        <span>{$_('methodology.fedisuiteTitle')}</span>
+        <a class="section-anchor" href="#fedisuite" aria-label={$_('methodology.sectionLink')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M10.5 13.5 13.5 10.5M7.7 16.3l-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.3 7.7l1.5-1.5a3 3 0 1 0-4.2-4.2l-4 4a3 3 0 0 0 0 4.2"
+            ></path>
+          </svg>
+        </a>
+      </h2>
     </header>
 
     <div class="fedisuite-layout">
