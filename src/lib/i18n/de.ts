@@ -47,6 +47,7 @@ export const de = {
   hero: {
     title:
       'Wie weit trägt<br />dein Post im <span class="hero-emphasis"><em>Fediverse</em><span class="hero-question">?</span></span>',
+    titleAria: 'Wie weit trägt dein Post im Fediverse?',
     intro:
       'Öffentliche Boosts werden dort ausgewertet, wo dein Beitrag zu Hause ist. Ohne Login, Tracking oder zentrale Datensammlung.',
     handle: 'Vollständiger Fediverse-Handle',

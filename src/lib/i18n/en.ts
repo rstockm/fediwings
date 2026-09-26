@@ -49,6 +49,7 @@ export const en: Messages = {
   hero: {
     title:
       'How far does<br />your post travel in the <span class="hero-emphasis"><em>Fediverse</em><span class="hero-question">?</span></span>',
+    titleAria: 'How far does your post travel in the Fediverse?',
     intro:
       'Public boosts are evaluated where your post lives. No login, no tracking, no centralised data collection.',
     handle: 'Full Fediverse handle',

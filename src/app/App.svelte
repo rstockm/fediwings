@@ -885,8 +885,11 @@
       <div class="hero-copy">
         <img class="hero-emblem" src={emblemUrl} alt="" aria-hidden="true" />
         <p class="kicker">von Ralf Stockmann</p>
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
-        <h1 id="page-title">{@html $_('hero.title')}</h1>
+        <h1 id="page-title">
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
+          <span aria-hidden="true">{@html $_('hero.title')}</span>
+          <span class="visually-hidden">{$_('hero.titleAria')}</span>
+        </h1>
         <p class="intro">{$_('hero.intro')}</p>
       </div>
 
