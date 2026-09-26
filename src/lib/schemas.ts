@@ -25,7 +25,11 @@ export const mediaAttachmentSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
-export const statusSchema = z.object({
+// Friendica mappt in der Mastodon-kompatiblen API den Beitragstitel auf
+// spoiler_text; die ContentWarning dient nur als Fallback
+// (Status.php: spoiler_text = title ?: content-warning ?: '').
+// Ein vorhandener Titel ist daher eine Überschrift und keine ContentWarning.
+const statusObjectSchema = z.object({
   id: z.string(),
   created_at: z.string(),
   url: z.string().nullable(),
@@ -40,7 +44,24 @@ export const statusSchema = z.object({
   in_reply_to_id: z.string().nullable().default(null),
   in_reply_to_account_id: z.string().nullable().default(null),
   media_attachments: z.array(mediaAttachmentSchema).default([]),
+  friendica: z
+    .object({
+      title: z.string().nullish(),
+    })
+    .nullish(),
 });
+
+function stripFriendicaTitleSpoiler<
+  T extends { spoiler_text: string; friendica?: { title?: string | null } | null },
+>(status: T): Omit<T, 'friendica'> {
+  const { friendica, ...rest } = status;
+  if (friendica?.title) {
+    return { ...rest, spoiler_text: '' };
+  }
+  return rest;
+}
+
+export const statusSchema = statusObjectSchema.transform(stripFriendicaTitleSpoiler);
 
 export const statusListSchema = z.array(statusSchema);
 
@@ -80,9 +101,11 @@ export const pixelfedStatusSchema = z
 
 export const pixelfedStatusListSchema = z.array(pixelfedStatusSchema);
 
-export const statusWithAccountSchema = statusSchema.extend({
-  account: accountSchema,
-});
+export const statusWithAccountSchema = statusObjectSchema
+  .extend({
+    account: accountSchema,
+  })
+  .transform(stripFriendicaTitleSpoiler);
 
 export const statusContextSchema = z.object({
   ancestors: z.array(statusWithAccountSchema),

@@ -210,3 +210,86 @@ describe.each([
     }
   });
 });
+
+describe('Friendica status normalization', () => {
+  const baseStatus = {
+    created_at: '2026-09-10T10:00:00Z',
+    url: 'https://test.social/notes/123',
+    content: '<p>Artikeltext</p>',
+    visibility: 'public',
+    favourites_count: 0,
+    reblogs_count: 0,
+    replies_count: 0,
+    media_attachments: [],
+  };
+
+  function stubStatuses(body: unknown) {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(jsonResponse(body))),
+    );
+  }
+
+  it('entfernt den Beitragstitel aus spoiler_text, weil Friendica Titel als spoiler_text liefert', async () => {
+    stubStatuses([
+      {
+        id: 'title-post',
+        ...baseStatus,
+        spoiler_text: 'Mein Artikeltitel',
+        sensitive: false,
+        friendica: { title: 'Mein Artikeltitel' },
+      },
+    ]);
+
+    const { statuses } = await getStatuses('https://test.social', 'account-1');
+
+    expect(statuses[0]?.spoiler_text).toBe('');
+  });
+
+  it('behaelt echte ContentWarnings ohne Titel bei', async () => {
+    stubStatuses([
+      {
+        id: 'cw-post',
+        ...baseStatus,
+        spoiler_text: 'nsfw',
+        sensitive: true,
+        friendica: { title: '' },
+      },
+    ]);
+
+    const { statuses } = await getStatuses('https://test.social', 'account-1');
+
+    expect(statuses[0]?.spoiler_text).toBe('nsfw');
+  });
+
+  it('behandelt auch Thread- und Shared-Status ueber die Context-Route mit derselben Regel', async () => {
+    const { getStatus } = await import('./api');
+    stubStatuses({
+      id: 'shared-post',
+      ...baseStatus,
+      spoiler_text: 'Artikeltitel',
+      sensitive: false,
+      account,
+      friendica: { title: 'Artikeltitel' },
+    });
+
+    const result = await getStatus('https://test.social', 'shared-post');
+
+    expect(result.spoiler_text).toBe('');
+  });
+
+  it('laesst Mastodon-Status ohne friendica-Erweiterung unverändert (Regression)', async () => {
+    stubStatuses([
+      {
+        id: 'mastodon-post',
+        ...baseStatus,
+        spoiler_text: 'CW-Text',
+        sensitive: true,
+      },
+    ]);
+
+    const { statuses } = await getStatuses('https://test.social', 'account-1');
+
+    expect(statuses[0]?.spoiler_text).toBe('CW-Text');
+  });
+});
