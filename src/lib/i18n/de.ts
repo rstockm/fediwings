@@ -45,7 +45,8 @@ export const de = {
     share: 'Geteilte Thread-Analyse | FediWings',
   },
   hero: {
-    title: 'Wie weit trägt<br />dein Post im <em>Fediverse</em>?',
+    title:
+      'Wie weit trägt<br />dein Post im <span class="hero-emphasis"><em>Fediverse</em><span class="hero-question">?</span></span>',
     intro:
       'Öffentliche Boosts werden dort ausgewertet, wo dein Beitrag zu Hause ist. Ohne Login, Tracking oder zentrale Datensammlung.',
     handle: 'Vollständiger Fediverse-Handle',
@@ -107,6 +108,7 @@ export const de = {
     sortBoosts: 'Boosts',
     footerApiRef: 'API-Referenz ↗',
     footerFedisuite: 'Erfolg im Fediverse dauerhaft messen: FediSuite',
+    footerFedisuiteShort: 'FediSuite',
   },
   insights: {
     kicker: 'Posting insights / 02',

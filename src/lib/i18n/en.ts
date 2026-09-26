@@ -47,7 +47,8 @@ export const en: Messages = {
     share: 'Shared Thread Analysis | FediWings',
   },
   hero: {
-    title: 'How far does<br />your post travel in the <em>Fediverse</em>?',
+    title:
+      'How far does<br />your post travel in the <span class="hero-emphasis"><em>Fediverse</em><span class="hero-question">?</span></span>',
     intro:
       'Public boosts are evaluated where your post lives. No login, no tracking, no centralised data collection.',
     handle: 'Full Fediverse handle',
@@ -109,6 +110,7 @@ export const en: Messages = {
     sortBoosts: 'Boosts',
     footerApiRef: 'API reference ↗',
     footerFedisuite: 'Measuring lasting success in the Fediverse: FediSuite',
+    footerFedisuiteShort: 'FediSuite',
   },
   insights: {
     kicker: 'Posting insights / 02',
