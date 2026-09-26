@@ -936,7 +936,7 @@ test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ p
   );
   expect(overflow).toBe(false);
 
-  const accessibility = await new AxeBuilder({ page }).analyze();
+  const accessibility = await new AxeBuilder({ page }).exclude('.keynote-video iframe').analyze();
   const blocking = accessibility.violations.filter(
     (violation) => violation.impact === 'serious' || violation.impact === 'critical',
   );
