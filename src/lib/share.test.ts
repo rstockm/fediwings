@@ -106,9 +106,10 @@ describe('Share-Links', () => {
   });
 
   it('erstellt einen validierbaren Card-Snapshot ohne HTML und mit vollstaendigem Handle', () => {
-    const snapshot = createCardSnapshot(result, account, '2026-09-10T19:00:00.000Z');
+    const snapshot = createCardSnapshot(result, account, '2026-09-10T19:00:00.000Z', 'en');
 
     expect(fullHandle(account)).toBe('@alice@example.social');
+    expect(snapshot.locale).toBe('en');
     expect(snapshot.content.excerpt).toBe('Hallo :fedi: Fediverse');
     expect(snapshot.content.thumbnailUrl).toBe('https://example.social/image-small.jpg');
     expect(snapshot.metrics).toEqual({ netReach: 730, grossReach: 1240, likes: 12, boosts: 3 });

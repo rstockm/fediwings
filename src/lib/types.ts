@@ -127,6 +127,7 @@ export interface BoostHistoryState {
 
 export interface CardSnapshot {
   version: 1;
+  locale: 'de' | 'en';
   sourceUrl: string;
   account: {
     url: string;

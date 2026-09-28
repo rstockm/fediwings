@@ -1,4 +1,4 @@
-import { msg } from './i18n';
+import { currentLocale, msg, type Locale } from './i18n';
 import { cardServiceResponseSchema, cardShareTokenSchema } from './schemas';
 import type { CardServiceResponse, CardSnapshot, MastodonAccount, PostReach } from './types';
 
@@ -126,6 +126,7 @@ export function createCardSnapshot(
   result: PostReach,
   account: MastodonAccount,
   analyzedAt: string,
+  locale: Locale = currentLocale(),
 ): CardSnapshot {
   if (!result.status.url) throw new Error(msg('error.shareNoPostUrl'));
   if (result.state !== 'complete' && result.state !== 'partial') {
@@ -136,6 +137,7 @@ export function createCardSnapshot(
   const excerpt = sensitive ? `CW: ${contentWarning}` : contentExcerpt(result.status.content, 280);
   return {
     version: 1,
+    locale,
     sourceUrl: parseSharedPostUrl(result.status.url).url,
     account: {
       url: account.url,
