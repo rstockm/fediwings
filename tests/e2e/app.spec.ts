@@ -475,6 +475,8 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     detailsBarBox!.y + detailsBarBox!.height,
   );
   await actionButtons.first().click();
+  await page.keyboard.press('Escape');
+  await expect(threadCard.locator('dialog')).toBeHidden();
   await expect(details).toHaveAttribute('open', '');
 
   await expect(threadCard.locator('.thread-posts > li')).toHaveCount(1);
