@@ -184,7 +184,7 @@ export const en: Messages = {
     threadCollapse: 'Collapse thread',
     moreInThread: 'More posts in this thread',
     openThreadAt: 'Open thread post {index} in the Fediverse',
-    share: 'Share post',
+    share: 'Share results',
     shared: 'Link shared.',
     copied: 'Share link copied.',
     shareFailed: 'Sharing not possible.',

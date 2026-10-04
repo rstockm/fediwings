@@ -440,7 +440,30 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
 
   const actionButtons = threadCard.locator('.post-details-actions button');
   await expect(actionButtons).toHaveCount(1);
-  await expect(actionButtons.first()).toHaveAccessibleName('Beitrag teilen');
+  await expect(actionButtons.first()).toHaveAccessibleName('Ergebnis teilen');
+  await expect(actionButtons.first()).toHaveText('Ergebnis teilen');
+  const checkShareButtonLayout = async () => {
+    const button = actionButtons.first();
+    const [buttonBox, labelBox, iconBox, chevronBox, cardBox] = await Promise.all([
+      button.boundingBox(),
+      button.locator('span').boundingBox(),
+      button.locator('svg').boundingBox(),
+      threadCard.locator('.details-chevron').boundingBox(),
+      threadCard.boundingBox(),
+    ]);
+    expect(buttonBox).not.toBeNull();
+    expect(labelBox).not.toBeNull();
+    expect(iconBox).not.toBeNull();
+    expect(chevronBox).not.toBeNull();
+    expect(cardBox).not.toBeNull();
+    expect(labelBox!.x + labelBox!.width).toBeLessThan(iconBox!.x);
+    expect(chevronBox!.x + chevronBox!.width).toBeLessThan(buttonBox!.x);
+    expect(
+      Math.abs(labelBox!.y + labelBox!.height / 2 - (iconBox!.y + iconBox!.height / 2)),
+    ).toBeLessThanOrEqual(1);
+    expect(buttonBox!.x + buttonBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width);
+  };
+  await checkShareButtonLayout();
   const [actionBox, detailsBarBox] = await Promise.all([
     actionButtons.first().boundingBox(),
     threadCard.locator('.post-details-bar').boundingBox(),
@@ -466,6 +489,10 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(overflow).toBe(false);
+  await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
+  await expect(actionButtons.first()).toHaveAccessibleName('Share results');
+  await expect(actionButtons.first()).toHaveText('Share results');
+  await checkShareButtonLayout();
 });
 
 test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst beim geöffneten Beitrag', async ({
@@ -704,7 +731,7 @@ test('teilt einen vollstaendigen Thread als eigenstaendige Landing-Page', async 
     hasText: 'Ein Testbeitrag aus dem Fediverse.',
   });
   await threadCard.locator('summary').click();
-  await threadCard.getByRole('button', { name: 'Beitrag teilen' }).click();
+  await threadCard.getByRole('button', { name: 'Ergebnis teilen' }).click();
 
   await expect
     .poll(() =>
@@ -796,7 +823,7 @@ test('erstellt und teilt eine individuelle Card ueber den konfigurierten Service
   const threadCard = page.locator('.post-card').filter({
     hasText: 'Ein Testbeitrag aus dem Fediverse.',
   });
-  await threadCard.getByRole('button', { name: 'Beitrag teilen' }).click();
+  await threadCard.getByRole('button', { name: 'Ergebnis teilen' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Analyse teilen' });
   await expect(dialog).toBeVisible();

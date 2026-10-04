@@ -1930,15 +1930,20 @@ footer {
 }
 
 .post-details-action {
-  display: grid;
-  place-items: center;
-  width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   height: 36px;
-  padding: 0;
+  padding: 0 9px 0 14px;
   border: 1px solid #c9c5ba;
-  border-radius: 50%;
+  border-radius: 999px;
   color: #5040c8;
   background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   pointer-events: auto;
   transition:
@@ -1948,6 +1953,7 @@ footer {
 }
 
 .post-details-action svg {
+  flex-shrink: 0;
   width: 17px;
   height: 17px;
   fill: none;
@@ -4435,6 +4441,7 @@ footer {
 
   .post-details summary {
     min-height: 52px;
+    width: calc(100% - 176px);
   }
 
   .post-details-actions {
@@ -4442,8 +4449,9 @@ footer {
   }
 
   .post-details-action {
-    width: 48px;
     height: 48px;
+    padding-right: 14px;
+    padding-left: 18px;
   }
 
   .share-dialog-actions {

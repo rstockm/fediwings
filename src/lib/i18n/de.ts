@@ -182,7 +182,7 @@ export const de = {
     threadCollapse: 'Thread einklappen',
     moreInThread: 'Weitere Beiträge in diesem Thread',
     openThreadAt: 'Thread-Beitrag {index} im Fediverse öffnen',
-    share: 'Beitrag teilen',
+    share: 'Ergebnis teilen',
     shared: 'Link geteilt.',
     copied: 'Share-Link kopiert.',
     shareFailed: 'Teilen nicht möglich.',

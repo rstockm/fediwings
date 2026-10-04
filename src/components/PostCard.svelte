@@ -386,6 +386,7 @@
         disabled={!result.status.url || (result.state !== 'complete' && result.state !== 'partial')}
         onclick={shareThread}
       >
+        <span>{$_('post.share')}</span>
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <circle cx="18" cy="5" r="3"></circle>
           <circle cx="6" cy="12" r="3"></circle>
