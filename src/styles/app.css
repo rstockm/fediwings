@@ -1952,6 +1952,12 @@ footer {
     transform 160ms ease;
 }
 
+.post-details-action > span {
+  /* Optical font-metric correction; keep the icon geometrically centered. */
+  position: relative;
+  top: 1px;
+}
+
 .post-details-action svg {
   flex-shrink: 0;
   width: 17px;

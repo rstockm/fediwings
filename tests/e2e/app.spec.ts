@@ -458,9 +458,11 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     expect(cardBox).not.toBeNull();
     expect(labelBox!.x + labelBox!.width).toBeLessThan(iconBox!.x);
     expect(chevronBox!.x + chevronBox!.width).toBeLessThan(buttonBox!.x);
-    expect(
-      Math.abs(labelBox!.y + labelBox!.height / 2 - (iconBox!.y + iconBox!.height / 2)),
-    ).toBeLessThanOrEqual(1);
+    expect(labelBox!.y + labelBox!.height / 2 - (iconBox!.y + iconBox!.height / 2)).toBeCloseTo(
+      1,
+      1,
+    );
+    expect(iconBox!.y + iconBox!.height / 2).toBeCloseTo(buttonBox!.y + buttonBox!.height / 2, 1);
     expect(buttonBox!.x + buttonBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width);
   };
   await checkShareButtonLayout();
