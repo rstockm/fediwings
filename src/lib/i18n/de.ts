@@ -176,7 +176,7 @@ export const de = {
     quotes: 'Zitate',
     replies: 'Antworten',
     repliesTooltip:
-      'Summe aus direkten Antworten und Zitaten. Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
+      'Summe aus direkten Antworten ({replies}) und Zitaten ({quotes}). Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
     gross: 'Brutto',
     grossTitle: 'Brutto-Reichweite',
     expand: 'Vollständigen Beitrag anzeigen',

@@ -178,7 +178,7 @@ export const en: Messages = {
     quotes: 'Quotes',
     replies: 'Replies',
     repliesTooltip:
-      'Total of direct replies and quotes. Quotes are posts that share this post with an added comment.',
+      'Total of direct replies ({replies}) and quotes ({quotes}). Quotes are posts that share this post with an added comment.',
     gross: 'Gross',
     grossTitle: 'Gross reach',
     expand: 'Show full post',

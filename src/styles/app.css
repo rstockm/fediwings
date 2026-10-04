@@ -647,6 +647,9 @@ footer {
   z-index: 1;
   display: inline-block;
   padding-right: 0.08em;
+  /* Let the clipped gradient cover glyphs outside the tight headline line box. */
+  padding-block: 0.15em;
+  margin-block: -0.15em;
   margin-right: -0.03em;
   font-style: normal;
   color: transparent;

@@ -274,7 +274,7 @@ test('fasst Antworten und Zitate zusammen und erklaert das Teilen zweisprachig',
   await expect(replies.locator('dd')).toHaveText('5');
   await expect(replies).toHaveAttribute(
     'title',
-    'Summe aus direkten Antworten und Zitaten. Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
+    'Summe aus direkten Antworten (2) und Zitaten (3). Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
   );
   await expect(card.locator('.metric-boosts dd')).toHaveText('0');
   await expect(card.getByRole('button', { name: 'Ergebnis teilen' })).toHaveAttribute(
@@ -287,12 +287,34 @@ test('fasst Antworten und Zitate zusammen und erklaert das Teilen zweisprachig',
   await expect(replies.locator('dd')).toHaveText('5');
   await expect(replies).toHaveAttribute(
     'title',
-    'Total of direct replies and quotes. Quotes are posts that share this post with an added comment.',
+    'Total of direct replies (2) and quotes (3). Quotes are posts that share this post with an added comment.',
   );
   await expect(card.getByRole('button', { name: 'Share results' })).toHaveAttribute(
     'title',
     'Creates a link to these results. When you share the link on social media, a preview card showing the post and its reach may appear.',
   );
+});
+
+test('gibt dem Farbverlauf der Hero-Headline genug Raum fuer ganze Buchstaben', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const emphasis = page.locator('.hero h1 em');
+  await expect(emphasis).toBeVisible();
+  const spacing = await emphasis.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      fontSize: parseFloat(style.fontSize),
+      paddingTop: parseFloat(style.paddingTop),
+      paddingBottom: parseFloat(style.paddingBottom),
+      marginTop: parseFloat(style.marginTop),
+      marginBottom: parseFloat(style.marginBottom),
+    };
+  });
+  expect(spacing.paddingTop / spacing.fontSize).toBeCloseTo(0.15, 2);
+  expect(spacing.paddingBottom / spacing.fontSize).toBeCloseTo(0.15, 2);
+  expect(spacing.paddingTop + spacing.marginTop).toBeCloseTo(0, 2);
+  expect(spacing.paddingBottom + spacing.marginBottom).toBeCloseTo(0, 2);
 });
 
 test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) => {

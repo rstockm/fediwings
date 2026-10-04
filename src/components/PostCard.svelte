@@ -269,7 +269,15 @@
           <dt>{$_('post.boosts')}</dt>
           <dd>{$_number(result.boosts, { format: 'int' })}</dd>
         </div>
-        <div class="metric-secondary metric-replies" title={$_('post.repliesTooltip')}>
+        <div
+          class="metric-secondary metric-replies"
+          title={$_('post.repliesTooltip', {
+            values: {
+              replies: $_number(result.interactions - result.likes, { format: 'int' }),
+              quotes: $_number(result.quotes, { format: 'int' }),
+            },
+          })}
+        >
           <dt>{$_('post.replies')}</dt>
           <dd>{$_number(repliesAndQuotes, { format: 'int' })}</dd>
         </div>
