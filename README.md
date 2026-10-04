@@ -8,6 +8,11 @@ Die Oberfläche ist zweisprachig (Deutsch/Englisch, Umschalter in der Kopfzeile)
 
 Voraussetzung ist Node.js 22 oder neuer.
 
+Der gezielte npm-Override fuer `svelte-i18n > esbuild` erzwingt eine gepatchte
+esbuild-Version, solange svelte-i18n 4.0.1 noch die verwundbare 0.19-Reihe anfordert.
+Er kann entfallen, sobald upstream eine sichere Version verwendet. Vitest 4.1.11
+oder neuer behebt den Path-Traversal-Befund im Mocking-Modul.
+
 ```bash
 npm install
 npm run dev
