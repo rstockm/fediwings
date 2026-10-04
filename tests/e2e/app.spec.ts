@@ -255,6 +255,46 @@ async function mockInstanceConnection(page: Page) {
   });
 }
 
+test('fasst Antworten und Zitate zusammen und erklaert das Teilen zweisprachig', async ({
+  page,
+}) => {
+  await mockMastodon(page);
+  await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
+    await route.fulfill({
+      json: [{ ...makeStatus('combined', daysAgo(1)), replies_count: 2, quotes_count: 3 }],
+    });
+  });
+  await page.goto('/');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+
+  const card = page.locator('.post-card');
+  const replies = card.locator('.metric-replies');
+  await expect(replies.locator('dt')).toHaveText('Antworten');
+  await expect(replies.locator('dd')).toHaveText('5');
+  await expect(replies).toHaveAttribute(
+    'title',
+    'Summe aus direkten Antworten und Zitaten. Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
+  );
+  await expect(card.locator('.metric-boosts dd')).toHaveText('0');
+  await expect(card.getByRole('button', { name: 'Ergebnis teilen' })).toHaveAttribute(
+    'title',
+    'Erstellt einen Link zu diesem Ergebnis. Wenn du den Link in sozialen Medien teilst, kann eine Vorschaukarte mit dem Beitrag und seiner Reichweite angezeigt werden.',
+  );
+
+  await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
+  await expect(replies.locator('dt')).toHaveText('Replies');
+  await expect(replies.locator('dd')).toHaveText('5');
+  await expect(replies).toHaveAttribute(
+    'title',
+    'Total of direct replies and quotes. Quotes are posts that share this post with an added comment.',
+  );
+  await expect(card.getByRole('button', { name: 'Share results' })).toHaveAttribute(
+    'title',
+    'Creates a link to these results. When you share the link on social media, a preview card showing the post and its reach may appear.',
+  );
+});
+
 test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) => {
   await mockMastodon(page);
   await page.goto('/');
@@ -339,7 +379,11 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   const cards = page.locator('.post-card');
   await expect(cards.locator('.post-thumb')).toHaveCount(2);
   await expect(cards.locator('.post-thumb-empty')).toHaveCount(1);
-  await expect(cards.locator('.post-thumb-empty svg')).toHaveCount(1);
+  await expect(cards.locator('.post-thumb-empty svg')).toHaveCount(0);
+  const placeholder = cards.locator('.post-thumb-empty img');
+  await expect(placeholder).toHaveAttribute('src', account.avatar_static);
+  await expect(placeholder).toHaveAttribute('alt', '');
+  await expect(placeholder).toHaveCSS('opacity', '0.15');
   await expect(cards.locator('.state-pill')).toHaveCount(0);
   const visualPositions = await cards
     .locator('.post-visual')

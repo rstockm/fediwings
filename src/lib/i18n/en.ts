@@ -176,6 +176,9 @@ export const en: Messages = {
     likes: 'Likes',
     boosts: 'Boosts',
     quotes: 'Quotes',
+    replies: 'Replies',
+    repliesTooltip:
+      'Total of direct replies and quotes. Quotes are posts that share this post with an added comment.',
     gross: 'Gross',
     grossTitle: 'Gross reach',
     expand: 'Show full post',
@@ -185,6 +188,8 @@ export const en: Messages = {
     moreInThread: 'More posts in this thread',
     openThreadAt: 'Open thread post {index} in the Fediverse',
     share: 'Share results',
+    shareTooltip:
+      'Creates a link to these results. When you share the link on social media, a preview card showing the post and its reach may appear.',
     shared: 'Link shared.',
     copied: 'Share link copied.',
     shareFailed: 'Sharing not possible.',

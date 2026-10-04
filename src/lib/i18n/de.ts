@@ -174,6 +174,9 @@ export const de = {
     likes: 'Likes',
     boosts: 'Boosts',
     quotes: 'Zitate',
+    replies: 'Antworten',
+    repliesTooltip:
+      'Summe aus direkten Antworten und Zitaten. Zitate sind Beiträge, die diesen Beitrag mit einem eigenen Kommentar teilen.',
     gross: 'Brutto',
     grossTitle: 'Brutto-Reichweite',
     expand: 'Vollständigen Beitrag anzeigen',
@@ -183,6 +186,8 @@ export const de = {
     moreInThread: 'Weitere Beiträge in diesem Thread',
     openThreadAt: 'Thread-Beitrag {index} im Fediverse öffnen',
     share: 'Ergebnis teilen',
+    shareTooltip:
+      'Erstellt einen Link zu diesem Ergebnis. Wenn du den Link in sozialen Medien teilst, kann eine Vorschaukarte mit dem Beitrag und seiner Reichweite angezeigt werden.',
     shared: 'Link geteilt.',
     copied: 'Share-Link kopiert.',
     shareFailed: 'Teilen nicht möglich.',

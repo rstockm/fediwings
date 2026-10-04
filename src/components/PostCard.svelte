@@ -66,6 +66,7 @@
   }
 
   const netReachRatio = $derived(relativeReach(result.netReach));
+  const repliesAndQuotes = $derived(result.interactions - result.likes + result.quotes);
 
   const threadLabel = $derived(
     result.threadSize > 1
@@ -151,12 +152,7 @@
         </div>
       {:else}
         <div class="post-thumb post-thumb-empty" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" focusable="false">
-            <rect x="4" y="5" width="16" height="14" rx="1"></rect>
-            <circle cx="9" cy="10" r="1.5"></circle>
-            <path d="m5 17 4.5-4 3 2.7 2.2-2 4.3 3.8"></path>
-            <path class="preview-slash" d="M3 3 21 21"></path>
-          </svg>
+          <img src={account.avatar_static} alt="" loading="lazy" referrerpolicy="no-referrer" />
         </div>
       {/if}
       <span class="post-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
@@ -273,9 +269,9 @@
           <dt>{$_('post.boosts')}</dt>
           <dd>{$_number(result.boosts, { format: 'int' })}</dd>
         </div>
-        <div class="metric-secondary metric-quotes">
-          <dt>{$_('post.quotes')}</dt>
-          <dd>{$_number(result.quotes, { format: 'int' })}</dd>
+        <div class="metric-secondary metric-replies" title={$_('post.repliesTooltip')}>
+          <dt>{$_('post.replies')}</dt>
+          <dd>{$_number(repliesAndQuotes, { format: 'int' })}</dd>
         </div>
         <div class="metric-secondary metric-gross">
           <dt title={$_('post.grossTitle')}>{$_('post.gross')}</dt>
@@ -382,7 +378,7 @@
         type="button"
         class="post-details-action"
         aria-label={$_('post.share')}
-        title={$_('post.share')}
+        title={$_('post.shareTooltip')}
         disabled={!result.status.url || (result.state !== 'complete' && result.state !== 'partial')}
         onclick={shareThread}
       >
