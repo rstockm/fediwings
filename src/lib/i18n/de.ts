@@ -198,6 +198,9 @@ export const de = {
   },
   boostHistory: {
     title: 'Boost-Dynamik - Long Tail',
+    preview: 'Vorschau · keine Messdaten',
+    connectHint: 'Für Boost-Dynamik – Zeitanalyse mit eigener Instanz verbinden',
+    connect: 'Eigene Instanz verbinden',
     loading: 'Boost-Zeitpunkte werden geladen…',
     empty:
       'In den geladenen Benachrichtigungen wurden keine Zeitpunkte für diesen Beitrag gefunden.',

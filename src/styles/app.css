@@ -417,6 +417,68 @@ footer {
   gap: 16px;
 }
 
+.boost-timeline-preview {
+  box-shadow: inset 3px 0 var(--chart-muted);
+}
+
+.boost-timeline-preview .boost-timeline-heading {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boost-timeline-preview .boost-timeline-heading h3,
+.boost-preview-label {
+  color: var(--text-on-light);
+}
+
+.boost-preview-label {
+  font: 0.55rem/1.5 var(--mono);
+}
+
+.boost-preview-curve {
+  opacity: 0.5;
+}
+
+.boost-preview-area {
+  fill: var(--chart-muted);
+  fill-opacity: 0.25;
+}
+
+.boost-preview-line {
+  fill: none;
+  stroke: var(--text-on-light);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.boost-preview-hint {
+  margin: 8px 0 12px;
+  color: var(--text-on-light);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.boost-preview-connect {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--violet-strong);
+  border-radius: var(--radius);
+  color: var(--violet-strong);
+  background: var(--paper-raised);
+  font: 500 0.8125rem/1.5 var(--sans-display);
+  cursor: pointer;
+}
+
+.boost-preview-connect:hover {
+  background: var(--paper);
+}
+
+.boost-preview-connect:focus-visible {
+  outline: 3px solid var(--violet-strong);
+  outline-offset: 2px;
+}
+
 .boost-timeline-heading h3 {
   margin: 0;
   color: #35313d;

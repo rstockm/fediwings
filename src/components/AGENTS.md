@@ -2,4 +2,5 @@
 
 | Datei | Zweck |
 | --- | --- |
-| `PostCard.svelte` | Post-Karte; native Details-Schaltfläche und Teilen-Aktion bilden verbundene 50/50-Leiste; bestehende Thread-, Medien-, Boost- und Share-Funktionen bleiben erhalten. |
+| `BoostTimelinePreview.svelte` | Graue, dekorative Long-Tail-Beispielkurve ohne Messdaten; aktiver `onconnect`-CTA öffnet bestehende Instanzverbindung. |
+| `PostCard.svelte` | Post-Karte; verbundene 50/50-Aktionen; aufgeklappt echte Boost-Historie oder Vorschau bei angebotenem `onconnect`. |

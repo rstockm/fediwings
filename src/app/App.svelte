@@ -1019,6 +1019,7 @@
                 {analyzedAt}
                 expanded={expandedStatusIds.includes(post.status.id)}
                 boostHistory={boostHistoryFor(post)}
+                onconnect={authSession === null ? () => openConnection() : null}
                 onexpandedchange={(open) => setPostExpanded(post, open)}
                 onloadolderboosts={() => void loadBoostHistory(post)}
               />

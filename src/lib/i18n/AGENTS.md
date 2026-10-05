@@ -2,5 +2,5 @@
 
 | Datei | Zweck |
 | --- | --- |
-| `de.ts` | Deutsche UI-Texte; `post.details` benennt sichtbare Details-Aktion. |
-| `en.ts` | Englische UI-Texte; `post.details` benennt sichtbare Details-Aktion. |
+| `de.ts` | Deutsche UI-Texte; Details-Aktion und Long-Tail-Vorschau inkl. Verbindungs-CTA. |
+| `en.ts` | Englische UI-Texte; Details-Aktion und Long-Tail-Vorschau inkl. Verbindungs-CTA. |

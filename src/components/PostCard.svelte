@@ -4,6 +4,7 @@
   import { _, date as _date, number as _number } from 'svelte-i18n';
   import ShareDialog from './ShareDialog.svelte';
   import BoostTimeline from './BoostTimeline.svelte';
+  import BoostTimelinePreview from './BoostTimelinePreview.svelte';
   import { cardServiceAvailable, createSharedThreadUrl } from '../lib/share';
   import { msg } from '../lib/i18n';
   import type { BoostHistoryState, MastodonAccount, PostReach } from '../lib/types';
@@ -18,6 +19,7 @@
     boostHistory = null,
     onexpandedchange = () => {},
     onloadolderboosts = () => {},
+    onconnect = null,
   }: {
     result: PostReach;
     maxNetReach: number;
@@ -28,6 +30,7 @@
     boostHistory?: BoostHistoryState | null;
     onexpandedchange?: (open: boolean) => void;
     onloadolderboosts?: () => void;
+    onconnect?: (() => void) | null;
   } = $props();
   let shareDialogOpen = $state(false);
   let shareFeedback = $state('');
@@ -288,6 +291,8 @@
       </dl>
       {#if expanded && boostHistory}
         <BoostTimeline history={boostHistory} {result} onloadmore={onloadolderboosts} />
+      {:else if expanded && onconnect}
+        <BoostTimelinePreview {onconnect} />
       {/if}
     </div>
   </div>

@@ -200,6 +200,9 @@ export const en: Messages = {
   },
   boostHistory: {
     title: 'Boost dynamics - Long tail',
+    preview: 'Preview · not measured data',
+    connectHint: 'Connect your own instance for boost dynamics over time',
+    connect: 'Connect your own instance',
     loading: 'Loading boost times…',
     empty: 'No times for this post were found in the loaded notifications.',
     partialProgress:

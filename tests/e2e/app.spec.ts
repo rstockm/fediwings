@@ -582,6 +582,12 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
   await expect(actionButtons.first()).toHaveAccessibleName('Share results');
   await expect(actionButtons.first()).toHaveText('Share results');
+  await expect(threadCard.locator('.boost-timeline-preview')).toContainText(
+    'Connect your own instance for boost dynamics over time',
+  );
+  await expect(
+    threadCard.getByRole('button', { name: 'Connect your own instance', exact: true }),
+  ).toBeVisible();
   await expect(details.locator('summary')).toHaveAttribute(
     'aria-label',
     'Details: Collapse thread',
@@ -633,11 +639,24 @@ test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst b
   expect(notificationRequests).toBe(0);
 
   const threadCard = page.locator('.post-card').filter({ hasText: 'Ein Testbeitrag' });
+  await expect(threadCard.locator('.boost-timeline-preview')).toBeHidden();
   await threadCard.locator('summary').click();
   await expect(threadCard.locator('details.post-details')).toHaveAttribute('open', '');
   expect(notificationRequests).toBe(0);
 
-  await page.getByRole('button', { name: 'Eigene Instanz', exact: true }).click();
+  const preview = threadCard.locator('.boost-timeline-preview');
+  await expect(preview).toBeVisible();
+  await expect(preview).toContainText(
+    'Für Boost-Dynamik – Zeitanalyse mit eigener Instanz verbinden',
+  );
+  await expect(threadCard.locator('.post-analysis .boost-timeline-preview')).toBeVisible();
+  await expect(preview.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  await threadCard.locator('summary').click();
+  await expect(preview).toBeHidden();
+  await threadCard.locator('summary').click();
+  await expect(preview).toBeVisible();
+  await preview.getByRole('button', { name: 'Eigene Instanz verbinden' }).click();
+  await expect(page.getByRole('dialog', { name: 'Eigene Daten ergänzen' })).toBeVisible();
   await page.getByRole('button', { name: 'Mit test.social verbinden' }).click();
 
   await expect(
@@ -645,6 +664,7 @@ test('stellt die Analyse nach OAuth wieder her und lädt Boost-Zeitpunkte erst b
   ).toBeVisible();
   await expect(threadCard.locator('.boost-curve')).toBeVisible();
   await expect(threadCard.locator('.boost-curve-event')).toHaveCount(2);
+  await expect(preview).toBeHidden();
   const labelBoxes = await threadCard.locator('.boost-curve-label').evaluateAll((labels) =>
     labels
       .map((label) => label.getBoundingClientRect())
