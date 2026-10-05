@@ -1852,101 +1852,38 @@ footer {
 }
 
 .post-details {
-  border-top: 1px solid #d5d1c6;
-  background: rgba(229, 225, 215, 0.32);
+  background: #f9f7f1;
 }
 
-.post-details summary {
+.post-details summary,
+.post-details-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 4px 16px;
-  color: #8d89a3;
+  gap: 8px;
+  height: var(--post-action-height);
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  color: var(--violet-strong);
+  background: var(--post-action-background);
+  font: 500 0.8125rem/1 var(--sans-display);
   cursor: pointer;
-  list-style: none;
   transition:
     background 160ms ease,
     color 160ms ease;
+}
+
+.post-details summary {
+  width: 50%;
+  list-style: none;
 }
 
 .post-details summary::-webkit-details-marker {
   display: none;
 }
 
-.post-details .details-chevron {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.post-details summary:hover {
-  color: #403b6c;
-  background: rgba(139, 124, 255, 0.07);
-}
-
-.post-details summary:focus-visible {
-  outline: 3px solid var(--violet-strong);
-  outline-offset: -3px;
-}
-
-.post-details[open] summary {
-  background: rgba(139, 124, 255, 0.05);
-}
-
-.post-details[open] .details-chevron {
-  transform: rotate(180deg);
-}
-
-.post-details-bar {
-  position: relative;
-}
-
-.post-details-actions {
-  position: absolute;
-  top: 22px;
-  right: 10px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.post-details-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 9px 0 14px;
-  border: 1px solid #c9c5ba;
-  border-radius: 999px;
-  color: #5040c8;
-  background: transparent;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  pointer-events: auto;
-  transition:
-    color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
-}
-
-.post-details-action > span {
-  /* Optical font-metric correction; keep the icon geometrically centered. */
-  position: relative;
-  top: 1px;
-}
-
+.post-details .details-chevron,
 .post-details-action svg {
   flex-shrink: 0;
   width: 17px;
@@ -1956,21 +1893,55 @@ footer {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform 160ms ease;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.post-details summary:hover,
 .post-details-action:hover {
-  color: #4637c4;
-  background: rgba(124, 108, 255, 0.1);
+  background: color-mix(in srgb, var(--violet-strong) 9%, #f9f7f1);
 }
 
-.post-details-action:active {
-  transform: scale(0.92);
-}
-
+.post-details summary:focus-visible,
 .post-details-action:focus-visible {
   outline: 3px solid var(--violet-strong);
-  outline-offset: 2px;
+  outline-offset: -3px;
+}
+
+.post-details[open] summary {
+  background: color-mix(in srgb, var(--violet-strong) 9%, #f9f7f1);
+}
+
+.post-details[open] .details-chevron {
+  transform: rotate(180deg);
+}
+
+.post-details-bar {
+  position: relative;
+  border-top: 1px solid #c7c2b7;
+  background: var(--post-action-background);
+}
+
+.post-details-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+
+.post-details-action {
+  width: 100%;
+  border-left: 1px solid #c7c2b7;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.post-details summary:active,
+.post-details-action:active {
+  background: color-mix(in srgb, var(--violet-strong) 9%, #f9f7f1);
 }
 
 .post-details-action:disabled {
@@ -2001,8 +1972,8 @@ footer {
 }
 
 .share-feedback:not(:empty) {
-  top: 50%;
-  right: calc(100% + 7px);
+  bottom: calc(100% + 7px);
+  right: 8px;
   width: max-content;
   max-width: 190px;
   height: auto;
@@ -2016,7 +1987,6 @@ footer {
   font: 0.56rem/1.35 var(--mono);
   text-align: center;
   white-space: normal;
-  transform: translateY(-50%);
   pointer-events: none;
 }
 
@@ -4432,21 +4402,6 @@ footer {
 
   .thread-detail-body {
     padding: 20px 16px 22px;
-  }
-
-  .post-details summary {
-    min-height: 52px;
-    width: calc(100% - 176px);
-  }
-
-  .post-details-actions {
-    top: 26px;
-  }
-
-  .post-details-action {
-    height: 48px;
-    padding-right: 14px;
-    padding-left: 18px;
   }
 
   .share-dialog-actions {

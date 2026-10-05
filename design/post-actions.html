@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fediwings · Kartenaktionen – Design-Dummy</title>
+    <style>
+      :root {
+        --paper: #f1eee5;
+        --card: #f9f7f1;
+        --ink: #17181b;
+        --muted: #5c5a62;
+        --accent: #5d4cf0;
+        --line: #c7c2b7;
+        --radius: 12px;
+        --action-height: 44px;
+        --action-tint: 5%;
+        --action-color: var(--accent);
+        --mono: Consolas, 'Liberation Mono', monospace;
+        font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 40px 28px;
+      }
+      main {
+        max-width: 1004px;
+        margin: auto;
+      }
+      .intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .intro p,
+      .note {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+      }
+      .badge {
+        font: 11px var(--mono);
+        white-space: nowrap;
+        border: 1px solid var(--line);
+        border-radius: 99px;
+        padding: 7px 10px;
+      }
+      .card {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--card);
+        box-shadow: 0 4px 14px rgb(23 24 27 / 7%);
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: 108px minmax(0, 1fr) minmax(0, 1.8fr);
+        gap: 27px;
+        padding: 24px 27px;
+        align-items: start;
+      }
+      .avatar {
+        position: relative;
+        height: 108px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #e6e2d8;
+        display: grid;
+        place-items: center;
+      }
+      .avatar svg {
+        width: 62px;
+        opacity: 0.16;
+      }
+      .index {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        padding: 6px 11px;
+        border-radius: 99px;
+        color: var(--paper);
+        background: #30302f;
+        font: 600 14px var(--mono);
+      }
+      .date {
+        display: inline-block;
+        margin: 9px 0 20px;
+        font: 14px var(--mono);
+        color: var(--muted);
+        border-bottom: 1px solid #aaa69d;
+      }
+      .post {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .post span {
+        color: var(--accent);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .metrics {
+        padding: 16px 15px 12px;
+        background: #ebe8df;
+        border: 1px solid #d0ccc2;
+        border-left: 4px solid var(--accent);
+        border-radius: 12px;
+      }
+      .reach {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .reach-label {
+        font: 700 13px var(--mono);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      .reach-label small {
+        display: block;
+        margin-top: 5px;
+        font-weight: 400;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .reach strong {
+        font-size: 36px;
+        letter-spacing: -2px;
+        margin-left: auto;
+      }
+      .meter {
+        flex: 1;
+        height: 27px;
+        min-width: 35px;
+        border-radius: 12px;
+        border: 1px solid #aaa7b1;
+        background: #d6d4cd;
+        box-shadow: inset 0 1px 4px #0002;
+        padding: 3px;
+      }
+      .meter::before {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 4px;
+        border-radius: 4px 0 0 4px;
+        background: var(--accent);
+      }
+      .counts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        margin-top: 20px;
+        border-top: 1px solid var(--line);
+      }
+      .counts div {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 8px;
+        padding: 9px 4px 0;
+      }
+      .counts div + div {
+        border-left: 1px solid var(--line);
+      }
+      .counts span {
+        font: 12px var(--mono);
+        color: var(--muted);
+      }
+      .counts b {
+        font-size: 21px;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid var(--line);
+        background: color-mix(in srgb, var(--accent) var(--action-tint), var(--card));
+      }
+      .action {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: var(--action-color);
+        min-height: var(--action-height);
+        padding: 12px;
+        font:
+          500 18px 'Segoe UI',
+          Helvetica,
+          Arial,
+          sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 11px;
+        transition: background 150ms ease;
+      }
+      .action + .action {
+        border-left: 1px solid var(--line);
+      }
+      .action:hover {
+        background: rgb(93 76 240 / 8%);
+      }
+      .action:active {
+        background: rgb(93 76 240 / 14%);
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: -4px;
+      }
+      .action svg {
+        width: 21px;
+        height: 21px;
+        flex-shrink: 0;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .chevron {
+        transition: transform 180ms ease;
+      }
+      [aria-expanded='true'] .chevron {
+        transform: rotate(180deg);
+      }
+      .action[aria-expanded='true'] {
+        background: rgb(93 76 240 / 8%);
+      }
+      .details {
+        padding: 22px 27px;
+        border-top: 1px solid var(--line);
+      }
+      .details h2 {
+        margin: 0 0 10px;
+        font-size: 17px;
+      }
+      .details p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .tuning {
+        margin-top: 32px;
+        padding: 20px 0;
+        border-top: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        align-items: center;
+      }
+      .tuning label {
+        display: grid;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .tuning label span {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      input {
+        accent-color: var(--accent);
+        width: 180px;
+        margin: 0;
+      }
+      select {
+        background: var(--card);
+        color: var(--ink);
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+      }
+      dialog {
+        width: min(420px, calc(100% - 32px));
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 28px;
+        background: var(--card);
+        color: var(--ink);
+      }
+      dialog::backdrop {
+        background: rgb(23 24 27 / 30%);
+      }
+      dialog h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+      dialog p {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      dialog button {
+        background: var(--accent);
+        color: white;
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font: inherit;
+      }
+      @media (max-width: 800px) {
+        body {
+          padding: 24px 16px;
+        }
+        .summary {
+          grid-template-columns: 72px minmax(0, 1fr);
+          gap: 16px;
+          padding: 20px;
+        }
+        .avatar {
+          height: 72px;
+        }
+        .avatar svg {
+          width: 42px;
+        }
+        .date {
+          font-size: 12px;
+          margin: 0 0 10px;
+        }
+        .post {
+          font-size: 18px;
+        }
+        .metrics {
+          grid-column: 1 / -1;
+        }
+        .action {
+          font-size: 16px;
+          gap: 8px;
+        }
+      }
+      @media (max-width: 400px) {
+        .intro {
+          display: block;
+        }
+        .badge {
+          display: inline-block;
+          margin-top: 12px;
+        }
+        .summary {
+          padding: 16px;
+          gap: 12px;
+        }
+        .action {
+          font-size: 14px;
+          gap: 6px;
+          padding: 10px 6px;
+        }
+        .action svg {
+          width: 18px;
+        }
+        .reach-label {
+          font-size: 11px;
+        }
+        .counts div {
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .counts span {
+          font-size: 10px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="intro">
+        <div>
+          <h1>Zwei Aktionen. Eine Karte.</h1>
+          <p>Gleichberechtigt, verbunden und ohne aufgesetzte Einzelbuttons.</p>
+        </div>
+        <span class="badge">LOKALER DESIGN-DUMMY</span>
+      </header>
+      <article class="card">
+        <div class="summary">
+          <div class="avatar" aria-label="Beispiel-Vorschaubild">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="22" r="13" fill="currentColor" />
+              <path d="M8 62c0-29 48-29 48 0" fill="currentColor" />
+            </svg>
+            <span class="index">18</span>
+          </div>
+          <div>
+            <time class="date" datetime="2026-09-20T14:55">20.09.2026, 14:55</time>
+            <p class="post">
+              Hey <span>#NextcloudConf</span> - here is a <span>#mastowall</span> for you: …
+            </p>
+          </div>
+          <div class="metrics" aria-label="Reichweite des Beispielposts">
+            <div class="reach">
+              <div class="reach-label">NETTO-REICHWEITE<small>MAX. 84.732</small></div>
+              <strong>483</strong>
+              <div class="meter" aria-hidden="true"></div>
+            </div>
+            <div class="counts">
+              <div><span>LIKES</span><b>10</b></div>
+              <div><span>BOOSTS</span><b>1</b></div>
+              <div><span>ANTWORTEN</span><b>0</b></div>
+              <div><span>BRUTTO</span><b>7.700</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="details" id="post-details" hidden>
+          <h2>Details zum Post</h2>
+          <p>
+            Hey #NextcloudConf – here is a #mastowall for you!<br />483 erreichte Accounts · 1 Boost
+            · 10 Likes<br />Dieser Bereich simuliert nur das Aufklappen der Karte.
+          </p>
+        </div>
+        <footer class="actions">
+          <button
+            class="action"
+            id="details-button"
+            aria-expanded="false"
+            aria-controls="post-details"
+          >
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" /></svg
+            >Details
+          </button>
+          <button class="action" id="share-button">
+            Ergebnis teilen<svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" />
+            </svg>
+          </button>
+        </footer>
+      </article>
+      <section class="tuning" aria-label="Design anpassen">
+        <label
+          ><span>Buttonhöhe <output id="height-value">44 px</output></span
+          ><input id="height" type="range" min="44" max="80" value="44"
+        /></label>
+        <label
+          ><span>Violette Flächentönung <output id="tint-value">5 %</output></span
+          ><input id="tint" type="range" min="0" max="16" value="5"
+        /></label>
+        <label
+          >Text und Icons<select id="color">
+            <option value="var(--accent)">Violett</option>
+            <option value="var(--ink)">Dunkel</option>
+            <option value="var(--muted)">Gedämpft</option>
+          </select></label
+        >
+      </section>
+      <p class="note">
+        Details und Teilen sind klickbar. Die Regler ändern nur diesen Dummy, nicht die Anwendung.
+      </p>
+    </main>
+    <dialog id="share-dialog">
+      <h2>Ergebnis teilen</h2>
+      <p>
+        Platzhalter für den bisherigen Teilen-Dialog. Hier wird nichts veröffentlicht oder kopiert.
+      </p>
+      <form method="dialog"><button>Schließen</button></form>
+    </dialog>
+    <script>
+      const root = document.documentElement;
+      const detailsButton = document.getElementById('details-button');
+      detailsButton.addEventListener('click', () => {
+        const expanded = detailsButton.getAttribute('aria-expanded') !== 'true';
+        detailsButton.setAttribute('aria-expanded', String(expanded));
+        document.getElementById('post-details').hidden = !expanded;
+      });
+      document
+        .getElementById('share-button')
+        .addEventListener('click', () => document.getElementById('share-dialog').showModal());
+      for (const [id, property, unit] of [
+        ['height', '--action-height', 'px'],
+        ['tint', '--action-tint', '%'],
+      ]) {
+        document.getElementById(id).addEventListener('input', (event) => {
+          root.style.setProperty(property, event.target.value + unit);
+          document.getElementById(id + '-value').textContent = event.target.value + ' ' + unit;
+        });
+      }
+      document
+        .getElementById('color')
+        .addEventListener('change', (event) =>
+          root.style.setProperty('--action-color', event.target.value),
+        );
+    </script>
+  </body>
+</html>

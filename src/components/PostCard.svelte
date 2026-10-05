@@ -298,10 +298,11 @@
       open={expanded}
       ontoggle={(event) => onexpandedchange((event.currentTarget as HTMLDetailsElement).open)}
     >
-      <summary aria-label={detailsLabel}>
+      <summary aria-label={`${$_('post.details')}: ${detailsLabel}`}>
         <svg class="details-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="m5 9 7 7 7-7"></path>
         </svg>
+        <span>{$_('post.details')}</span>
       </summary>
 
       {#if additionalThreadEntries.length > 0}

@@ -181,6 +181,7 @@ export const en: Messages = {
       'Total of direct replies ({replies}) and quotes ({quotes}). Quotes are posts that share this post with an added comment.',
     gross: 'Gross',
     grossTitle: 'Gross reach',
+    details: 'Details',
     expand: 'Show full post',
     collapse: 'Collapse post',
     threadExpand: 'Show full thread',

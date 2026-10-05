@@ -495,13 +495,16 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   const reply = threadCard.getByText('Eine Antwort im selben Thread.');
   await expect(details.locator('summary')).toHaveAttribute(
     'aria-label',
-    'Vollständigen Thread anzeigen',
+    'Details: Vollständigen Thread anzeigen',
   );
   await expect(reply).toBeHidden();
 
   await details.locator('summary').click();
   await expect(details).toHaveAttribute('open', '');
-  await expect(details.locator('summary')).toHaveAttribute('aria-label', 'Thread einklappen');
+  await expect(details.locator('summary')).toHaveAttribute(
+    'aria-label',
+    'Details: Thread einklappen',
+  );
   await expect(reply).toBeVisible();
 
   const actionButtons = threadCard.locator('.post-details-actions button');
@@ -510,6 +513,9 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await expect(actionButtons.first()).toHaveText('Ergebnis teilen');
   const checkShareButtonLayout = async () => {
     const button = actionButtons.first();
+    const summary = details.locator('summary');
+    await expect(summary).toHaveText('Details');
+    const summaryBox = await summary.boundingBox();
     const [buttonBox, labelBox, iconBox, chevronBox, cardBox] = await Promise.all([
       button.boundingBox(),
       button.locator('span').boundingBox(),
@@ -522,10 +528,24 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
     expect(iconBox).not.toBeNull();
     expect(chevronBox).not.toBeNull();
     expect(cardBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(buttonBox!.height).toBe(44);
+    expect(summaryBox!.height).toBe(44);
+    expect(buttonBox!.width).toBeCloseTo(summaryBox!.width, 1);
+    expect(buttonBox!.x).toBeCloseTo(summaryBox!.x + summaryBox!.width, 1);
+    expect(buttonBox!.y).toBeCloseTo(summaryBox!.y, 1);
+    const colors = await button.evaluate((el) => ({
+      color: getComputedStyle(el).color,
+      background: getComputedStyle(el.closest('.post-details-bar')!).backgroundColor,
+      radius: getComputedStyle(el).borderRadius,
+    }));
+    expect(colors.color).toBe('rgb(93, 76, 240)');
+    expect(colors.background).toBe('color(srgb 0.945882 0.935098 0.944902)');
+    expect(colors.radius).toBe('0px');
     expect(labelBox!.x + labelBox!.width).toBeLessThan(iconBox!.x);
     expect(chevronBox!.x + chevronBox!.width).toBeLessThan(buttonBox!.x);
     expect(labelBox!.y + labelBox!.height / 2 - (iconBox!.y + iconBox!.height / 2)).toBeCloseTo(
-      1,
+      0,
       1,
     );
     expect(iconBox!.y + iconBox!.height / 2).toBeCloseTo(buttonBox!.y + buttonBox!.height / 2, 1);
@@ -562,6 +582,10 @@ test('analysiert einen Account ueber mehrere Booster-Seiten', async ({ page }) =
   await page.getByRole('group', { name: 'Sprache' }).getByRole('button', { name: 'EN' }).click();
   await expect(actionButtons.first()).toHaveAccessibleName('Share results');
   await expect(actionButtons.first()).toHaveText('Share results');
+  await expect(details.locator('summary')).toHaveAttribute(
+    'aria-label',
+    'Details: Collapse thread',
+  );
   await checkShareButtonLayout();
 });
 

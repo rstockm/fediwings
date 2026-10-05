@@ -36,6 +36,8 @@
 
   /* shape */
   --radius: 8px;
+  --post-action-height: 44px;
+  --post-action-background: color-mix(in srgb, var(--violet-strong) 5%, #f9f7f1);
 
   --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   --sans-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
