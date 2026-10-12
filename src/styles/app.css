@@ -18,6 +18,14 @@ body {
   background-size: 48px 48px;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--sans-display);
+  font-kerning: normal;
+  letter-spacing: normal;
+}
+
 button,
 input,
 select {
@@ -268,7 +276,6 @@ footer {
 .connection-panel h2 {
   margin: 6px 36px 14px 0;
   font-size: clamp(1.65rem, 5vw, 2.35rem);
-  letter-spacing: -0.04em;
 }
 
 .connection-close {
@@ -695,8 +702,7 @@ footer {
   margin: 0;
   font-size: clamp(3.3rem, 6.5vw, 7.25rem);
   line-height: 0.9;
-  letter-spacing: -0.075em;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .hero-emphasis {
@@ -1024,7 +1030,6 @@ footer {
   margin: 0 0 5px;
   font-size: clamp(1.5rem, 3vw, 2.45rem);
   line-height: 1;
-  letter-spacing: -0.05em;
 }
 
 .account-identity a {
@@ -1157,9 +1162,8 @@ footer {
   max-width: 660px;
   margin: 0;
   font-size: clamp(2.1rem, 4vw, 4rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.06em;
 }
 
 .insights-periods {
@@ -1501,9 +1505,8 @@ footer {
 .method h2 {
   margin: 0;
   font-size: clamp(2.1rem, 4vw, 4.5rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.06em;
 }
 
 .sort-control {
@@ -2075,7 +2078,6 @@ footer {
 .share-dialog h2 {
   margin: 0;
   font-size: clamp(1.7rem, 5vw, 2.45rem);
-  letter-spacing: -0.055em;
 }
 
 .share-dialog-close {
@@ -2314,9 +2316,8 @@ footer {
   max-width: 760px;
   margin: 0 0 20px;
   font-size: clamp(2.3rem, 6vw, 5.5rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.06em;
 }
 
 .share-state-page > p:not(.kicker) {
@@ -2362,9 +2363,8 @@ footer {
   margin: 0;
   font-family: var(--sans-display);
   font-size: clamp(2.8rem, 5vw, 5.8rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 0.9;
-  letter-spacing: -0.065em;
 }
 
 .shared-intro h1 .shared-title-light {
@@ -2372,7 +2372,6 @@ footer {
   font-size: 0.53em;
   font-family: var(--sans-display-thin);
   font-weight: 100;
-  letter-spacing: -0.005em;
 }
 
 .shared-intro h1 em {
@@ -2380,7 +2379,6 @@ footer {
   font-stretch: normal;
   font-style: normal;
   font-weight: 800;
-  letter-spacing: -0.055em;
 }
 
 .shared-intro > div > p:last-child {
@@ -2464,7 +2462,6 @@ footer {
   font-size: clamp(1.8rem, 3vw, 3.2rem);
   font-weight: 550;
   line-height: 1;
-  letter-spacing: -0.05em;
 }
 
 .shared-thread-header > small {
@@ -2735,8 +2732,7 @@ footer {
   max-width: 850px;
   margin: 0;
   font-size: clamp(3.5rem, 7vw, 7.6rem);
-  font-weight: 500;
-  letter-spacing: -0.075em;
+  font-weight: 400;
   line-height: 0.88;
 }
 
@@ -3016,8 +3012,7 @@ footer {
   gap: 14px;
   align-items: flex-start;
   font-size: clamp(1.9rem, 3.2vw, 3.4rem);
-  font-weight: 500;
-  letter-spacing: -0.05em;
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -3155,8 +3150,7 @@ footer {
   gap: 18px;
   align-items: flex-start;
   font-size: clamp(2.7rem, 5vw, 5.4rem);
-  font-weight: 500;
-  letter-spacing: -0.065em;
+  font-weight: 400;
   line-height: 0.94;
 }
 
@@ -3268,7 +3262,6 @@ footer {
   margin: 0;
   font-size: clamp(2rem, 3.5vw, 3.9rem);
   font-weight: 550;
-  letter-spacing: -0.06em;
 }
 
 .model-card code {
@@ -3437,7 +3430,6 @@ footer {
 .api-flow h3 {
   margin: 0 0 8px;
   font-size: clamp(1.35rem, 2vw, 2rem);
-  letter-spacing: -0.035em;
 }
 
 .api-flow code {
@@ -3730,8 +3722,7 @@ footer {
   max-width: 850px;
   margin: 0;
   font-size: clamp(3rem, 6vw, 6.4rem);
-  font-weight: 500;
-  letter-spacing: -0.07em;
+  font-weight: 400;
   line-height: 0.9;
 }
 
@@ -3772,7 +3763,6 @@ footer {
   margin: 0 0 18px;
   font-size: clamp(1.4rem, 2.4vw, 2rem);
   font-weight: 550;
-  letter-spacing: -0.04em;
 }
 
 .follower-actions {

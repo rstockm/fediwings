@@ -19,6 +19,7 @@ function cspPlugin(): Plugin {
         "default-src 'none'",
         "script-src 'self'",
         `style-src ${styleSrc}`,
+        "font-src 'self'",
         "img-src 'self' https: data:",
         `connect-src ${connectSrc}`,
         'frame-src https://fair.tube',
