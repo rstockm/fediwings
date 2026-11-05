@@ -13,9 +13,24 @@ https://rstockm.github.io/fediwings/?handle=alice%40mastodon.social
 ```
 
 Der Wert ist ein URL-kodierter Handle (`alice@mastodon.social`, optional mit
-führendem `@`), keine Profil-URL. **Die Analyse startet erst nach Klick auf
-„Analysieren“**; das Öffnen des Links sendet keine instanzbezogenen Requests.
-Ungültige Deep Links werden ignoriert, die normale Eingabe bleibt verfügbar.
+führendem `@`), keine Profil-URL. Ohne weitere Parameter startet die Analyse erst
+nach Klick auf „Analysieren“; das Öffnen dieses Links sendet keine
+instanzbezogenen Requests. Ungültige Deep Links werden ignoriert, die normale
+Eingabe bleibt verfügbar.
+
+Für einen unmittelbaren Analysestart kann genau einmal `autostart=1` ergänzt werden:
+
+```text
+https://rstockm.github.io/fediwings/?handle=alice%40mastodon.social&autostart=1
+```
+
+Der Autostart wird nur für einen gültigen Handle akzeptiert; doppelte Flags oder
+andere Werte lösen ihn nicht aus. Vor dem Start wird das Flag aus der URL entfernt,
+damit ein Reload die Analyse nicht erneut auslöst. Ein neuer Aufruf des ursprünglichen
+Links startet wieder eine Analyse. OAuth- und Share-Aufrufe starten darüber keine
+Analyse. Autostart-Links kann jeder erstellen: Sie sind keine Vertrauensprüfung
+des Absenders und lösen direkt Anfragen an die Instanz aus, die dabei die IP-Adresse
+der Besucher:innen sieht.
 
 Die Übernahme akzeptiert genau einen `handle`-Parameter mit begrenzter Länge.
 Benutzername und DNS-Labels werden validiert, internationale Domains zu Punycode
@@ -23,8 +38,8 @@ normalisiert. HTML-/URL-Payloads, Steuerzeichen, Zugangsdaten, Ports, Pfade,
 IP-Adressen und lokale/reservierte Domain-Endungen werden abgewiesen. Der Wert
 wird nur als Svelte-Inputwert verwendet, nie als HTML oder ausführbarer Code.
 OAuth-Rücksprünge, andere Ansichten und fragmentbasierte Share-Links haben Vorrang.
-Die syntaktische Domainprüfung ist keine DNS-/Netzwerk-Sandbox; nach bewusstem
-Start gelten die bestehenden API-, CORS- und Browser-Sicherheitsregeln.
+Die syntaktische Domainprüfung ist keine DNS-/Netzwerk-Sandbox; für manuelle und
+automatische Starts gelten die bestehenden API-, CORS- und Browser-Sicherheitsregeln.
 
 ## Entwicklung
 

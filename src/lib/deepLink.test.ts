@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readDeepLinkHandle } from './deepLink';
+import { readDeepLinkHandle, shouldAutostartDeepLink } from './deepLink';
 
 describe('readDeepLinkHandle', () => {
   it('normalizes a single handle without starting an analysis', () => {
@@ -54,5 +54,37 @@ describe('readDeepLinkHandle', () => {
       expect(readDeepLinkHandle(`?handle=alice%40mastodon.social${suffix}`)).toBeNull();
     }
     expect(readDeepLinkHandle('?handle=alice%40mastodon.social', '#post=shared')).toBeNull();
+  });
+});
+
+describe('shouldAutostartDeepLink', () => {
+  it('requires exactly one explicit flag and a valid handle', () => {
+    expect(shouldAutostartDeepLink('?handle=alice%40mastodon.social&autostart=1')).toBe(true);
+    for (const suffix of [
+      '',
+      '&autostart=0',
+      '&autostart=true',
+      '&autostart=01',
+      '&autostart=1&autostart=1',
+      '&autostart=1&autostart=0',
+    ]) {
+      expect(shouldAutostartDeepLink(`?handle=alice%40mastodon.social${suffix}`)).toBe(false);
+    }
+  });
+
+  it('cannot bypass handle validation or OAuth/share/view precedence', () => {
+    for (const query of [
+      '?autostart=1',
+      '?handle=alice%40127.0.0.1&autostart=1',
+      '?handle=%3Cscript%3E%40mastodon.social&autostart=1',
+      '?handle=alice%40mastodon.social&handle=bob%40mastodon.social&autostart=1',
+      '?handle=alice%40mastodon.social&autostart=1&code=oauth',
+      '?handle=alice%40mastodon.social&autostart=1&view=follower',
+      '?handle=alice%40mastodon.social&autostart=1&view=methodik',
+    ])
+      expect(shouldAutostartDeepLink(query)).toBe(false);
+    expect(
+      shouldAutostartDeepLink('?handle=alice%40mastodon.social&autostart=1', '#post=shared'),
+    ).toBe(false);
   });
 });

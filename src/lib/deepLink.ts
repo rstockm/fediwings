@@ -1,6 +1,6 @@
 import { parseHandle } from './handle';
 
-/** Untrusted links may prefill a handle, never start network requests or OAuth. */
+/** Parse untrusted handles without network requests or HTML interpretation. */
 export function readDeepLinkHandle(search: string, hash = ''): string | null {
   if (search.length > 2048 || hash) return null;
   const params = new URLSearchParams(search);
@@ -33,4 +33,10 @@ export function readDeepLinkHandle(search: string, hash = ''): string | null {
   } catch {
     return null;
   }
+}
+
+export function shouldAutostartDeepLink(search: string, hash = ''): boolean {
+  if (!readDeepLinkHandle(search, hash)) return false;
+  const flags = new URLSearchParams(search).getAll('autostart');
+  return flags.length === 1 && flags[0] === '1';
 }

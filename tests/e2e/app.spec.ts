@@ -269,6 +269,24 @@ test('Deep Link befuellt nur den Handle und analysiert erst nach Klick', async (
   expect(remoteRequests.length).toBeGreaterThan(0);
 });
 
+test('Deep Link startet mit explizitem Flag genau einmal und nicht erneut nach Reload', async ({
+  page,
+}) => {
+  await mockMastodon(page);
+  const remoteRequests: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).hostname === 'test.social') remoteRequests.push(request.url());
+  });
+  await page.goto('/?handle=alice%40test.social&autostart=1');
+  await expect(page.locator('.post-card').first()).toBeVisible();
+  await expect(page).toHaveURL(/\?handle=alice%40test.social$/);
+  expect(remoteRequests.filter((url) => url.includes('/accounts/lookup'))).toHaveLength(1);
+  remoteRequests.length = 0;
+  await page.reload();
+  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('alice@test.social');
+  expect(remoteRequests).toEqual([]);
+});
+
 test('Deep Link ignoriert HTML-Payloads und lokale Ziele ohne Requests', async ({ page }) => {
   const remoteRequests: string[] = [];
   page.on('request', (request) => {
@@ -276,7 +294,7 @@ test('Deep Link ignoriert HTML-Payloads und lokale Ziele ohne Requests', async (
       remoteRequests.push(request.url());
   });
   for (const payload of ['<img src=x onerror=alert(1)>@test.social', 'alice@127.0.0.1']) {
-    await page.goto(`/?handle=${encodeURIComponent(payload)}`);
+    await page.goto(`/?handle=${encodeURIComponent(payload)}&autostart=1`);
     await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('');
     await expect(page.locator('img[onerror], script[src="x"]')).toHaveCount(0);
   }
