@@ -4,6 +4,28 @@ FediWings ist eine statische Webanwendung zur Analyse der Netto-Reichweite öffe
 
 Die Oberfläche ist zweisprachig (Deutsch/Englisch, Umschalter in der Kopfzeile). Ohne weiteren Hinweis startet die App auf Deutsch; die Browsersprache dient als Vorschlag.
 
+## Accounts per Deep Link öffnen
+
+Ein Link kann den Analyse-Handle vorbefüllen, zum Beispiel:
+
+```text
+https://rstockm.github.io/fediwings/?handle=alice%40mastodon.social
+```
+
+Der Wert ist ein URL-kodierter Handle (`alice@mastodon.social`, optional mit
+führendem `@`), keine Profil-URL. **Die Analyse startet erst nach Klick auf
+„Analysieren“**; das Öffnen des Links sendet keine instanzbezogenen Requests.
+Ungültige Deep Links werden ignoriert, die normale Eingabe bleibt verfügbar.
+
+Die Übernahme akzeptiert genau einen `handle`-Parameter mit begrenzter Länge.
+Benutzername und DNS-Labels werden validiert, internationale Domains zu Punycode
+normalisiert. HTML-/URL-Payloads, Steuerzeichen, Zugangsdaten, Ports, Pfade,
+IP-Adressen und lokale/reservierte Domain-Endungen werden abgewiesen. Der Wert
+wird nur als Svelte-Inputwert verwendet, nie als HTML oder ausführbarer Code.
+OAuth-Rücksprünge, andere Ansichten und fragmentbasierte Share-Links haben Vorrang.
+Die syntaktische Domainprüfung ist keine DNS-/Netzwerk-Sandbox; nach bewusstem
+Start gelten die bestehenden API-, CORS- und Browser-Sicherheitsregeln.
+
 ## Entwicklung
 
 Voraussetzung ist Node.js 22 oder neuer.

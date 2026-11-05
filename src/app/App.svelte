@@ -21,6 +21,7 @@
   } from '../lib/api';
   import { analyzePosts, preparePosts, prepareSharedPost } from '../lib/analysis';
   import { resolveHandle } from '../lib/handle';
+  import { readDeepLinkHandle } from '../lib/deepLink';
   import { loadSavedHandles, saveHandleToHistory, type SavedHandle } from '../lib/history';
   import { readLastAccount, writeLastAccount } from '../lib/lastAccount';
   import { buildPostingInsights } from '../lib/insights';
@@ -565,6 +566,8 @@
   }
 
   onMount(() => {
+    const linkedHandle = readDeepLinkHandle(window.location.search, window.location.hash);
+    if (linkedHandle) handle = linkedHandle;
     const storedSession = loadFollowerSession();
     if (storedSession) {
       authSession = storedSession;

@@ -255,6 +255,34 @@ async function mockInstanceConnection(page: Page) {
   });
 }
 
+test('Deep Link befuellt nur den Handle und analysiert erst nach Klick', async ({ page }) => {
+  await mockMastodon(page);
+  const remoteRequests: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).hostname === 'test.social') remoteRequests.push(request.url());
+  });
+  await page.goto('/?handle=alice%40test.social');
+  await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('alice@test.social');
+  expect(remoteRequests).toEqual([]);
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  await expect(page.locator('.post-card').first()).toBeVisible();
+  expect(remoteRequests.length).toBeGreaterThan(0);
+});
+
+test('Deep Link ignoriert HTML-Payloads und lokale Ziele ohne Requests', async ({ page }) => {
+  const remoteRequests: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4173')
+      remoteRequests.push(request.url());
+  });
+  for (const payload of ['<img src=x onerror=alert(1)>@test.social', 'alice@127.0.0.1']) {
+    await page.goto(`/?handle=${encodeURIComponent(payload)}`);
+    await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('');
+    await expect(page.locator('img[onerror], script[src="x"]')).toHaveCount(0);
+  }
+  expect(remoteRequests).toEqual([]);
+});
+
 test('fasst Antworten und Zitate zusammen und erklaert das Teilen zweisprachig', async ({
   page,
 }) => {
