@@ -1,8 +1,65 @@
 # FediWings
 
-FediWings ist eine statische Webanwendung zur Analyse der Netto-Reichweite öffentlicher Fediverse-Beiträge auf unterstützten API-kompatiblen Servern. Die App lädt Daten direkt aus dem Browser von der Heimatinstanz des analysierten Accounts und speichert keine Analyseergebnisse.
+FediWings macht die öffentliche Verbreitung von Fediverse-Beiträgen sichtbar: mit einer geschätzten **Netto-Reichweite**, dem **Brutto-Potenzial** und vergleichbaren Posting-Kennzahlen. Es misst keine Views oder eindeutigen Leser:innen. Die statische Webanwendung lädt Daten direkt im Browser von den unterstützten Instanzen; für die öffentliche Analyse ist kein Login nötig.
 
-Die Oberfläche ist zweisprachig (Deutsch/Englisch, Umschalter in der Kopfzeile). Ohne weiteren Hinweis startet die App auf Deutsch; die Browsersprache dient als Vorschlag.
+**[App öffnen](https://rstockm.github.io/fediwings/)** · **[Mit rstockm@chaos.social ausprobieren](https://rstockm.github.io/fediwings/?handle=rstockm%40chaos.social)** · **[Methodik](https://rstockm.github.io/fediwings/?view=methodik)**
+
+![FediWings: Analyse von Ralf Stockmann auf chaos.social mit Accountdaten und Posting Insights](docs/screenshots/analyse-desktop.png)
+
+## Was die App kann
+
+- **Accounts analysieren:** 10, 20, 40 oder 80 Threads auswählen; eigene Antwortketten werden zusammengefasst, Antworten an andere Accounts und Boosts aussortiert.
+- **Beiträge verstehen:** Netto-Reichweite, Brutto-Potenzial, Likes, Boosts sowie Antworten/Quotes pro Thread; aufklappbare Texte und Medien.
+- **30 Tage vergleichen:** Reichweitenschätzungen, Interaktionen, Likes und Boosts mit dem vorherigen 30-Tage-Zeitraum vergleichen; unvollständige Zeitfenster werden gekennzeichnet.
+- **Ergebnisse teilen:** Einzelne Threads als Analyse-Link öffnen oder über den optionalen Card Service eine Vorschaukarte erstellen.
+- **Eigene Instanz verbinden:** Optionaler Nur-Lese-Zugriff per OAuth für Follower-Verlauf und zeitlichen Boost-Verlauf eigener Beiträge. Die graue Long-Tail-Kurve ohne Verbindung ist ausdrücklich nur eine Vorschau, keine Messung.
+- **Mobil und zweisprachig arbeiten:** Responsive Oberfläche, Deutsch/Englisch und optional lokal gemerkte Handles. Zuerst gilt eine gespeicherte Sprachwahl, sonst die deutsche/englische Browsersprache; andere Sprachen fallen auf Deutsch zurück.
+
+## Einblicke
+
+Aufgenommen am **08.11.2026** mit öffentlichen Live-Daten von **[rstockm@chaos.social](https://chaos.social/@rstockm)**. Zahlen und Beiträge sind Momentaufnahmen, keine festen Demo-Werte. Desktop: 1440 Pixel, Mobilansicht: 390 Pixel breit; einzelne Bereiche sind zugeschnitten.
+
+<details>
+<summary>Startseite und mobile Analyse</summary>
+
+Der vorausgefüllte Handle startet ohne explizites Autostart-Flag noch keine Analyse.
+
+![Startseite mit vorausgefülltem Handle rstockm@chaos.social und Thread-Auswahl](docs/screenshots/start.png)
+
+<img src="docs/screenshots/analyse-mobile.png" alt="Mobile Analyse von rstockm@chaos.social mit vollständigem FediWings-Logo, Accountdaten und Analysefortschritt" width="390" />
+
+</details>
+
+<details>
+<summary>Posting Insights und Thread-Details</summary>
+
+![Vier Posting-Insights-Karten mit 30-Tage-Vergleich für Netto-Reichweite, Interaktionen, Likes und Boosts](docs/screenshots/posting-insights.png)
+
+![Aufgeklappter Thread von Ralf Stockmann mit Reichweitenkennzahlen, Folgebeitrag und als Vorschau gekennzeichneter Boost-Dynamik](docs/screenshots/thread-details.png)
+
+</details>
+
+<details>
+<summary>Follower und optionale Instanzverbindung</summary>
+
+Die aktuelle Followerzahl ist öffentlich. Historische Diagramme und echte Boost-Zeitpunkte benötigen die Zustimmung zum Nur-Lese-Zugriff auf den eigenen Account. Die Aufnahmen zeigen den nicht angemeldeten Zustand; authentifizierte Verlaufsdiagramme sind hier nicht abgebildet.
+
+![Follower-Ansicht mit öffentlicher Followerzahl von rstockm@chaos.social und Hinweis auf die optionale Anmeldung](docs/screenshots/follower.png)
+
+![Dialog zur optionalen Instanzverbindung mit Erklärung von Nur-Lese-Zugriff und lokaler Sitzung](docs/screenshots/instanzverbindung.png)
+
+</details>
+
+<details>
+<summary>Methodik und Grenzen</summary>
+
+Die Methodikseite erläutert Modell, Datenquellen und Grenzen; sie enthält auch die FediDay-Keynote und den Bezug zu FediSuite.
+
+![Methodikseite von FediWings mit Erläuterung des Reichweitenmodells](docs/screenshots/methodik.png)
+
+</details>
+
+Hinweise zur Aktualisierung und noch nicht abgebildeten Abläufen: [Screenshot-Dokumentation](docs/screenshots/README.md).
 
 ## Accounts per Deep Link öffnen
 
@@ -51,7 +108,7 @@ Er kann entfallen, sobald upstream eine sichere Version verwendet. Vitest 4.1.11
 oder neuer behebt den Path-Traversal-Befund im Mocking-Modul.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -76,6 +133,20 @@ make test           # Unit- und Integrationstests
 make test-browser   # Playwright-Smoke-Tests (Desktop, Mobile, 320px, axe)
 make build          # Produktions-Build
 ```
+
+Vor dem ersten Browser-Test die passende Chromium-Version installieren:
+
+```bash
+npx playwright install chromium
+make build
+make test-browser
+```
+
+## Betrieb auf GitHub Pages
+
+Die App besteht aus statischen Dateien in `dist/`. Der Workflow [deploy.yml](.github/workflows/deploy.yml) prüft Pushes auf `master`/`main` vor dem Pages-Deployment; er lässt sich auch manuell starten. Vite setzt dabei den Repository-Unterpfad automatisch. Für lokale Builds gilt `/` als Basis.
+
+Der optionale, separat betriebene Card Service wird beim Build über `VITE_CARD_SERVICE_URL` konfiguriert; GitHub Actions liest dafür die Repository-Variable `CARD_SERVICE_URL`. Ohne erreichbaren Service bleibt ein direkter Analyse-Link als Fallback verfügbar. Zum lokalen Prüfen des Builds: `npm run preview`.
 
 ## Unterstützte Server
 
@@ -111,15 +182,15 @@ Interaktionen = Likes + Antworten
 Netto-Reichweite = min(
   Brutto-Reichweite,
   max(
-    0,0165 × Brutto-Reichweite × (1 + 2 × Boosts)^0,7314 × (1 + Interaktionen)^0,2214,
-    Likes + Boosts
+    round(0,0165 × Brutto-Reichweite × (1 + 2 × Boosts + 2 × Quotes)^0,7314 × (1 + Interaktionen)^0,2214),
+    Likes + Boosts + Quotes
   )
 )
 
 Brutto-Reichweite = Autor-Follower + Summe der Follower öffentlicher Booster
 ```
 
-Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regression aus Instagram-Story-Daten heuristisch auf Beiträge im Fediverse. Der Faktor `2 × Boosts` unterstellt einen höheren Boost-Wert in der nicht algorithmisch sortierten Timeline; er ist nicht mit Fediverse-Impressionsdaten kalibriert. Die Schätzung wird an der ergänzend ausgewiesenen Brutto-Reichweite gedeckelt und fällt nie unter die Summe aus Likes und Boosts, da jede reagierende Person den Beitrag nachweislich gesehen hat. Die Brutto-Reichweite ist keine Impressionenzahl und enthält Überschneidungen zwischen Followerkreisen. Details zur Einordnung stehen auf der Methodik-Seite der App.
+Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regression aus Instagram-Story-Daten heuristisch auf Beiträge im Fediverse. Boosts und – soweit vom Server gemeldet – Quotes gehen jeweils mit dem Faktor 2 ein. Das Modell ist nicht mit Fediverse-Impressionsdaten kalibriert. Die gerundete Schätzung wird mindestens auf die Summe aus Likes, Boosts und Quotes angehoben, bleibt aber durch das Brutto-Potenzial gedeckelt. Diese Untergrenze zählt Reaktionen, nicht zwingend verschiedene Personen. Auch das Brutto-Potenzial enthält Überschneidungen zwischen Followerkreisen und ist keine Impressionenzahl. Details zur Einordnung stehen auf der Methodik-Seite der App.
 
 Die Ergebnisübersicht vergleicht Beiträge aus den letzten 30 Kalendertagen mit den 30 Tagen davor und gruppiert die Werte nach Veröffentlichungsdatum. An erster Stelle steht die Summe der bereits pro Thread berechneten Netto-Reichweiten; wegen möglicher Zielgruppenüberschneidungen ist sie keine Schätzung eindeutig erreichter Personen. Die weiteren Karten verwenden direkt gemeldete Postingzähler: Likes und Boosts sowie Likes, Boosts und Antworten zusammen als Interaktionen. Die Zähler zeigen den Stand zum Analysezeitpunkt, nicht den Zeitpunkt einzelner Reaktionen. Reicht die geladene Historie oder die Auswahl der 80 analysierten Threads nicht bis zum Beginn eines Zeitfensters, zeigt FediWings dafür weder eine Teilsumme noch eine irreführende Kurve. Eine Prozentabweichung entfällt außerdem, wenn die Vorperiodensumme null ist.
 
