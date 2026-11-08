@@ -21,7 +21,13 @@ Reichweite, Interaktionen, Likes und Boosts im Zeitverlauf — jeweils mit dem v
 
 ## Einblicke
 
-Aufgenommen am **08.11.2026** mit öffentlichen Live-Daten von **[rstockm@chaos.social](https://chaos.social/@rstockm)**. Zahlen und Beiträge sind Momentaufnahmen, keine festen Demo-Werte. Desktop: 1440 Pixel, Mobilansicht: 390 Pixel breit; einzelne Bereiche sind zugeschnitten.
+Aufgenommen am **08.11.2026** mit öffentlichen Live-Daten von **[rstockm@chaos.social](https://chaos.social/@rstockm)**. Zahlen und Beiträge sind Momentaufnahmen, keine festen Demo-Werte. Desktop-Viewport: 1440 Pixel, Mobilansicht: 390 Pixel breit; einzelne Bereiche sind zugeschnitten und alle Aufnahmen haben zusätzlichen Außenabstand.
+
+### Ergebnisse als Share-Card
+
+Eine echte, mit FediWings erstellte Vorschaukarte für einen öffentlichen Thread: mit Profil, Beitragstext, Vorschaubild und Reichweitenkennzahlen. Die Karte lässt sich als Bildvorschau über einen öffentlichen Share-Link teilen.
+
+![FediWings-Share-Card für einen Thread von Ralf Stockmann über FediPol mit Profilbild, Beitragsvorschau, 28.060 geschätzter Netto-Reichweite, 61 Likes und 37 Boosts](docs/screenshots/share-card.png)
 
 ### Threads und Reichweite im Detail
 
