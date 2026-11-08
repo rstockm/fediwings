@@ -4,7 +4,11 @@ FediWings macht die öffentliche Verbreitung von Fediverse-Beiträgen sichtbar: 
 
 **[App öffnen](https://rstockm.github.io/fediwings/)** · **[Mit rstockm@chaos.social ausprobieren](https://rstockm.github.io/fediwings/?handle=rstockm%40chaos.social)** · **[Methodik](https://rstockm.github.io/fediwings/?view=methodik)**
 
-![FediWings: Analyse von Ralf Stockmann auf chaos.social mit Accountdaten und Posting Insights](docs/screenshots/analyse-desktop.png)
+### Posting Insights: 30 Tage im Vergleich
+
+Reichweite, Interaktionen, Likes und Boosts im Zeitverlauf — jeweils mit dem vorherigen 30-Tage-Zeitraum als Vergleich.
+
+![Vier Verlaufsstatistiken für rstockm@chaos.social: Netto-Reichweite, Interaktionen, Likes und Boosts mit Vorperiodenvergleich](docs/screenshots/posting-insights.png)
 
 ## Was die App kann
 
@@ -19,23 +23,30 @@ FediWings macht die öffentliche Verbreitung von Fediverse-Beiträgen sichtbar: 
 
 Aufgenommen am **08.11.2026** mit öffentlichen Live-Daten von **[rstockm@chaos.social](https://chaos.social/@rstockm)**. Zahlen und Beiträge sind Momentaufnahmen, keine festen Demo-Werte. Desktop: 1440 Pixel, Mobilansicht: 390 Pixel breit; einzelne Bereiche sind zugeschnitten.
 
+### Threads und Reichweite im Detail
+
+Ein aufgeklappter Thread zeigt die zusammengefassten Kennzahlen und die Folgebeiträge. Rechts ist ohne Anmeldung nur die ausdrücklich als **Vorschau · keine Messdaten** markierte Boost-Kurve zu sehen. Echte Boost-Zeitverläufe werden erst nach Verbindung der eigenen Instanz geladen.
+
+![Aufgeklappter Thread von Ralf Stockmann mit Reichweitenkennzahlen, Folgebeitrag und als Vorschau gekennzeichneter Boost-Dynamik](docs/screenshots/thread-details.png)
+
+### Das Modell hinter den Zahlen
+
+Die Methodikseite erläutert Modell, Datenquellen und Grenzen; sie enthält auch die FediDay-Keynote und den Bezug zu FediSuite.
+
+![Methodikseite von FediWings mit Erläuterung des Reichweitenmodells](docs/screenshots/methodik.png)
+
+### Auch auf dem Smartphone
+
+<img src="docs/screenshots/analyse-mobile.png" alt="Mobile Analyse von rstockm@chaos.social mit vollständigem FediWings-Logo, Accountdaten und Analysefortschritt" width="390" />
+
 <details>
-<summary>Startseite und mobile Analyse</summary>
+<summary>Weitere Ansichten: Start und Accountübersicht</summary>
 
 Der vorausgefüllte Handle startet ohne explizites Autostart-Flag noch keine Analyse.
 
 ![Startseite mit vorausgefülltem Handle rstockm@chaos.social und Thread-Auswahl](docs/screenshots/start.png)
 
-<img src="docs/screenshots/analyse-mobile.png" alt="Mobile Analyse von rstockm@chaos.social mit vollständigem FediWings-Logo, Accountdaten und Analysefortschritt" width="390" />
-
-</details>
-
-<details>
-<summary>Posting Insights und Thread-Details</summary>
-
-![Vier Posting-Insights-Karten mit 30-Tage-Vergleich für Netto-Reichweite, Interaktionen, Likes und Boosts](docs/screenshots/posting-insights.png)
-
-![Aufgeklappter Thread von Ralf Stockmann mit Reichweitenkennzahlen, Folgebeitrag und als Vorschau gekennzeichneter Boost-Dynamik](docs/screenshots/thread-details.png)
+![Abgeschlossene Analyse mit Accountübersicht von Ralf Stockmann auf chaos.social](docs/screenshots/analyse-desktop.png)
 
 </details>
 
@@ -47,15 +58,6 @@ Die aktuelle Followerzahl ist öffentlich. Historische Diagramme und echte Boost
 ![Follower-Ansicht mit öffentlicher Followerzahl von rstockm@chaos.social und Hinweis auf die optionale Anmeldung](docs/screenshots/follower.png)
 
 ![Dialog zur optionalen Instanzverbindung mit Erklärung von Nur-Lese-Zugriff und lokaler Sitzung](docs/screenshots/instanzverbindung.png)
-
-</details>
-
-<details>
-<summary>Methodik und Grenzen</summary>
-
-Die Methodikseite erläutert Modell, Datenquellen und Grenzen; sie enthält auch die FediDay-Keynote und den Bezug zu FediSuite.
-
-![Methodikseite von FediWings mit Erläuterung des Reichweitenmodells](docs/screenshots/methodik.png)
 
 </details>
 
