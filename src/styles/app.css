@@ -4194,7 +4194,8 @@ footer {
   }
 
   .brand-logo-lockup {
-    width: 90px;
+    /* Keep the full wordmark: 160px image minus the 64px emblem offset. */
+    width: 96px;
     overflow: hidden;
   }
 

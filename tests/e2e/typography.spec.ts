@@ -1,5 +1,21 @@
 import { expect, test } from '@playwright/test';
 
+test('mobile header keeps the complete wordmark visible', async ({ page }) => {
+  for (const width of [320, 375, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/');
+
+    const lockup = await page.locator('.brand-logo-lockup').boundingBox();
+    const wordmark = await page.locator('.brand-logo-lockup-word').boundingBox();
+    const emblem = await page.locator('.brand-mobile-emblem').boundingBox();
+    expect(lockup).not.toBeNull();
+    expect(wordmark).not.toBeNull();
+    expect(emblem).not.toBeNull();
+    expect(wordmark!.x + wordmark!.width).toBeLessThanOrEqual(lockup!.x + lockup!.width);
+    expect(lockup!.x + lockup!.width).toBeLessThanOrEqual(emblem!.x);
+  }
+});
+
 test('display headings render Inter Tight Latin glyphs instead of fallback glyphs', async ({
   page,
 }) => {
