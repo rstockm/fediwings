@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import ReportCharts from './ReportCharts.svelte';
 
@@ -87,6 +87,27 @@ describe('ReportCharts', () => {
     expect(container.querySelector('.chart-mean')).toBeNull();
     expect(container.querySelector('.chart-mean-value')).toBeNull();
     expect(container.querySelector('.chart-meta')?.textContent).toContain('Höchster Monatswert');
+  });
+
+  it('zeigt beim Überfahren den Monatswert mit Führungslinie', async () => {
+    const { container } = render(ReportCharts, {
+      labels,
+      rows: [{ key: 'reach', label: 'Reichweite', values: [10, 20, 15, 35] }],
+    });
+    const plot = container.querySelector<HTMLElement>('.chart-plot');
+    expect(plot).toBeTruthy();
+    plot!.getBoundingClientRect = () =>
+      ({ left: 0, right: 120, width: 120, top: 0, bottom: 90, height: 90 }) as DOMRect;
+
+    await fireEvent(plot!, new MouseEvent('pointermove', { bubbles: true, clientX: 25 }));
+    const line = container.querySelector<HTMLElement>('.chart-hover-line');
+    expect(line).toBeTruthy();
+    expect(Number.parseFloat(line!.style.left)).toBeCloseTo(20.833, 2);
+    expect(container.querySelector('.chart-hover-tip')?.textContent).toContain('Mär · 15');
+    expect(container.querySelector('.chart-column-active')).toBeTruthy();
+
+    await fireEvent(plot!, new MouseEvent('pointerleave'));
+    expect(container.querySelector('.chart-hover-tip')).toBeNull();
   });
 
   it('behält den Leerhinweis für Reihen ganz ohne Monatswerte', () => {

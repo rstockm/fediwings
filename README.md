@@ -49,7 +49,8 @@ Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer.
 Eine gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate; sein
 Wert steht rechts oben in der Diagrammkarte und überdeckt so keine Balken. Die
 Mittelwerte von Follower-Wachstum, Reichweite und Interaktionen erscheinen als ganze
-Zahlen, Engagement und Postings behalten eine Nachkommastelle. Das Diagramm der
+Zahlen, Engagement und Postings behalten eine Nachkommastelle. Beim Überfahren
+eines Monats zeigt eine Führungslinie den Treffer, ein Tooltip nennt Monat und Wert. Das Diagramm der
 absoluten Follower-Zahlen zeigt keinen Mittelwert.
 Bei verbundener Instanz füllen der verankerte Follower-Verlauf und monatliche
 Follow-Benachrichtigungen fehlende Werte in den beiden Follower-Zeilen. Gespeicherte

@@ -186,6 +186,14 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await page.getByLabel('Jahr', { exact: true }).selectOption('2026');
   await expect(page.getByRole('rowheader', { name: 'Interaktionen' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Der Jahresverlauf' })).toBeVisible();
+  const reachPlot = page.locator('.chart-card', { hasText: 'Reichweite' }).locator('.chart-plot');
+  const reachBox = await reachPlot.boundingBox();
+  expect(reachBox).not.toBeNull();
+  await reachPlot.hover({ position: { x: reachBox!.width * (1.5 / 12), y: reachBox!.height / 2 } });
+  await expect(page.locator('.chart-hover-tip')).toHaveText(/Feb/);
+  await expect(page.locator('.chart-hover-line')).toHaveCount(1);
+  await page.mouse.move(0, 0);
+  await expect(page.locator('.chart-hover-tip')).toHaveCount(0);
   await expect(page.getByRole('row', { name: /Interaktionen/ })).toContainText('6');
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(

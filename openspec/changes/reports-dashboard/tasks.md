@@ -25,6 +25,7 @@
 - [x] 4.3 README, Methodik und relevante Komponenten-/Bibliotheksdokumentation aktualisieren; Desktop- und Mobil-Screenshots mit öffentlichen Daten erstellen und verlinken.
 - [x] 4.4 Mittelwertlinie je Monatsdiagramm mit Wertanzeige ergänzen; Unit- und Komponententests prüfen Berechnung, Position und Leerzustand.
 - [x] 4.7 Mittelwert beim Follower-Stand ausblenden, Wachstum/Reichweite/Interaktionen ganzzahlig runden und den Wert rechts oben in die Diagrammkarte verschieben; Komponententests prüfen Rundung, Ausblenden und Position.
+- [x] 4.8 Monatsbalken mit Führungslinie, Hervorhebung und Wert-Tooltip beim Überfahren ausstatten; Komponenten- und Browsertest prüfen Anzeige und Verschwinden.
 - [x] 4.5 Rückmeldung für Kopieren und Löschen direkt an der Aktionsleiste anzeigen; Komponenten- und Browsertest prüfen Erfolg, Fehler und Sichtbarkeit.
 - [x] 4.6 Jahres-Spinner durch eine klar bedienbare Auswahlliste ersetzen; Komponententest prüft den gültigen Jahresbereich.
 

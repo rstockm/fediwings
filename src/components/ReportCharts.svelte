@@ -56,6 +56,36 @@
       maximumFractionDigits,
     }).format(value);
   }
+
+  const plotColumns = 12;
+
+  let hoveredKey = $state<string | null>(null);
+  let hoveredIndex = $state<number | null>(null);
+
+  function trackPointer(
+    event: PointerEvent,
+    chart: { key: string; values: Array<number | null> },
+  ): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const fraction = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const index = Math.min(plotColumns - 1, Math.floor(fraction * plotColumns));
+    if (index >= periodLength || chart.values[index] === null) {
+      clearPointer();
+      return;
+    }
+    hoveredKey = chart.key;
+    hoveredIndex = index;
+  }
+
+  function clearPointer(): void {
+    hoveredKey = null;
+    hoveredIndex = null;
+  }
+
+  function tooltipOffset(index: number): string {
+    return `clamp(3.4rem, ${((index + 0.5) * 100) / plotColumns}%, calc(100% - 3.4rem))`;
+  }
 </script>
 
 <section class="report-charts" aria-labelledby="report-charts-title">
@@ -98,7 +128,12 @@
                 </span>
               {/each}
             </div>
-            <div class="chart-plot">
+            <div
+              class="chart-plot"
+              role="presentation"
+              onpointermove={(event) => trackPointer(event, chart)}
+              onpointerleave={clearPointer}
+            >
               {#each chart.ticks as tick (tick.top)}
                 <div class="chart-gridline" style:top={`${tick.top}%`}></div>
               {/each}
@@ -109,7 +144,7 @@
               {#each chart.bars as bar, index (index)}
                 <div
                   class="chart-column"
-                  title={`${labels[index]}: ${bar.value === null ? '—' : formatValue(bar.value)}`}
+                  class:chart-column-active={hoveredKey === chart.key && hoveredIndex === index}
                 >
                   {#if bar.value !== null}
                     <span
@@ -131,6 +166,18 @@
                   {/if}
                 </div>
               {/each}
+              {#if hoveredKey === chart.key && hoveredIndex !== null}
+                {@const hoveredBar = chart.bars[hoveredIndex]}
+                {#if hoveredBar && hoveredBar.value !== null}
+                  <div
+                    class="chart-hover-line"
+                    style:left={`${((hoveredIndex + 0.5) * 100) / plotColumns}%`}
+                  ></div>
+                  <div class="chart-hover-tip" style:left={tooltipOffset(hoveredIndex)}>
+                    {labels[hoveredIndex]} · {formatValue(hoveredBar.value)}
+                  </div>
+                {/if}
+              {/if}
             </div>
           </div>
           <div class="chart-labels" aria-hidden="true">
@@ -258,6 +305,32 @@
     left: 0;
     border-top: 1px dashed var(--violet);
     pointer-events: none;
+  }
+  .chart-hover-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 1px;
+    background: color-mix(in srgb, var(--paper) 40%, transparent);
+    pointer-events: none;
+  }
+  .chart-hover-tip {
+    position: absolute;
+    top: 0;
+    z-index: 4;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--paper) 28%, transparent);
+    border-radius: 4px;
+    color: var(--paper);
+    background: rgba(23, 24, 27, 0.94);
+    font: 0.6rem var(--mono);
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .chart-column-active .chart-bar {
+    filter: brightness(1.2);
   }
   .chart-column {
     position: relative;

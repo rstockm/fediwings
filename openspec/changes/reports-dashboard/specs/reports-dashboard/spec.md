@@ -74,6 +74,10 @@ Das System SHALL für ein wählbares Jahr Monats- und Jahreswerte für Followers
 - **WHEN** das Diagramm die absoluten Follower-Zahlen zeigt
 - **THEN** entfällt der Mittelwert samt Linie.
 
+#### Scenario: Monatswert beim Überfahren
+- **WHEN** der Zeiger über einem Monatsbalken liegt
+- **THEN** markiert eine Führungslinie den Monat und ein Tooltip nennt Monat und Wert; beim Verlassen verschwinden beide.
+
 #### Scenario: Ganzzahlige Mittelwerte
 - **WHEN** das Diagramm Follower-Wachstum, Reichweite oder Interaktionen zeigt
 - **THEN** wird der Mittelwert auf eine ganze Zahl gerundet; Engagement und Postings behalten eine Nachkommastelle.
