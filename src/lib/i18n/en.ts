@@ -6,7 +6,7 @@ export const en: Messages = {
     title: 'Monthly and annual report',
     intro: 'Analyse public posts by publication month.',
     methodology:
-      'Reports group threads by their starting month in Berlin time. Interactions include likes, boosts, replies and available quotes; engagement is the ratio to the modelled reach total. Counters reflect the time of retrieval, not the time of each interaction.',
+      'Reports group posts by their starting month in Berlin time. Interactions include likes, boosts, replies and available quotes; engagement is the ratio to the modelled reach total. Counters reflect the time of retrieval, not the time of each interaction.',
     year: 'Year',
     yearTotal: 'Year',
     metric: 'Metric',
@@ -19,7 +19,7 @@ export const en: Messages = {
     reach: 'Reach',
     interactions: 'Interactions',
     engagement: 'Engagement rate (%)',
-    threads: 'Threads',
+    threads: 'Posts',
     asOf: 'As of',
     currentMonth: '* Current month',
     followerAsOf: 'Last saved follower count from',
@@ -27,7 +27,7 @@ export const en: Messages = {
     chartsKicker: 'Month by month',
     chartsTitle: 'The year at a glance',
     chartsNote:
-      'Monthly values at a glance. Missing months count as 0 in the chart; the table leaves them empty. The dashed violet line marks the mean of the displayed months.',
+      'Monthly values at a glance. Missing months count as 0 in the chart; the table leaves them empty. The dashed violet line marks the mean of the displayed months, with its value shown at the top right of the chart. The absolute follower chart omits the mean.',
     chartColorLegend:
       'Green: at least as high as the previous month · Orange: lower. A faint colour marks a small jump, a strong colour a large jump within this chart.',
     chartEmpty: 'No monthly values yet.',

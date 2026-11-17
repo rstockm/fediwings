@@ -29,7 +29,8 @@ Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
 Die älteren Reports-/Diagrammaufnahmen vom 16.11.2026 verwenden öffentliche
 ZLB-Daten und stammen vor der Verbindungspflicht, vor der aktuellen
 Grün-/Orange-Farblogik, vor der heutigen Aktionsleiste, vor der
-Mittelwertlinie in den Diagrammen und vor der Jahresauswahl als Liste. Sie
+Mittelwertlinie in den Diagrammen, vor der heutigen Wertanzeige rechts oben in der
+Diagrammkarte und vor der Jahresauswahl als Liste. Sie
 bleiben als gekennzeichnete Darstellungsbeispiele erhalten. Authentifizierte Live-Reports
 können ohne Anmeldung des Accountinhabers nicht neu aufgenommen werden; sie
 werden nicht vorgetäuscht.

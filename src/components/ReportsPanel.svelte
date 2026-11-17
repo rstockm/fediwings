@@ -117,14 +117,15 @@
     ];
     return [
       {
+        key: 'followers',
         label: $_('reports.followers'),
         values: [...followerValues, annualFollowers],
       },
-      { label: $_('reports.growth'), values: [...growthValues, annualGrowth] },
-      { label: $_('reports.reach'), values: period('reach') },
-      { label: $_('reports.interactions'), values: period('interactions') },
-      { label: $_('reports.engagement'), values: period('engagement') },
-      { label: $_('reports.threads'), values: period('threads') },
+      { key: 'growth', label: $_('reports.growth'), values: [...growthValues, annualGrowth] },
+      { key: 'reach', label: $_('reports.reach'), values: period('reach') },
+      { key: 'interactions', label: $_('reports.interactions'), values: period('interactions') },
+      { key: 'engagement', label: $_('reports.engagement'), values: period('engagement') },
+      { key: 'threads', label: $_('reports.threads'), values: period('threads') },
     ];
   });
   const exportData = $derived<ReportExport | null>(

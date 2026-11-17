@@ -44,11 +44,11 @@ Das System SHALL den bisherigen Follower-Reiter als „Reports“ anbieten, den 
 
 ### Requirement: Monats- und Jahreskennzahlen
 
-Das System SHALL für ein wählbares Jahr Monats- und Jahreswerte für Followerstand, Netto-Followerwachstum, modellierte Netto-Reichweitensumme, Interaktionen, Engagement Rate und gestartete Threads anbieten. Views und Klicks sind ausgeschlossen.
+Das System SHALL für ein wählbares Jahr Monats- und Jahreswerte für Followerstand, Netto-Followerwachstum, modellierte Netto-Reichweitensumme, Interaktionen, Engagement Rate und gestartete Postings anbieten. Views und Klicks sind ausgeschlossen.
 
 #### Scenario: Vollständiger Monat
 - **WHEN** die Daten eines Monats vollständig geladen sind
-- **THEN** zeigt das System Kennzahlen für Threads mit Start im Monat nach Zeitzone Europe/Berlin und den Abrufzeitpunkt.
+- **THEN** zeigt das System Kennzahlen für Postings mit Start im Monat nach Zeitzone Europe/Berlin und den Abrufzeitpunkt.
 
 #### Scenario: Berechnung
 - **WHEN** Kennzahlen aggregiert werden
@@ -68,7 +68,15 @@ Das System SHALL für ein wählbares Jahr Monats- und Jahreswerte für Followers
 
 #### Scenario: Mittelwert im Diagramm
 - **WHEN** ein Diagramm mindestens einen Monatswert zeigt
-- **THEN** zeichnet das System eine gestrichelte Linie auf Höhe des arithmetischen Mittels der gezeigten Monatswerte und nennt den Mittelwert im Diagramm.
+- **THEN** zeichnet das System eine gestrichelte Linie auf Höhe des arithmetischen Mittels der gezeigten Monatswerte und nennt den Wert rechts oben in der Diagrammkarte, ohne Balken zu überdecken.
+
+#### Scenario: Mittelwert beim Follower-Stand
+- **WHEN** das Diagramm die absoluten Follower-Zahlen zeigt
+- **THEN** entfällt der Mittelwert samt Linie.
+
+#### Scenario: Ganzzahlige Mittelwerte
+- **WHEN** das Diagramm Follower-Wachstum, Reichweite oder Interaktionen zeigt
+- **THEN** wird der Mittelwert auf eine ganze Zahl gerundet; Engagement und Postings behalten eine Nachkommastelle.
 
 ### Requirement: Zeitraumabruf und Datenabdeckung
 

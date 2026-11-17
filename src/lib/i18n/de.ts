@@ -4,7 +4,7 @@ export const de = {
     title: 'Monats- und Jahresreport',
     intro: 'Öffentliche Beiträge nach Veröffentlichungsmonat auswerten.',
     methodology:
-      'Reports ordnen Threads ihrem Startmonat in Berliner Zeit zu. Interaktionen umfassen Likes, Boosts, Antworten und verfügbare Quotes; Engagement ist das Verhältnis zur modellierten Reichweitensumme. Zähler gelten zum Abrufzeitpunkt, nicht zum Zeitpunkt der Reaktion.',
+      'Reports ordnen Postings ihrem Startmonat in Berliner Zeit zu. Interaktionen umfassen Likes, Boosts, Antworten und verfügbare Quotes; Engagement ist das Verhältnis zur modellierten Reichweitensumme. Zähler gelten zum Abrufzeitpunkt, nicht zum Zeitpunkt der Reaktion.',
     year: 'Jahr',
     yearTotal: 'Jahr',
     metric: 'Kennzahl',
@@ -17,7 +17,7 @@ export const de = {
     reach: 'Reichweite',
     interactions: 'Interaktionen',
     engagement: 'Engagement Rate (%)',
-    threads: 'Threads',
+    threads: 'Postings',
     asOf: 'Datenstand',
     currentMonth: '* Laufender Monat',
     followerAsOf: 'Letzter gespeicherter Followerstand vom',
@@ -25,7 +25,7 @@ export const de = {
     chartsKicker: 'Monat für Monat',
     chartsTitle: 'Der Jahresverlauf',
     chartsNote:
-      'Monatliche Werte im Überblick. Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer. Die gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate.',
+      'Monatliche Werte im Überblick. Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer. Die gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate; sein Wert steht rechts oben im Diagramm. Beim absoluten Follower-Stand entfällt der Mittelwert.',
     chartColorLegend:
       'Grün: mindestens so hoch wie im Vormonat · Orange: niedriger. Schwache Farbe bedeutet einen kleinen Sprung, kräftige Farbe einen großen Sprung innerhalb des Diagramms.',
     chartEmpty: 'Noch keine Monatswerte vorhanden.',

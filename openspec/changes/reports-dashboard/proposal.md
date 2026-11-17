@@ -7,7 +7,7 @@ Die ZLB benötigt eine monatliche und jährliche Mastodon-Bilanz, die sich in ih
 ## What Changes
 
 - Der Reiter „Follower“ wird zu „Reports“; der bisherige Follower-Verlauf und die Instanzverbindung bleiben erhalten.
-- Jahresberichte zeigen Monats- und Jahreswerte für Follower, Wachstum, modellierte Reichweite, Interaktionen, Engagement und Threads.
+- Jahresberichte zeigen Monats- und Jahreswerte für Follower, Wachstum, modellierte Reichweite, Interaktionen, Engagement und Postings.
 - Zeitraumbezogener Abruf, Fortschritt, Vollständigkeit und lokale Speicherung ergänzen die bestehende Analyse.
 - Tabellen lassen sich für Excel kopieren und als CSV herunterladen. Views und Klicks sind nicht Bestandteil.
 - Der bisherige Follower-Direktlink und OAuth-Rücksprünge bleiben kompatibel.

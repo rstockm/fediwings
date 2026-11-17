@@ -16,7 +16,7 @@ Reichweite, Interaktionen, Likes und Boosts im Zeitverlauf — jeweils mit dem v
 - **Beiträge verstehen:** Netto-Reichweite, Brutto-Potenzial, Likes, Boosts sowie Antworten/Quotes pro Thread; aufklappbare Texte und Medien.
 - **30 Tage vergleichen:** Reichweitenschätzungen, Interaktionen, Likes und Boosts mit dem vorherigen 30-Tage-Zeitraum vergleichen; unvollständige Zeitfenster werden gekennzeichnet.
 - **Ergebnisse teilen:** Einzelne Threads als Analyse-Link öffnen oder über den optionalen Card Service eine Vorschaukarte erstellen.
-- **Reports:** Erst nach Verbindung der eigenen Instanz erscheinen Statistiken und starten Jahresbericht und Follower-Verlauf gemeinsam. Reports zeigen monatliche Threads, Interaktionen, modellierte Reichweite und Engagement als Tabelle und Balkendiagramme; Tabellen lassen sich für Excel kopieren oder als CSV herunterladen. Ein Jahreswechsel lädt den Live-Report automatisch neu. „Report speichern“ legt den aktuellen Stand lokal ab; pro Account und Jahr gibt es einen Stand, dessen Datum die Ansicht ausweist. Follower-Stichtage bleiben beim Löschen des Stands erhalten. Das Handle-Feld bleibt auch mit Verbindung bedienbar: Ein anderer Account lässt sich wählen und per Login verbinden; die Auswahl gilt stabil auch für die Analyse.
+- **Reports:** Erst nach Verbindung der eigenen Instanz erscheinen Statistiken und starten Jahresbericht und Follower-Verlauf gemeinsam. Reports zeigen monatliche Postings, Interaktionen, modellierte Reichweite und Engagement als Tabelle und Balkendiagramme; Tabellen lassen sich für Excel kopieren oder als CSV herunterladen. Ein Jahreswechsel lädt den Live-Report automatisch neu. „Report speichern“ legt den aktuellen Stand lokal ab; pro Account und Jahr gibt es einen Stand, dessen Datum die Ansicht ausweist. Follower-Stichtage bleiben beim Löschen des Stands erhalten. Das Handle-Feld bleibt auch mit Verbindung bedienbar: Ein anderer Account lässt sich wählen und per Login verbinden; die Auswahl gilt stabil auch für die Analyse.
 - **Eigene Instanz verbinden:** Optionaler Nur-Lese-Zugriff per OAuth für Follower-Verlauf und zeitlichen Boost-Verlauf eigener Beiträge. Die graue Long-Tail-Kurve ohne Verbindung ist ausdrücklich nur eine Vorschau, keine Messung.
 - **Mobil und zweisprachig arbeiten:** Responsive Oberfläche, Deutsch/Englisch und optional lokal gemerkte Handles. Zuerst gilt eine gespeicherte Sprachwahl, sonst die deutsche/englische Browsersprache; andere Sprachen fallen auf Deutsch zurück.
 
@@ -46,15 +46,18 @@ einen höheren Wert, Orange einen niedrigeren. Kleine Sprünge erscheinen in sch
 Grün beziehungsweise Orange, große Sprünge in kräftiger Farbe. Die Intensität
 orientiert sich am größten absoluten Monatsunterschied des jeweiligen Diagramms.
 Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer.
-Eine gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate und
-nennt ihn am rechten Rand jedes Diagramms.
+Eine gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate; sein
+Wert steht rechts oben in der Diagrammkarte und überdeckt so keine Balken. Die
+Mittelwerte von Follower-Wachstum, Reichweite und Interaktionen erscheinen als ganze
+Zahlen, Engagement und Postings behalten eine Nachkommastelle. Das Diagramm der
+absoluten Follower-Zahlen zeigt keinen Mittelwert.
 Bei verbundener Instanz füllen der verankerte Follower-Verlauf und monatliche
 Follow-Benachrichtigungen fehlende Werte in den beiden Follower-Zeilen. Gespeicherte
 Monatsendstände haben Vorrang. Der Verlauf berücksichtigt keine Unfollows;
 Benachrichtigungen können auch Follow-Anfragen enthalten. Außerhalb der
 vorhandenen Historie bleiben Werte leer.
 
-![Balkendiagramme des ZLB-Jahresreports für Reichweite, Interaktionen, Engagement und Threads](docs/screenshots/reports-charts-desktop.png)
+![Balkendiagramme des ZLB-Jahresreports für Reichweite, Interaktionen, Engagement und Postings](docs/screenshots/reports-charts-desktop.png)
 
 <img src="docs/screenshots/reports-charts-mobile.png" alt="Balkendiagramme des ZLB-Jahresreports in der Mobilansicht" width="390" />
 
@@ -252,7 +255,7 @@ Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regress
 
 Die Ergebnisübersicht vergleicht Beiträge aus den letzten 30 Kalendertagen mit den 30 Tagen davor und gruppiert die Werte nach Veröffentlichungsdatum. An erster Stelle steht die Summe der bereits pro Thread berechneten Netto-Reichweiten; wegen möglicher Zielgruppenüberschneidungen ist sie keine Schätzung eindeutig erreichter Personen. Die weiteren Karten verwenden direkt gemeldete Postingzähler: Likes und Boosts sowie Likes, Boosts und Antworten zusammen als Interaktionen. Die Zähler zeigen den Stand zum Analysezeitpunkt, nicht den Zeitpunkt einzelner Reaktionen. Reicht die geladene Historie oder die Auswahl der 80 analysierten Threads nicht bis zum Beginn eines Zeitfensters, zeigt FediWings dafür weder eine Teilsumme noch eine irreführende Kurve. Eine Prozentabweichung entfällt außerdem, wenn die Vorperiodensumme null ist.
 
-Reports gruppieren Threads nach ihrem Startmonat in der Zeitzone Europe/Berlin. Interaktionen zählen Likes, Boosts, Antworten und, soweit gemeldet, Quotes; die Engagement Rate teilt sie durch die modellierte Reichweitensumme. Die Zahlen sind Abrufstände und keine nach Reaktionszeitpunkt erfasste Monatsstatistik. Bei begrenzter Historie oder unvollständiger Boosterliste wird ein Teilstand angezeigt. Follower-Wachstum benötigt gespeicherte Stände vom letzten Tag zweier aufeinanderfolgender Monate; bei geschlossener App werden keine Stände automatisch erhoben.
+Reports gruppieren Postings nach ihrem Startmonat in der Zeitzone Europe/Berlin. Interaktionen zählen Likes, Boosts, Antworten und, soweit gemeldet, Quotes; die Engagement Rate teilt sie durch die modellierte Reichweitensumme. Die Zahlen sind Abrufstände und keine nach Reaktionszeitpunkt erfasste Monatsstatistik. Bei begrenzter Historie oder unvollständiger Boosterliste wird ein Teilstand angezeigt. Follower-Wachstum benötigt gespeicherte Stände vom letzten Tag zweier aufeinanderfolgender Monate; bei geschlossener App werden keine Stände automatisch erhoben.
 
 Für den eigenen, verbundenen Account können aufgeklappte Beiträge zusätzlich Zeitpunkte aus `reblog`-Benachrichtigungen zeigen. Diese Historie ist von den öffentlichen Boost-Zählern getrennt und kann durch gelöschte, gefilterte oder noch nicht geladene Notifications unvollständig sein. Zunächst wird eine Seite geladen; ältere Seiten nur auf ausdrückliche Aktion, maximal zehn pro Tab-Sitzung.
 

@@ -7,8 +7,13 @@
     rows,
   }: {
     labels: string[];
-    rows: Array<{ label: string; values: Array<number | null> }>;
+    rows: Array<{ key: string; label: string; values: Array<number | null> }>;
   } = $props();
+
+  /** Charts whose scale makes a mean line misleading or unreadable. */
+  const MEANLESS_KEYS = new Set(['followers']);
+  /** Counts that should be reported as whole numbers. */
+  const WHOLE_MEAN_KEYS = new Set(['growth', 'reach', 'interactions']);
 
   const periodLength = $derived(
     labels.some((label) => label.endsWith('*'))
@@ -22,6 +27,7 @@
         const period = values.slice(0, periodLength);
         const hasValues = period.some((value) => value !== null);
         return {
+          key: row.key,
           label: row.label,
           hasValues,
           values: values.map((value, index) =>
@@ -35,7 +41,8 @@
         ticks: reportScaleTicks(row.values),
         changes: reportChanges(row.values.slice(0, periodLength)),
         ...reportBars(row.values),
-        mean: reportMean(row.values),
+        mean: MEANLESS_KEYS.has(row.key) ? null : reportMean(row.values),
+        meanFractionDigits: WHOLE_MEAN_KEYS.has(row.key) ? 0 : 1,
       }))
       .sort(
         (a, b) =>
@@ -63,7 +70,14 @@
   <div class="chart-grid">
     {#each charts as chart (chart.label)}
       <article class="chart-card">
-        <h4>{chart.label}</h4>
+        <div class="chart-card-head">
+          <h4>{chart.label}</h4>
+          {#if chart.mean}
+            <p class="chart-mean-value">
+              {$_('reports.chartMean')}: {formatValue(chart.mean.value, chart.meanFractionDigits)}
+            </p>
+          {/if}
+        </div>
         {#if !chart.hasValues}
           <p class="chart-empty">
             {chart.label === $_('reports.followers')
@@ -75,9 +89,6 @@
         {:else}
           <p class="chart-meta">
             {$_('reports.chartMaximum')}: {formatValue(chart.maximum)}
-            {#if chart.mean}
-              · {$_('reports.chartMean')}: {formatValue(chart.mean.value)}
-            {/if}
           </p>
           <div class="chart-plot-row" aria-hidden="true">
             <div class="chart-scale">
@@ -93,9 +104,7 @@
               {/each}
               <div class="chart-zero" style:top={`${chart.baseline}%`}></div>
               {#if chart.mean}
-                <div class="chart-mean" style:top={`${chart.mean.top}%`}>
-                  <span>Ø {formatValue(chart.mean.value)}</span>
-                </div>
+                <div class="chart-mean" style:top={`${chart.mean.top}%`}></div>
               {/if}
               {#each chart.bars as bar, index (index)}
                 <div
@@ -180,9 +189,23 @@
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.025);
   }
+  .chart-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 0.8rem;
+    margin-bottom: 0.5rem;
+  }
   .chart-card h4 {
-    margin: 0 0 0.5rem;
+    margin: 0;
     font-size: 0.9rem;
+  }
+  .chart-mean-value {
+    margin: 0;
+    color: var(--violet);
+    font: 0.65rem var(--mono);
+    white-space: nowrap;
   }
   .chart-meta {
     margin: 0 0 1rem;
@@ -235,17 +258,6 @@
     left: 0;
     border-top: 1px dashed var(--violet);
     pointer-events: none;
-  }
-  .chart-mean span {
-    position: absolute;
-    top: 0;
-    right: 0.25rem;
-    padding: 0 0.25rem;
-    color: var(--violet);
-    background: var(--ink);
-    font: 0.6rem var(--mono);
-    transform: translateY(-50%);
-    white-space: nowrap;
   }
   .chart-column {
     position: relative;
