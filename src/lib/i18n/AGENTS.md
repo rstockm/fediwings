@@ -2,5 +2,5 @@
 
 | Datei | Zweck |
 | --- | --- |
-| `de.ts` | Deutsche UI-Texte; Details-Aktion und Long-Tail-Vorschau inkl. Verbindungs-CTA. |
-| `en.ts` | Englische UI-Texte; Details-Aktion und Long-Tail-Vorschau inkl. Verbindungs-CTA. |
+| `de.ts` | Deutsche UI-Texte, einschließlich Reports und Long-Tail-Vorschau. |
+| `en.ts` | Englische UI-Texte, einschließlich Reports und Long-Tail-Vorschau. |

@@ -4,5 +4,7 @@ test-results/
 playwright-report/
 .playwright-browsers/
 package-lock.json
+compliance/sbom.cdx.json
+compliance/schemas/*.json
 *.md
 *.sarif

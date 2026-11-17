@@ -89,6 +89,71 @@ describe('resolveHandle', () => {
     ]);
   });
 
+  it('versucht v1 auch nach einem Serverfehler von v2', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        calls.push(url);
+        if (url === 'https://example.social/api/v2/instance') {
+          return Promise.resolve(new Response('{}', { status: 503 }));
+        }
+        if (url === 'https://example.social/api/v1/instance') {
+          return Promise.resolve(new Response(JSON.stringify({ version: '4.7.5' })));
+        }
+        return Promise.reject(new TypeError(`Unexpected URL: ${url}`));
+      }),
+    );
+
+    await expect(resolveHandle('@alice@example.social')).resolves.toMatchObject({
+      origin: 'https://example.social',
+    });
+    expect(calls).toEqual([
+      'https://example.social/api/v2/instance',
+      'https://example.social/api/v1/instance',
+    ]);
+  });
+
+  it('faellt bei einem Rate Limit von v2 auf v1 zurueck', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        calls.push(url);
+        if (url === 'https://example.social/api/v2/instance') {
+          return Promise.resolve(new Response('{}', { status: 429 }));
+        }
+        if (url === 'https://example.social/api/v1/instance') {
+          return Promise.resolve(new Response(JSON.stringify({ version: '4.7.5' })));
+        }
+        return Promise.reject(new TypeError(`Unexpected URL: ${url}`));
+      }),
+    );
+
+    await expect(resolveHandle('@alice@example.social')).resolves.toMatchObject({
+      origin: 'https://example.social',
+    });
+    expect(calls).toHaveLength(2);
+  });
+
+  it('meldet ein Rate Limit verstaendlich statt als fehlende API', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{}', { status: 429 }))),
+    );
+
+    await expect(resolveHandle('@alice@example.social')).rejects.toThrow(/begrenzt gerade/);
+  });
+
+  it('meldet einen HTTP-Fehler statt einer fehlenden API', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{}', { status: 403 }))),
+    );
+
+    await expect(resolveHandle('@alice@example.social')).rejects.toThrow(/HTTP 403/);
+  });
+
   it('bricht bei einer haengenden Instanz mit Zeitueberschreitung ab', async () => {
     vi.useFakeTimers();
     vi.stubGlobal(
@@ -107,6 +172,7 @@ describe('resolveHandle', () => {
     );
 
     const promise = resolveHandle('@alice@hanging.example').catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(INSTANCE_TIMEOUT_MS + 100);
     await vi.advanceTimersByTimeAsync(INSTANCE_TIMEOUT_MS + 100);
 
     const error = await promise;

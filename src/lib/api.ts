@@ -244,6 +244,82 @@ export async function getStatuses(
   return { statuses, requests, oldestFetchedAt, historyComplete };
 }
 
+export interface ReportStatusCollection extends StatusCollection {
+  error: string | null;
+}
+
+/**
+ * Load the public account history through the start of a Berlin calendar year.
+ * Unlike the short analysis, include replies so self-reply threads can be grouped.
+ */
+export async function getReportStatuses(
+  origin: string,
+  accountId: string,
+  year: number,
+  signal: AbortSignal,
+  onProgress?: (requests: number, oldestFetchedAt: string | null) => void,
+  maxPages = 100,
+  pixelfed = false,
+): Promise<ReportStatusCollection> {
+  const boundary = Date.UTC(year - 1, 11, 31, 23);
+  const params = new URLSearchParams({
+    limit: String(STATUSES_PER_PAGE),
+    exclude_reblogs: 'true',
+  });
+  let url: string | null = pixelfed
+    ? `${origin}/api/pixelfed/v1/accounts/${encodeURIComponent(accountId)}/statuses?limit=${PIXELFED_STATUSES_PER_PAGE}`
+    : `${origin}/api/v1/accounts/${encodeURIComponent(accountId)}/statuses?${params}`;
+  const statuses: MastodonStatus[] = [];
+  const seen = new Set<string>();
+  const visited = new Set<string>();
+  let requests = 0;
+  let oldestFetchedAt: string | null = null;
+  let historyComplete = false;
+  let error: string | null = null;
+
+  while (url && requests < maxPages) {
+    if (signal.aborted) throw new DOMException('Abgebrochen', 'AbortError');
+    if (visited.has(url)) break;
+    visited.add(url);
+    try {
+      const page: ApiPage<MastodonStatus[]> = pixelfed
+        ? await get(url, pixelfedStatusListSchema, signal)
+        : await get(url, statusListSchema, signal);
+      requests += 1;
+      oldestFetchedAt = olderDate(oldestFetchedAt, page.data);
+      for (const status of page.data) {
+        if (!seen.has(status.id) && isOriginalOrSelfReply(status, accountId)) {
+          seen.add(status.id);
+          statuses.push(status);
+        }
+      }
+      onProgress?.(requests, oldestFetchedAt);
+      const relation = pixelfed ? 'prev' : 'next';
+      const next = nextLink(page.link, origin, relation);
+      const nextDeclared = page.link
+        ?.split(',')
+        .some((entry) => new RegExp(`;\\s*rel="?${relation}"?(?:\\s*;|\\s*$)`, 'i').test(entry));
+      if (
+        (oldestFetchedAt !== null && Date.parse(oldestFetchedAt) < boundary) ||
+        (!next &&
+          !nextDeclared &&
+          page.data.length < (pixelfed ? PIXELFED_STATUSES_PER_PAGE : STATUSES_PER_PAGE))
+      ) {
+        historyComplete = true;
+        break;
+      }
+      url = next;
+    } catch (caught) {
+      if (signal.aborted || (caught instanceof DOMException && caught.name === 'AbortError')) {
+        throw caught;
+      }
+      error = caught instanceof Error ? caught.message : msg('error.apiUnreachable');
+      break;
+    }
+  }
+  return { statuses, requests, oldestFetchedAt, historyComplete, error };
+}
+
 export function getRebloggers(
   url: string,
   signal?: AbortSignal,

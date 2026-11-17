@@ -1,8 +1,70 @@
 export const de = {
+  reports: {
+    connectFirst: 'Verbinde deine eigene Instanz, um alle Statistiken gemeinsam zu laden.',
+    title: 'Monats- und Jahresreport',
+    intro: 'Öffentliche Beiträge nach Veröffentlichungsmonat auswerten.',
+    methodology:
+      'Reports ordnen Threads ihrem Startmonat in Berliner Zeit zu. Interaktionen umfassen Likes, Boosts, Antworten und verfügbare Quotes; Engagement ist das Verhältnis zur modellierten Reichweitensumme. Zähler gelten zum Abrufzeitpunkt, nicht zum Zeitpunkt der Reaktion.',
+    year: 'Jahr',
+    yearTotal: 'Jahr',
+    metric: 'Kennzahl',
+    load: 'Live-Report laden',
+    restore: 'Gespeicherten Stand öffnen',
+    invalidYear: 'Bitte ein Jahr zwischen 2006 und dem laufenden Jahr wählen.',
+    loading: 'Report wird geladen · Seiten:',
+    followers: 'Follower*innen',
+    growth: 'Follower-Wachstum',
+    reach: 'Reichweite',
+    interactions: 'Interaktionen',
+    engagement: 'Engagement Rate (%)',
+    threads: 'Threads',
+    asOf: 'Datenstand',
+    currentMonth: '* Laufender Monat',
+    followerAsOf: 'Letzter gespeicherter Followerstand vom',
+    modelNote: 'Reichweite und Engagement nach FediWings-Modell.',
+    chartsKicker: 'Monat für Monat',
+    chartsTitle: 'Der Jahresverlauf',
+    chartsNote:
+      'Monatliche Werte im Überblick. Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer. Die gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate.',
+    chartColorLegend:
+      'Grün: mindestens so hoch wie im Vormonat · Orange: niedriger. Schwache Farbe bedeutet einen kleinen Sprung, kräftige Farbe einen großen Sprung innerhalb des Diagramms.',
+    chartEmpty: 'Noch keine Monatswerte vorhanden.',
+    followersEmpty:
+      'Noch keine Monatsendstände gespeichert. Lade den Account am letzten Kalendertag und wähle „Report speichern“.',
+    growthEmpty:
+      'Für das Wachstum sind gespeicherte Monatsendstände aus zwei aufeinanderfolgenden Monaten nötig.',
+    followerHistoryNote:
+      'Fehlende Monatsstände stammen aus dem verankerten Verlauf; beim Wachstum zählen ersatzweise Follow-Benachrichtigungen einschließlich Anfragen. Unfollows fehlen.',
+    followerHistoryPartial: 'Der geladene Follower-Verlauf ist unvollständig.',
+    chartMaximum: 'Höchster Monatswert',
+    chartMean: 'Mittelwert',
+    partial:
+      'Teilstand: Nicht alle Beiträge oder Booster-Daten konnten vollständig erfasst werden.',
+    error: 'Report konnte nicht geladen werden.',
+    storageError: 'Lokaler Speicher ist nicht verfügbar.',
+    saved: 'Report lokal gespeichert.',
+    save: 'Report speichern',
+    saveHint: 'Noch kein Live-Report geladen. „Report speichern“ wird nach dem Laden aktiv.',
+    savedState: 'Gespeicherter Stand',
+    noSavedState: 'Noch kein gespeicherter Stand für dieses Jahr.',
+    restoreConfirm: 'Gespeicherten Stand öffnen?',
+    replaceConfirm: 'Gespeicherten Stand für dieses Jahr ersetzen?',
+    notFound: 'Kein gespeicherter Stand für dieses Jahr.',
+    restored: 'Gespeicherter Stand geöffnet.',
+    delete: 'Gespeicherten Stand löschen',
+    deleteConfirm: 'Gespeicherten Stand löschen?',
+    deleted: 'Gespeicherter Stand gelöscht. Follower-Stichtage bleiben erhalten.',
+    copy: 'Für Excel kopieren',
+    copied: 'Tabelle kopiert.',
+    copyError: 'Kopieren fehlgeschlagen. Bitte CSV verwenden.',
+    csv: 'CSV herunterladen',
+    storageNote:
+      'Speichern legt den aktuellen Report und Followerstand als lokalen Stand in diesem Browser ab. Pro Account und Jahr gibt es einen Stand. Monatsendstände werden nur am letzten Kalendertag erfasst.',
+  },
   header: {
     home: 'FediWings Startseite',
     navAnalysis: 'Analyse',
-    navFollower: 'Follower',
+    navFollower: 'Reports',
     navMethodology: 'Methodik',
     metaLive: 'Live · lokal',
     metaMethodology: 'Offene Methodik',
@@ -33,6 +95,9 @@ export const de = {
     disconnect: 'Verbindung trennen',
     manage: 'Verbindung verwalten',
     otherAccount: 'Die aktuelle Analyse betrifft einen anderen Account.',
+    switch: 'Anderen Account verbinden',
+    previousRevokeFailed:
+      'Der neue Account ist verbunden. Der Zugriff des vorherigen Accounts konnte nicht automatisch widerrufen werden; entferne FediWings dort in den App-Einstellungen.',
     chooseHandle: 'Welchen eigenen Account möchtest du verbinden?',
     resolve: 'Account prüfen',
     storageError:
@@ -41,7 +106,7 @@ export const de = {
   title: {
     analyse: 'FediWings | Fediverse Reichweite',
     methodology: 'Methodik | FediWings',
-    follower: 'Follower-Verlauf | FediWings',
+    follower: 'Reports | FediWings',
     share: 'Geteilte Thread-Analyse | FediWings',
   },
   hero: {
@@ -414,13 +479,15 @@ export const de = {
   follower: {
     titleHtml: 'Wie wächst<br />dein Account?',
     intro:
-      'Die aktuelle Followerzahl ist öffentlich. Deinen persönlichen Verlauf kann FediWings optional aus den Follow-Benachrichtigungen deines eigenen Accounts rekonstruieren. Die Instanz-Verbindung gilt nur für diesen Browser-Tab.',
-    stepAnon: 'Öffentlicher Stand · ohne Verbindung',
+      'Verbinde deinen eigenen Account, um Reports und Follower-Verlauf gemeinsam zu laden. Erst nach der Verbindung erscheinen die Statistiken. Die Instanz-Verbindung gilt nur für diesen Browser-Tab.',
+    stepAnon: 'Account wählen · Instanz verbinden',
     load: 'Laden',
     loading: 'Lädt…',
     followersNote: 'aktuelle Follower',
     serverSoftware: 'Server-Software',
     loginButton: 'Eigene Instanz verbinden',
+    connectMismatch:
+      'Noch nicht verbunden: @{account}. Verbinde die eigene Instanz, um die Statistiken zu laden.',
     stepLogin: 'Schritt 2 · Login',
     redirecting: 'Weiterleitung zum Server …',
     authorizeNote:
@@ -448,7 +515,7 @@ export const de = {
       'Hinweis: Die Historie ist unvollständig (Follow-Benachrichtigungen wurden zuvor gelöscht). Die kumulierte Kurve beginnt deshalb unter null.',
     monthlyCaption: 'Neue Follower pro Monat',
     monthlyAria: 'Neue Follower pro Monat, hoechster Wert {max}',
-    monthlyNote: 'Exakte Folgenachweise aus den Benachrichtigungen deines Servers.',
+    monthlyNote: 'Follow-Benachrichtigungen deines Servers, einschließlich Follow-Anfragen.',
     anchoredCaption: 'Kumulierte Follower (verankert)',
     anchoredAria: 'Kumulierte Follower von {min} bis {current}',
     start: 'Start',
@@ -483,6 +550,8 @@ export const de = {
     handleWebfingerInvalid: 'WebFinger liefert keine gueltige Antwort.',
     handleWebfingerInsecure: 'WebFinger liefert keine sichere ActivityPub-Adresse.',
     handleNoApi: 'Fuer diesen Account wurde keine unterstuetzte Fediverse-API gefunden.',
+    handleRateLimited:
+      'Die Instanz begrenzt gerade anonyme Anfragen. Bitte in einigen Minuten erneut versuchen.',
     oauthRejected: 'Der Fediverse-Server hat die OAuth-Anfrage abgelehnt (HTTP {status}).',
     oauthInvalid: 'Der Fediverse-Server lieferte keine gueltige OAuth-Antwort.',
     oauthAppRegistration: 'Die App-Registrierung lieferte ungueltige Daten.',

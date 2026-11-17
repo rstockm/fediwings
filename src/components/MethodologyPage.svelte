@@ -103,6 +103,7 @@
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- statischer, eigener Dictionary-Text ohne Nutzerinhalte -->
       <h1 id="methodology-title">{@html $_('methodology.titleHtml')}</h1>
       <p>{$_('methodology.intro')}</p>
+      <p>{$_('reports.methodology')}</p>
     </div>
 
     <aside class="curve-card" aria-label="Visualisierung der Netto-Reichweite">

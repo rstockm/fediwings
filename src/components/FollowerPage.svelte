@@ -4,6 +4,16 @@
     MonthlyPoint as CachedMonthlyPoint,
   } from '../lib/followers';
   import type { OAuthSession as CachedOAuthSession } from '../lib/oauth';
+  import type {
+    MastodonAccount as CachedMastodonAccount,
+    ServerPlatform as CachedPlatform,
+  } from '../lib/types';
+
+  export interface AccountSelection {
+    account: CachedMastodonAccount;
+    platform: CachedPlatform | null;
+    origin: string;
+  }
 
   interface HistoryCache {
     sessionKey: string;
@@ -29,6 +39,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { _, date as _date, number as _number } from 'svelte-i18n';
   import HandleCombobox from './HandleCombobox.svelte';
+  import ReportsPanel from './ReportsPanel.svelte';
   import { getAccount, MastodonApiError } from '../lib/api';
   import {
     buildAnchoredSeries,
@@ -56,19 +67,22 @@
     authPhase = 'idle',
     onopenconnection,
     oninvalidatesession,
+    onselectaccount,
   }: {
     prefillHandle?: string;
     savedHandles?: SavedHandle[];
-    snapshot?: {
-      account: MastodonAccount;
-      platform: ServerPlatform | null;
-      origin: string;
-    } | null;
+    snapshot?: AccountSelection | null;
     authSession?: OAuthSession | null;
     authPhase?: 'idle' | 'connecting' | 'connected' | 'error';
     onopenconnection: (candidate: ConnectionCandidate | null) => void;
     oninvalidatesession: (message: string) => void;
+    onselectaccount?: (selection: AccountSelection) => void;
   } = $props();
+
+  function selectionKey(value: { account: MastodonAccount; origin: string } | null): string {
+    if (!value) return '';
+    return `${value.origin}|${value.account.id || value.account.acct}`;
+  }
 
   function applyStoredAccount(stored: NonNullable<ReturnType<typeof readLastAccount>>): void {
     const username = stored.acct.split('@')[0] ?? stored.acct;
@@ -110,9 +124,16 @@
   let historyIncomplete = $state(false);
   let historyController: AbortController | null = null;
   let appliedSession = '';
+  let appliedSelection = $state('');
   let initialized = $state(false);
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
+  const connectedAccount = $derived(
+    authSession !== null &&
+      account !== null &&
+      authSession.origin === origin &&
+      authSession.account.id === account.id,
+  );
   const heroCollapsed = $derived(anonPhase === 'loading' || account !== null);
   const progressPercent = $derived(
     Math.min(100, Math.round((requestsUsed / DEFAULT_MAX_PAGES) * 100)),
@@ -126,12 +147,31 @@
         : '',
     );
   });
+  const handleMatchesSession = $derived(
+    authSession !== null &&
+      normalizedHandle(handle) ===
+        canonicalAcct(authSession.account, authSession.origin).toLowerCase(),
+  );
+
+  function normalizedHandle(value: string): string {
+    return value.trim().replace(/^@/, '').toLowerCase();
+  }
 
   function applyFollowerSession(session: OAuthSession): void {
     origin = session.origin;
     handle = `@${canonicalAcct(session.account, session.origin)}`;
     account = session.account;
     anonPhase = 'ready';
+    appliedSelection = selectionKey(session);
+  }
+
+  function applySelection(selection: AccountSelection): void {
+    handle = `@${canonicalAcct(selection.account, selection.origin)}`;
+    origin = selection.origin;
+    account = selection.account;
+    platform = selection.platform;
+    anonPhase = 'ready';
+    appliedSelection = selectionKey(selection);
   }
 
   function restoreHistory(session: OAuthSession): boolean {
@@ -147,22 +187,27 @@
     return true;
   }
 
+  function resetHistory(): void {
+    historyController?.abort();
+    historyPhase = 'idle';
+    historyMessage = '';
+    monthly = [];
+    anchored = null;
+    eventsCount = 0;
+    requestsUsed = 0;
+    oldestDate = '';
+    historyIncomplete = false;
+  }
+
   onMount(() => {
-    if (authSession) {
+    if (snapshot) {
+      // An explicit in-app selection (analysis or Reports) beats a stale stored account.
+      applySelection(snapshot);
+    } else if (authSession) {
       applyFollowerSession(authSession);
-      appliedSession = authSession.token;
-      restoreHistory(authSession);
     } else {
       const stored = readLastAccount();
-      if (stored?.source === 'follower') {
-        applyStoredAccount(stored);
-      } else if (snapshot) {
-        handle = prefillHandle || `@${snapshot.account.acct}`;
-        account = snapshot.account;
-        platform = snapshot.platform;
-        origin = snapshot.origin;
-        anonPhase = 'ready';
-      } else if (stored) {
+      if (stored) {
         applyStoredAccount(stored);
       } else if (prefillHandle) {
         handle = prefillHandle;
@@ -171,30 +216,38 @@
     initialized = true;
   });
 
+  // Adopt account changes that originate outside this component (for example a finished
+  // OAuth switch). The key guard prevents the local selection echo from resetting state.
+  $effect(() => {
+    if (!initialized || !snapshot) return;
+    if (selectionKey(snapshot) === appliedSelection) return;
+    applySelection(snapshot);
+  });
+
   $effect(() => {
     if (!initialized) return;
-    if (authSession && authSession.token !== appliedSession) {
-      appliedSession = authSession.token;
-      applyFollowerSession(authSession);
-      historyPhase = 'idle';
-      if (!restoreHistory(authSession)) void loadHistory();
-    } else if (!authSession && appliedSession) {
+    if (authSession && connectedAccount) {
+      if (authSession.token !== appliedSession) {
+        appliedSession = authSession.token;
+        if (!restoreHistory(authSession)) {
+          resetHistory();
+          void loadHistory();
+        }
+      }
+      return;
+    }
+    // A session exists for another account (or none at all): never show its history here.
+    if (appliedSession) {
       appliedSession = '';
-      historyController?.abort();
-      historyCache = null;
-      historyPhase = 'idle';
-      monthly = [];
-      anchored = null;
-      eventsCount = 0;
-      requestsUsed = 0;
-      oldestDate = '';
+      resetHistory();
     }
   });
 
-  async function loadAnonymous(): Promise<void> {
-    if (authSession) return;
+  async function loadAccount(): Promise<void> {
+    if (anonPhase === 'loading') return;
     anonPhase = 'loading';
     anonMessage = '';
+    historyController?.abort();
     account = null;
     platform = null;
     try {
@@ -207,13 +260,13 @@
         undefined,
         platformResult.id,
       );
+      const acct = canonicalAcct(accountResult, target.origin);
       account = accountResult;
       platform = platformResult;
+      handle = `@${acct}`;
       writeLastAccount({
-        handle: `@${accountResult.acct.includes('@') ? accountResult.acct : `${accountResult.acct}@${new URL(target.origin).hostname}`}`,
-        acct: accountResult.acct.includes('@')
-          ? accountResult.acct
-          : `${accountResult.acct}@${new URL(target.origin).hostname}`,
+        handle: `@${acct}`,
+        acct,
         origin: target.origin,
         followers: accountResult.followers_count,
         platformId: platformResult?.id ?? 'unknown',
@@ -221,6 +274,17 @@
         source: 'follower',
       });
       anonPhase = 'ready';
+      appliedSelection = selectionKey({ account: accountResult, origin: target.origin });
+      onselectaccount?.({
+        account: accountResult,
+        platform: platformResult,
+        origin: target.origin,
+      });
+      const sessionMatches =
+        authSession !== null &&
+        authSession.origin === target.origin &&
+        authSession.account.id === accountResult.id;
+      if (!sessionMatches) onopenconnection({ account: accountResult, origin: target.origin });
     } catch (error) {
       anonPhase = 'error';
       anonMessage =
@@ -405,7 +469,7 @@
       class="search-form"
       onsubmit={(event) => {
         event.preventDefault();
-        void loadAnonymous();
+        void loadAccount();
       }}
     >
       <p class="eyebrow" id="anon-title">{$_('follower.stepAnon')}</p>
@@ -416,13 +480,17 @@
           listboxId="follower-saved-handles-listbox"
           bind:value={handle}
           {savedHandles}
-          disabled={anonPhase === 'loading' || authSession !== null}
+          disabled={anonPhase === 'loading'}
         />
         <button
           type="submit"
-          disabled={anonPhase === 'loading' || authSession !== null || handle.trim().length === 0}
+          disabled={anonPhase === 'loading' || authPhase === 'connecting' || !handle.trim()}
         >
-          {anonPhase === 'loading' ? $_('follower.loading') : $_('follower.load')}
+          {anonPhase === 'loading'
+            ? $_('hero.connecting')
+            : handleMatchesSession
+              ? $_('follower.load')
+              : $_('follower.loginButton')}
         </button>
       </div>
     </form>
@@ -431,7 +499,7 @@
       <p class="follower-error" role="alert">{anonMessage}</p>
     {/if}
 
-    {#if anonPhase === 'ready' && account}
+    {#if connectedAccount && anonPhase === 'ready' && account}
       <div class="follower-snapshot">
         <div>
           <span>@{account.acct}</span>
@@ -443,21 +511,34 @@
           <strong>{platform?.name ?? 'ActivityPub'}</strong>
           <small>{$_('follower.serverSoftware')}</small>
         </div>
-        {#if authSession === null}
-          <button
-            type="button"
-            class="login-button"
-            disabled={authPhase === 'connecting'}
-            onclick={() => onopenconnection(account && origin ? { account, origin } : null)}
-          >
-            {authPhase === 'connecting' ? $_('hero.connecting') : $_('follower.loginButton')}
-          </button>
-        {/if}
       </div>
+    {:else if authSession && account && anonPhase === 'ready' && !connectedAccount}
+      <p class="follower-note" role="status">
+        {$_('follower.connectMismatch', { values: { account: account.acct } })}
+      </p>
     {/if}
   </section>
 
-  {#if authSession && account}
+  {#if connectedAccount && anonPhase === 'ready' && account && origin}
+    <ReportsPanel
+      {account}
+      {origin}
+      {platform}
+      followerHistory={authSession &&
+      authSession.origin === origin &&
+      authSession.account.id === account.id &&
+      hasHistory &&
+      anchored
+        ? {
+            monthly,
+            anchored,
+            partial: historyPhase === 'partial' || historyIncomplete,
+          }
+        : null}
+    />
+  {/if}
+
+  {#if connectedAccount && authSession && account}
     <section class="follower-card" aria-labelledby="history-title">
       <p class="eyebrow">{$_('follower.stepHistory')}</p>
       <h2 id="history-title">@{account.acct}</h2>

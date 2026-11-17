@@ -280,6 +280,7 @@ test('Deep Link startet mit explizitem Flag genau einmal und nicht erneut nach R
   await page.goto('/?handle=alice%40test.social&autostart=1');
   await expect(page.locator('.post-card').first()).toBeVisible();
   await expect(page).toHaveURL(/\?handle=alice%40test.social$/);
+  await expect(page.getByRole('button', { name: 'Analysieren', exact: true })).toBeEnabled();
   expect(remoteRequests.filter((url) => url.includes('/accounts/lookup'))).toHaveLength(1);
   remoteRequests.length = 0;
   await page.reload();
@@ -860,12 +861,12 @@ test('uebergibt den analysierten Account ohne Reload an den Follower-Tab', async
   await page.evaluate(() => {
     (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload = 'alive';
   });
-  await page.getByRole('link', { name: 'Follower' }).click();
+  await page.getByRole('link', { name: 'Reports' }).click();
   await expect(
     page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toHaveValue('@alice@test.social');
-  await expect(page.getByText('1.000')).toBeVisible();
+  await expect(page.locator('.reports-panel')).toHaveCount(0);
   const marker = await page.evaluate(
     () => (window as Window & { __fediWingsNoReload?: string }).__fediWingsNoReload,
   );
@@ -1088,7 +1089,12 @@ test('haelt das Hero-Emblem auch auf breiten Screens in der Textspalte', async (
   expect(positions.overflow).toBe(false);
 });
 
-test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ page }) => {
+test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({
+  page,
+}, testInfo) => {
+  if (process.env.UPDATE_REPORT_SCREENSHOTS && testInfo.project.name === 'chromium') {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  }
   await page.goto('/');
 
   const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
@@ -1102,6 +1108,10 @@ test('wechselt ueber die Reiter auf die ausfuehrliche Methodikseite', async ({ p
   await expect(page).toHaveTitle('Methodik | FediWings');
   await expect(methodologyTab).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { name: 'Was die Zahlen wirklich sagen.' })).toBeVisible();
+  if (process.env.UPDATE_REPORT_SCREENSHOTS && testInfo.project.name === 'chromium') {
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: 'docs/screenshots/methodik.png' });
+  }
   await expect(page.getByRole('heading', { name: 'Vom Handle zur Reichweite.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'So wenig Last wie möglich.' })).toBeVisible();
   await expect(

@@ -43,6 +43,7 @@ function cspPlugin(): Plugin {
 }
 
 export default defineConfig({
+  resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
   base: process.env.GITHUB_ACTIONS
     ? `/${process.env.GITHUB_REPOSITORY?.split('/')[1] ?? ''}/`
     : '/',

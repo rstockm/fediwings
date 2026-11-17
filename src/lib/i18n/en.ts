@@ -1,10 +1,70 @@
 import type { Messages } from './de';
 
 export const en: Messages = {
+  reports: {
+    connectFirst: 'Connect your own instance to load all statistics together.',
+    title: 'Monthly and annual report',
+    intro: 'Analyse public posts by publication month.',
+    methodology:
+      'Reports group threads by their starting month in Berlin time. Interactions include likes, boosts, replies and available quotes; engagement is the ratio to the modelled reach total. Counters reflect the time of retrieval, not the time of each interaction.',
+    year: 'Year',
+    yearTotal: 'Year',
+    metric: 'Metric',
+    load: 'Load live report',
+    restore: 'Open saved snapshot',
+    invalidYear: 'Choose a year between 2006 and the current year.',
+    loading: 'Loading report · pages:',
+    followers: 'Followers',
+    growth: 'Follower growth',
+    reach: 'Reach',
+    interactions: 'Interactions',
+    engagement: 'Engagement rate (%)',
+    threads: 'Threads',
+    asOf: 'As of',
+    currentMonth: '* Current month',
+    followerAsOf: 'Last saved follower count from',
+    modelNote: 'Reach and engagement use the FediWings model.',
+    chartsKicker: 'Month by month',
+    chartsTitle: 'The year at a glance',
+    chartsNote:
+      'Monthly values at a glance. Missing months count as 0 in the chart; the table leaves them empty. The dashed violet line marks the mean of the displayed months.',
+    chartColorLegend:
+      'Green: at least as high as the previous month · Orange: lower. A faint colour marks a small jump, a strong colour a large jump within this chart.',
+    chartEmpty: 'No monthly values yet.',
+    followersEmpty:
+      'No month-end counts saved yet. Load the account on the last calendar day and choose “Save report”.',
+    growthEmpty: 'Growth requires saved month-end counts for two consecutive months.',
+    followerHistoryNote:
+      'Missing month-end counts use the anchored history; growth falls back to follow notifications including requests. Unfollows are not included.',
+    followerHistoryPartial: 'The loaded follower history is incomplete.',
+    chartMaximum: 'Highest monthly value',
+    chartMean: 'Mean',
+    partial: 'Partial result: not all posts or booster data could be retrieved.',
+    error: 'Could not load report.',
+    storageError: 'Local storage is unavailable.',
+    saved: 'Report saved locally.',
+    save: 'Save report',
+    saveHint: 'No live report loaded yet. “Save report” becomes available after loading.',
+    savedState: 'Saved snapshot',
+    noSavedState: 'No saved snapshot for this year yet.',
+    restoreConfirm: 'Open saved snapshot?',
+    replaceConfirm: 'Replace the saved snapshot for this year?',
+    notFound: 'No saved snapshot for this year.',
+    restored: 'Saved snapshot opened.',
+    delete: 'Delete saved snapshot',
+    deleteConfirm: 'Delete the saved snapshot?',
+    deleted: 'Saved snapshot deleted. Follower observations remain.',
+    copy: 'Copy for Excel',
+    copied: 'Table copied.',
+    copyError: 'Copy failed. Please use CSV.',
+    csv: 'Download CSV',
+    storageNote:
+      'Saving stores the current report and follower count as a local snapshot in this browser. There is one snapshot per account and year. Month-end counts are recorded only on the last calendar day.',
+  },
   header: {
     home: 'FediWings home',
     navAnalysis: 'Analyse',
-    navFollower: 'Followers',
+    navFollower: 'Reports',
     navMethodology: 'Methodology',
     metaLive: 'Live · local',
     metaMethodology: 'Open methodology',
@@ -35,6 +95,9 @@ export const en: Messages = {
     disconnect: 'Disconnect',
     manage: 'Manage connection',
     otherAccount: 'The current analysis concerns a different account.',
+    switch: 'Connect another account',
+    previousRevokeFailed:
+      'The new account is connected. The previous account access could not be revoked automatically; remove FediWings there in your app settings.',
     chooseHandle: 'Which of your accounts would you like to connect?',
     resolve: 'Check account',
     storageError:
@@ -43,7 +106,7 @@ export const en: Messages = {
   title: {
     analyse: 'FediWings | Fediverse Reach',
     methodology: 'Methodology | FediWings',
-    follower: 'Follower History | FediWings',
+    follower: 'Reports | FediWings',
     share: 'Shared Thread Analysis | FediWings',
   },
   hero: {
@@ -412,13 +475,14 @@ export const en: Messages = {
   follower: {
     titleHtml: 'How is your<br />account growing?',
     intro:
-      'The current follower count is public. FediWings can optionally reconstruct your personal history from your own account’s follow notifications. The instance connection applies only to this browser tab.',
-    stepAnon: 'Public snapshot · no connection',
+      'Connect your own account to load reports and follower history together. Statistics appear only after connecting. The instance connection applies only to this browser tab.',
+    stepAnon: 'Choose account · connect instance',
     load: 'Load',
     loading: 'Loading…',
     followersNote: 'current followers',
     serverSoftware: 'Server software',
     loginButton: 'Connect your instance',
+    connectMismatch: 'Not connected yet: @{account}. Connect your instance to load the statistics.',
     stepLogin: 'Step 2 · login',
     redirecting: 'Redirecting to the server …',
     authorizeNote:
@@ -446,7 +510,7 @@ export const en: Messages = {
       'Note: The history is incomplete (follow notifications were deleted before). The cumulative curve therefore starts below zero.',
     monthlyCaption: 'New followers per month',
     monthlyAria: 'New followers per month, highest value {max}',
-    monthlyNote: 'Exact follow evidence from your server’s notifications.',
+    monthlyNote: 'Follow notifications from your server, including follow requests.',
     anchoredCaption: 'Cumulative followers (anchored)',
     anchoredAria: 'Cumulative followers from {min} to {current}',
     start: 'Start',
@@ -480,6 +544,8 @@ export const en: Messages = {
     handleWebfingerInvalid: 'WebFinger did not return a valid response.',
     handleWebfingerInsecure: 'WebFinger did not return a secure ActivityPub address.',
     handleNoApi: 'No supported Fediverse API was found for this account.',
+    handleRateLimited:
+      'The instance is currently limiting anonymous requests. Please try again in a few minutes.',
     oauthRejected: 'The Fediverse server rejected the OAuth request (HTTP {status}).',
     oauthInvalid: 'The Fediverse server did not return a valid OAuth response.',
     oauthAppRegistration: 'The app registration returned invalid data.',

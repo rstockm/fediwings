@@ -6,7 +6,7 @@
   import { setLocale } from '../lib/i18n';
   import AccountHeader from '../components/AccountHeader.svelte';
   import ConnectionPanel, { type ConnectionCandidate } from '../components/ConnectionPanel.svelte';
-  import FollowerPage from '../components/FollowerPage.svelte';
+  import FollowerPage, { type AccountSelection } from '../components/FollowerPage.svelte';
   import HandleCombobox from '../components/HandleCombobox.svelte';
   import MethodologyPage from '../components/MethodologyPage.svelte';
   import PostCard from '../components/PostCard.svelte';
@@ -77,6 +77,7 @@
   function readView(): View {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get('view');
+    if (requested === 'reports') return 'follower';
     if (requested === 'methodik' || requested === 'follower') return requested;
     if (params.get('code') !== null || params.get('error') !== null) {
       return loadHandshake()?.returnView ?? 'follower';
@@ -112,9 +113,11 @@
   let sharedThreadError = $state('');
   let shareController: AbortController | null = null;
   let shareLoadId = 0;
-  let authSession = $state<OAuthSession | null>(null);
-  let authPhase = $state<AuthPhase>('idle');
+  const initialSession = loadFollowerSession();
+  let authSession = $state<OAuthSession | null>(initialSession);
+  let authPhase = $state<AuthPhase>(initialSession ? 'connected' : 'idle');
   let authMessage = $state('');
+  let reportsSelection = $state<AccountSelection | null>(null);
   let connectionOpen = $state(false);
   let connectionCandidate = $state<ConnectionCandidate | null>(null);
   let expandedStatusIds = $state<string[]>([]);
@@ -132,7 +135,11 @@
   });
 
   function navigate(next: View): void {
-    window.history.pushState(null, '', next === 'analyse' ? './' : `./?view=${next}`);
+    window.history.pushState(
+      null,
+      '',
+      next === 'analyse' ? './' : `./?view=${next === 'follower' ? 'reports' : next}`,
+    );
     view = next;
   }
 
@@ -152,7 +159,36 @@
   }
 
   function currentConnectionCandidate(): ConnectionCandidate | null {
+    if (view === 'follower' && reportsSelection) {
+      return { account: reportsSelection.account, origin: reportsSelection.origin };
+    }
     return account && origin ? { account, origin } : null;
+  }
+
+  function dropAnalysisOfOtherAccount(selection: AccountSelection): void {
+    if (!account) return;
+    if (selection.origin === origin && selection.account.id === account.id) return;
+    controller?.abort();
+    phase = 'idle';
+    message = '';
+    account = null;
+    platform = null;
+    posts = [];
+    insightStatuses = [];
+    analyzedAt = '';
+    insightHistoryComplete = false;
+    insightOldestFetchedAt = null;
+    insightReachSelectionComplete = false;
+    progress = { completedPosts: 0, totalPosts: 0, requests: 0 };
+    boostController?.abort();
+    reblogCache = null;
+    boostHistories = {};
+    expandedStatusIds = [];
+  }
+
+  function selectReportsAccount(selection: AccountSelection): void {
+    dropAnalysisOfOtherAccount(selection);
+    reportsSelection = selection;
   }
 
   function openConnection(
@@ -200,7 +236,7 @@
   }
 
   async function startConnection(candidate: ConnectionCandidate): Promise<void> {
-    if (busy || authSession) return;
+    if (busy) return;
     authPhase = 'connecting';
     authMessage = '';
     loginController?.abort();
@@ -261,6 +297,11 @@
     origin = snapshot.origin;
     account = snapshot.account;
     platform = snapshot.platform;
+    reportsSelection = {
+      account: snapshot.account,
+      platform: snapshot.platform,
+      origin: snapshot.origin,
+    };
     posts = snapshot.posts;
     insightStatuses = snapshot.insightStatuses;
     insightReferenceTime = snapshot.insightReferenceTime;
@@ -275,12 +316,13 @@
   }
 
   function cleanCallbackUrl(target: 'analyse' | 'follower'): void {
-    window.history.replaceState(null, '', target === 'follower' ? './?view=follower' : './');
+    window.history.replaceState(null, '', target === 'follower' ? './?view=reports' : './');
     view = target;
   }
 
   async function completeLogin(handshake: OAuthHandshake, code: string): Promise<void> {
     authPhase = 'connecting';
+    const replacedSession = authSession;
     const client = { clientId: handshake.clientId, clientSecret: handshake.clientSecret };
     loginController?.abort();
     loginController = new AbortController();
@@ -312,6 +354,18 @@
       authPhase = 'connected';
       authMessage = '';
       connectionOpen = false;
+      const selection: AccountSelection = {
+        account: verifiedAccount,
+        platform:
+          reportsSelection &&
+          reportsSelection.origin === handshake.origin &&
+          reportsSelection.account.id === verifiedAccount.id
+            ? reportsSelection.platform
+            : null,
+        origin: handshake.origin,
+      };
+      dropAnalysisOfOtherAccount(selection);
+      reportsSelection = selection;
       for (const post of posts) {
         if (expandedStatusIds.includes(post.status.id)) void loadBoostHistory(post);
       }
@@ -330,6 +384,25 @@
           : 'ActivityPub-Server',
         source: 'follower',
       });
+
+      // Replace the previous access only after the new login fully succeeded.
+      if (
+        replacedSession &&
+        (replacedSession.token !== session.token || replacedSession.origin !== session.origin)
+      ) {
+        try {
+          await revokeToken(
+            replacedSession.origin,
+            {
+              clientId: replacedSession.clientId,
+              clientSecret: replacedSession.clientSecret,
+            },
+            replacedSession.token,
+          );
+        } catch {
+          authMessage = msg('connection.previousRevokeFailed');
+        }
+      }
     } catch (error) {
       const pending = pendingLogin;
       pendingLogin = null;
@@ -340,10 +413,19 @@
           revocationFailed = true;
         }
       }
+      const detail = error instanceof Error ? error.message : msg('follower.loginFailed');
+      if (replacedSession) {
+        // Keep the working session when switching accounts fails.
+        saveFollowerSession(replacedSession);
+        authSession = replacedSession;
+        authPhase = 'connected';
+        authMessage = revocationFailed ? `${detail} ${msg('follower.revokeFailed')}` : detail;
+        connectionOpen = true;
+        return;
+      }
       clearFollowerSession();
       authSession = null;
       authPhase = 'error';
-      const detail = error instanceof Error ? error.message : msg('follower.loginFailed');
       authMessage = revocationFailed ? `${detail} ${msg('follower.revokeFailed')}` : detail;
       connectionOpen = true;
     }
@@ -569,11 +651,6 @@
     const linkedHandle = readDeepLinkHandle(window.location.search, window.location.hash);
     const autostart = shouldAutostartDeepLink(window.location.search, window.location.hash);
     if (linkedHandle) handle = linkedHandle;
-    const storedSession = loadFollowerSession();
-    if (storedSession) {
-      authSession = storedSession;
-      authPhase = 'connected';
-    }
 
     const callback = parseCallback(window.location);
     if (callback) {
@@ -668,6 +745,24 @@
       );
       platform = detectedPlatform;
       account = accountResult;
+      reportsSelection = {
+        account: accountResult,
+        platform: detectedPlatform,
+        origin: target.origin,
+      };
+      try {
+        writeLastAccount({
+          handle: `@${target.acct}`,
+          acct: target.acct,
+          followers: accountResult.followers_count,
+          origin: target.origin,
+          platformId: detectedPlatform?.id ?? 'unknown',
+          platformName: detectedPlatform?.name ?? 'ActivityPub-Server',
+          source: 'analyse',
+        });
+      } catch {
+        // Sitzungsspeicher nicht verfügbar: Übergabe an den Follower-Tab entfällt.
+      }
       const pixelfed = platform?.id === 'pixelfed';
       const { statuses, requests, historyComplete, oldestFetchedAt } = pixelfed
         ? await getPixelfedStatuses(target.origin, account.id, controller.signal)
@@ -716,20 +811,6 @@
         : 'complete';
       analyzedAt = new Date().toISOString();
       message = phase === 'partial' ? msg('notice.partial') : msg('notice.complete');
-
-      try {
-        writeLastAccount({
-          handle: `@${target.acct}`,
-          acct: target.acct,
-          followers: account?.followers_count ?? 0,
-          origin: target.origin,
-          platformId: platform?.id ?? 'unknown',
-          platformName: platform?.name ?? 'ActivityPub-Server',
-          source: 'analyse',
-        });
-      } catch {
-        // Sitzungsspeicher nicht verfügbar: Übergabe an den Follower-Tab entfällt.
-      }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         phase = 'cancelled';
@@ -799,7 +880,7 @@
       onclick={(event) => navClick(event, 'analyse')}>{$_('header.navAnalysis')}</a
     >
     <a
-      href="./?view=follower"
+      href="./?view=reports"
       aria-current={view === 'follower' ? 'page' : undefined}
       onclick={(event) => navClick(event, 'follower')}>{$_('header.navFollower')}</a
     >
@@ -869,11 +950,12 @@
   <FollowerPage
     prefillHandle={handle}
     {savedHandles}
-    snapshot={account ? { account, platform, origin } : null}
+    snapshot={reportsSelection}
     {authSession}
     {authPhase}
     onopenconnection={openConnection}
     oninvalidatesession={invalidateSession}
+    onselectaccount={selectReportsAccount}
   />
 {:else if shareView === 'ready' && sharedThread}
   <SharedThreadPage result={sharedThread} analyzedAt={sharedAnalyzedAt} />

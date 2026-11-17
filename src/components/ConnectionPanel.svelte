@@ -41,13 +41,22 @@
   let selected = $state<ConnectionCandidate | null>(null);
   let resolving = $state(false);
   let resolveError = $state('');
+  let switching = $state(false);
   let wasOpen = false;
+
+  const sessionKey = $derived(session ? `${session.origin}|${session.account.id}` : '');
+  const selectedIsOtherAccount = $derived(
+    session !== null &&
+      selected !== null &&
+      `${selected.origin}|${selected.account.id}` !== sessionKey,
+  );
 
   $effect(() => {
     if (open && !wasOpen) {
       selected = candidate;
       handle = candidate ? `@${canonicalAcct(candidate.account, candidate.origin)}` : '';
       resolveError = '';
+      switching = false;
       void tick().then(() => panel?.focus());
     }
     wasOpen = open;
@@ -111,18 +120,88 @@
             <span>{new URL(session.origin).hostname} · {$_('connection.tabOnly')}</span>
           </div>
         </div>
-        {#if candidate && (candidate.origin !== session.origin || candidate.account.id !== session.account.id)}
+
+        {#if selectedIsOtherAccount && selected}
           <p class="connection-note">{$_('connection.otherAccount')}</p>
+          <div class="connection-account connection-account-selected">
+            <img src={selected.account.avatar_static} alt="" width="52" height="52" />
+            <div>
+              <small
+                >{$_('connection.selectedAccount', {
+                  values: { account: canonicalAcct(selected.account, selected.origin) },
+                })}</small
+              >
+              <strong>{selected.account.display_name || selected.account.username}</strong>
+              <span>{new URL(selected.origin).hostname}</span>
+            </div>
+          </div>
+          {#if message}<p class="connection-error" role="alert">{message}</p>{/if}
+          <div class="connection-actions">
+            <button
+              type="button"
+              disabled={phase === 'connecting'}
+              onclick={() => selected && void onconnect(selected)}
+            >
+              {phase === 'connecting'
+                ? $_('connection.connecting')
+                : $_('connection.connectTo', {
+                    values: { host: new URL(selected.origin).hostname },
+                  })}
+            </button>
+            <button
+              type="button"
+              class="connection-secondary"
+              disabled={phase === 'connecting'}
+              onclick={() => {
+                selected = null;
+                switching = false;
+              }}>{$_('connection.cancel')}</button
+            >
+          </div>
+        {:else}
+          {#if message}<p class="connection-error" role="alert">{message}</p>{/if}
+          {#if switching}
+            <form
+              class="connection-handle"
+              onsubmit={(event) => {
+                event.preventDefault();
+                void resolveCandidate();
+              }}
+            >
+              <label for="connection-handle">{$_('connection.chooseHandle')}</label>
+              <HandleCombobox
+                inputId="connection-handle"
+                listboxId="connection-handles-listbox"
+                bind:value={handle}
+                {savedHandles}
+                disabled={resolving || phase === 'connecting'}
+              />
+              <button type="submit" disabled={resolving || !handle.trim()}>
+                {resolving ? $_('hero.connecting') : $_('connection.resolve')}
+              </button>
+            </form>
+            {#if resolveError}<p class="connection-error" role="alert">{resolveError}</p>{/if}
+          {/if}
+          <div class="connection-actions">
+            <button
+              type="button"
+              class="connection-secondary"
+              disabled={phase === 'connecting'}
+              onclick={() => {
+                switching = !switching;
+                selected = null;
+                handle = '';
+                resolveError = '';
+              }}>{switching ? $_('connection.cancel') : $_('connection.switch')}</button
+            >
+            <button type="button" class="connection-disconnect" onclick={() => void ondisconnect()}>
+              {$_('connection.disconnect')}
+            </button>
+            <button type="button" class="connection-secondary" onclick={onclose}
+              >{$_('connection.close')}</button
+            >
+          </div>
         {/if}
-        {#if message}<p class="connection-error" role="alert">{message}</p>{/if}
-        <div class="connection-actions">
-          <button type="button" class="connection-disconnect" onclick={() => void ondisconnect()}>
-            {$_('connection.disconnect')}
-          </button>
-          <button type="button" class="connection-secondary" onclick={onclose}>
-            {$_('connection.close')}
-          </button>
-        </div>
       {:else}
         <p class="connection-intro">{$_('connection.intro')}</p>
         <ul class="connection-benefits">

@@ -47,6 +47,9 @@
   --positive: #14745b;
   --negative: #b13747;
   --chart-muted: #b9b6bd;
+  --chart-decline: #ff9d55;
+  --chart-rise-soft: #93b873;
+  --chart-decline-soft: #d99a63;
 
   /* text on dark surfaces (contrast >= 4.5:1) */
   --text-on-dark: #9f9f9f;

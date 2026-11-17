@@ -12,6 +12,17 @@ results.sarif
 
 # Planungs- und Entscheidungsdokumente bleiben lokal (keine Veroeffentlichung).
 /docs/
+!/docs/
+/docs/*
+!/docs/screenshots/
+/docs/screenshots/*
+!/docs/screenshots/reports-desktop.png
+!/docs/screenshots/reports-mobile.png
+!/docs/screenshots/reports-charts-desktop.png
+!/docs/screenshots/reports-charts-mobile.png
+!/docs/screenshots/reports-connect-desktop.png
+!/docs/screenshots/reports-connect-mobile.png
 /specs/
 /*.md
 !README.md
+!AGENTS.md

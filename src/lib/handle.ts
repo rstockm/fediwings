@@ -52,12 +52,22 @@ export function parseHandle(value: string): ParsedHandle {
   return { username, domain, acct: `${username}@${domain}` };
 }
 
-type InstanceProbe = 'ok' | 'unreachable' | 'other';
+type InstanceProbe =
+  | { state: 'ok' }
+  | { state: 'unreachable' }
+  | { state: 'rate-limited' }
+  | { state: 'http'; status: number }
+  | { state: 'missing' };
+
+const MISSING_ENDPOINT_STATUS = new Set([404, 405, 501]);
 
 async function probeInstance(origin: string, signal?: AbortSignal): Promise<InstanceProbe> {
   const paths = ['/api/v2/instance', '/api/v1/instance'];
+  let responded = false;
+  let problemStatus: number | null = null;
+  let rateLimited = false;
 
-  for (const [index, path] of paths.entries()) {
+  for (const path of paths) {
     let response: Response;
     try {
       response = (
@@ -71,24 +81,43 @@ async function probeInstance(origin: string, signal?: AbortSignal): Promise<Inst
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError' && signal?.aborted)
         throw error;
-      return 'unreachable';
+      // A single failing endpoint must not hide the other API version.
+      continue;
     }
 
+    responded = true;
+
     if (!response.ok) {
-      const endpointMissing = [404, 405, 501].includes(response.status);
-      if (index === 0 && endpointMissing) continue;
-      return 'other';
+      if (response.status === 429) {
+        rateLimited = true;
+      } else if (!MISSING_ENDPOINT_STATUS.has(response.status)) {
+        problemStatus ??= response.status;
+      }
+      continue;
     }
 
     try {
       instanceSchema.parse(await response.json());
-      return 'ok';
+      return { state: 'ok' };
     } catch {
-      return 'other';
+      // A challenge or error page can answer with 200; try the other endpoint.
     }
   }
 
-  return 'other';
+  if (!responded) return { state: 'unreachable' };
+  if (rateLimited) return { state: 'rate-limited' };
+  if (problemStatus !== null) return { state: 'http', status: problemStatus };
+  return { state: 'missing' };
+}
+
+function probeError(probe: InstanceProbe): HandleError | null {
+  if (probe.state === 'ok') return null;
+  if (probe.state === 'unreachable') return new HandleError(msg('error.handleServer'));
+  if (probe.state === 'rate-limited') return new HandleError(msg('error.handleRateLimited'));
+  if (probe.state === 'http') {
+    return new HandleError(msg('error.apiHttp', { status: probe.status }));
+  }
+  return new HandleError(msg('error.handleNoApi'));
 }
 
 export async function resolveHandle(value: string, signal?: AbortSignal): Promise<InstanceTarget> {
@@ -96,11 +125,17 @@ export async function resolveHandle(value: string, signal?: AbortSignal): Promis
   const directOrigin = `https://${parsed.domain}`;
 
   const directProbe = await probeInstance(directOrigin, signal);
-  if (directProbe === 'ok') {
+  if (directProbe.state === 'ok') {
     return { ...parsed, origin: directOrigin };
   }
-  if (directProbe === 'unreachable') {
+  if (directProbe.state === 'unreachable') {
     throw new HandleError(msg('error.handleServer'));
+  }
+  if (directProbe.state === 'rate-limited') {
+    throw new HandleError(msg('error.handleRateLimited'));
+  }
+  if (directProbe.state === 'http' && directProbe.status >= 500) {
+    throw new HandleError(msg('error.apiHttp', { status: directProbe.status }));
   }
 
   let response: Response;
@@ -120,6 +155,12 @@ export async function resolveHandle(value: string, signal?: AbortSignal): Promis
   }
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new HandleError(msg('error.handleRateLimited'));
+    }
+    if (response.status === 403 || response.status >= 500) {
+      throw new HandleError(msg('error.apiHttp', { status: response.status }));
+    }
     throw new HandleError(msg('error.handleWebfinger'));
   }
 
@@ -141,12 +182,8 @@ export async function resolveHandle(value: string, signal?: AbortSignal): Promis
   const actorUrl = new URL(selfLink.href);
   const origin = actorUrl.origin;
   const actorProbe = await probeInstance(origin, signal);
-  if (actorProbe === 'unreachable') {
-    throw new HandleError(msg('error.handleServer'));
-  }
-  if (actorProbe !== 'ok') {
-    throw new HandleError(msg('error.handleNoApi'));
-  }
+  const error = probeError(actorProbe);
+  if (error) throw error;
 
   return { ...parsed, origin };
 }

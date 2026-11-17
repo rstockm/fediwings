@@ -2741,7 +2741,7 @@ footer {
   font-style: normal;
 }
 
-.methodology-hero-copy > p:last-child {
+.methodology-hero-copy > p:not(.kicker) {
   max-width: 690px;
   margin: 34px 0 0;
   color: #aaa79f;
@@ -4581,7 +4581,7 @@ footer {
     font-size: clamp(2.05rem, 10.7vw, 3.35rem);
   }
 
-  .methodology-hero-copy > p:last-child {
+  .methodology-hero-copy > p:not(.kicker) {
     margin-top: 25px;
   }
 

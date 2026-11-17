@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "packageManager": "npm@10.9.8",
   "scripts": {
+    "sbom": "node scripts/sbom.mjs",
+    "sbom:check": "node scripts/sbom.mjs --check",
+    "test:sbom": "node --test scripts/sbom.test.mjs",
     "dev": "vite --host 127.0.0.1",
     "build": "npm run typecheck && vite build",
     "typecheck": "svelte-check",
@@ -16,6 +20,7 @@
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "dexie": "^4.4.7",
     "dompurify": "^3.4.17",
     "svelte-i18n": "^4.0.1",
     "zod": "^4.6.7"
@@ -27,6 +32,7 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/svelte": "^5.2.8",
     "@types/node": "^24.3.0",
+    "ajv": "6.15.0",
     "eslint": "^10.10.0",
     "eslint-plugin-svelte": "^3.23.0",
     "globals": "^16.3.0",

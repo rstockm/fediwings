@@ -2,4 +2,4 @@
 
 | Datei | Zweck |
 | --- | --- |
-| `deploy.yml` | Prüft Secrets, Audit, Format, Lint, Typen, Unit-/Browsertests und Build vor Pages-Deployment; Secrets-Scan erhält vollständige Git-Historie (`fetch-depth: 0`), damit Mehrfach-Commit-Pushes geprüft werden können. |
+| `deploy.yml` | Prüft Secrets, Audit, Format, Lint, Typen, Unit-/Browser-/SBOM-Tests und Build vor Pages-Deployment; pinnt npm 10.9.8, validiert SBOM und archiviert sie mit Commit-SHA; Secrets-Scan erhält vollständige Git-Historie (`fetch-depth: 0`). |

@@ -25,7 +25,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Reproduzierbare npm-/SBOM-Version
+        run: npm install --global npm@10.9.8
       - run: npm ci
+      - name: SBOM validieren und Aktualität prüfen
+        run: npm run sbom:check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: compliance/sbom.cdx.json
+          if-no-files-found: error
       - name: Secrets-Scan
         uses: gitleaks/gitleaks-action@v2
         env:
@@ -36,6 +45,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:sbom
       - run: npm run build
         env:
           VITE_CARD_SERVICE_URL: ${{ vars.CARD_SERVICE_URL }}

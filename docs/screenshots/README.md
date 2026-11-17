@@ -15,8 +15,29 @@ Keine API-Mocks, erfundenen Kennzahlen oder angemeldeten Sitzungen.
 | `instanzverbindung.png` | Erklärung der optionalen OAuth-Verbindung, vor der Anmeldung                      |
 | `methodik.png`          | Einstieg in die Methodikseite                                                     |
 | `share-card.png`        | Echte, über den Card Service erzeugte Karte für einen öffentlichen FediPol-Thread |
+| `reports-desktop.png`   | Reporttabelle mit öffentlichen ZLB-Daten; Desktop |
+| `reports-mobile.png`    | Reporttabelle mit denselben öffentlichen ZLB-Daten; Mobilansicht |
+| `reports-charts-desktop.png` | Balkendiagramme des ZLB-Jahresreports; Desktop |
+| `reports-charts-mobile.png` | Balkendiagramme desselben Reports; Mobilansicht |
+| `reports-connect-desktop.png` | Aktueller Reports-Einstieg ohne Verbindung und ohne Statistiken |
+| `reports-connect-mobile.png` | Derselbe Einstieg mobil |
 
 ## Aktualisieren
+
+Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
+`LIVE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'optionale öffentliche' --project=chromium`.
+Die älteren Reports-/Diagrammaufnahmen vom 16.11.2026 verwenden öffentliche
+ZLB-Daten und stammen vor der Verbindungspflicht, vor der aktuellen
+Grün-/Orange-Farblogik, vor der heutigen Aktionsleiste, vor der
+Mittelwertlinie in den Diagrammen und vor der Jahresauswahl als Liste. Sie
+bleiben als gekennzeichnete Darstellungsbeispiele erhalten. Authentifizierte Live-Reports
+können ohne Anmeldung des Accountinhabers nicht neu aufgenommen werden; sie
+werden nicht vorgetäuscht.
+Die Methodikaufnahme vom 16.11.2026 entsteht mit
+`UPDATE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/app.spec.ts -g 'wechselt ueber die Reiter' --project=chromium`.
+Sie zeigt die aktuelle Reports-Methodik und hat keinen zusätzlichen Außenrand.
+Ältere Übersichtsaufnahmen zeigen teilweise noch die frühere Reiterbezeichnung
+„Follower“.
 
 1. Den zu dokumentierenden Stand bauen bzw. dessen Deployment überprüfen.
 2. Deutsch wählen; Desktop-Viewport 1440 × 1000, Mobil-Viewport 390 × 1100,
