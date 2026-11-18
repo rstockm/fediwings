@@ -66,6 +66,16 @@ Grün-/Orange-Tokens einschließlich sRGB-Mischung und vertikalem Verlauf.
 Fehlende Werte bleiben im PDF ohne Balken; zukünftige Monate beeinflussen
 die relative Intensität nicht. Eine Legende erklärt die Farblogik.
 
+Alle Diagramme tragen beschriftete, gerundete Werteachsen mit Gitterlinien.
+Kleine Werte erscheinen vollständig, große mit lokalisierten Kürzeln
+(Tsd./Mio./Mrd./Bio. beziehungsweise k/M/B/T). Der Follower-Stand wird nicht
+ab null, sondern im Jahresbereich skaliert, damit auch kleine Veränderungen
+sichtbar bleiben; die Achse ist als „Achse nicht bei null“ gekennzeichnet und
+die Datentabelle nennt weiterhin jeden absoluten Stand. Die Top-5-Beiträge
+weisen Antworten, Boosts, Likes und Zitate einzeln aus; ihre Summe entspricht
+der ausgewiesenen Interaktionszahl. Tabellenköpfe mit Zahlen stehen rechtsbündig
+über ihren Spalten.
+
 Die PDF-TTFs decken Latin-Zeichen ab. Andere Zeichen erscheinen sichtbar als
 `[U+…]`; Original-Links und Metadaten werden nicht als Schriftzeichenersatz verändert.
 Das ist kein mehrsprachiger Universalschriftsatz. PDF-Tags und Sprache sind gesetzt,
@@ -113,7 +123,7 @@ während der Live-Abruf inzwischen andere Beiträge liefert. Die gespeicherten
 Top-Beiträge bleiben dabei unverändert. Die Community-Seite wurde zusätzlich
 in Graustufen visuell geprüft.
 
-Abschluss nach Titel-/Farb-Ergänzungen: `make check` erfolgreich, **206 Unit-/Komponententests**,
+Abschluss nach Titel-, Farb- und Achsen-Ergänzungen: `make check` erfolgreich, **207 Unit-/Komponententests**,
 SBOM-/Audit-Regressionstests und Produktionsbuild erfolgreich. Die zusätzlichen
 PDF-Fixtures für sehr große Zahlen und lange Texte wurden auf Satz und vollständige
 Tabellen geprüft; sämtliche aktuellen Rasterreferenzen stimmen überein.

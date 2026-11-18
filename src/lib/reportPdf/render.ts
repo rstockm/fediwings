@@ -10,6 +10,7 @@ import { cleanText, safePdfUrl, type PdfOptions, type ReportPdfSnapshot } from '
 import { pdfText } from './glyphs';
 import { pdfBarColors } from './colors';
 import { titleChange, titleFollowers, type TitleMetric, type TitleChange } from './comparisons';
+import { axisLabels, chartAxis } from './axis';
 
 const methodUrl = 'https://rstockm.github.io/fediwings/?view=methodik';
 const escapeXml = (s: string) =>
@@ -57,7 +58,7 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
     margin: [0, 4, 0, 6],
   });
   const table = (
-    headers: string[],
+    headers: Array<string | { text: string; right: true }>,
     rows: Content[][],
     widths: Array<number | '*' | 'auto'>,
     id?: string,
@@ -69,12 +70,16 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
       dontBreakRows: true,
       widths,
       body: [
-        headers.map((text) => ({
-          text,
-          bold: true,
-          color: colors.violet,
-          fillColor: colors.paper,
-        })),
+        headers.map((header) => {
+          const text = typeof header === 'string' ? header : header.text;
+          return {
+            text,
+            bold: true,
+            color: colors.violet,
+            fillColor: colors.paper,
+            ...(typeof header === 'string' ? {} : { alignment: 'right' as const }),
+          };
+        }),
         ...rows,
       ],
     },
@@ -82,20 +87,24 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
       hLineWidth: (i) => (i === 1 ? 0.8 : 0.25),
       vLineWidth: () => 0,
       hLineColor: () => colors.muted,
-      paddingTop: () => 1.5,
-      paddingBottom: () => 1.5,
+      paddingTop: () => 1,
+      paddingBottom: () => 1,
       paddingLeft: () => 4,
       paddingRight: () => 4,
     },
     margin: [0, 4, 0, 8],
   });
-  const graph = (series: PdfSeries, height = 124): Content => {
-    const values = series.values.filter((v): v is number => v !== null);
-    const min = Math.min(0, ...values);
-    const max = Math.max(1, ...values);
+  const graph = (series: PdfSeries, height = 124, zoomed = false): Content => {
+    const axis = chartAxis(series.values, zoomed);
+    const labels = axisLabels(axis, o.locale);
+    const { min, max } = axis;
+    const gutter = Math.min(92, Math.max(36, Math.max(...labels.map((l) => l.length)) * 3.8 + 8));
+    const plotWidth = 487 - gutter - 6;
+    const slot = plotWidth / 12;
+    const barWidth = Math.min(24, slot * 0.62);
     const chartHeight = height - 38;
+    const bottom = 10 + chartHeight;
     const y = (v: number) => 10 + (chartHeight * (max - v)) / (max - min);
-    const zero = y(0);
     const barColors = pdfBarColors(series, colors);
     const gradients = barColors
       .map((bar, index) =>
@@ -104,25 +113,32 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
           : `<linearGradient id="${series.id}-${index}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${bar.color}"/><stop offset="100%" stop-color="${bar.shade}"/></linearGradient>`,
       )
       .join('');
+    const grid = axis.ticks
+      .map(
+        (tick, index) =>
+          `<line x1="${gutter}" y1="${y(tick)}" x2="${487 - 4}" y2="${y(tick)}" stroke="${colors.muted}" stroke-width="${index === 0 ? 0.55 : 0.3}" stroke-opacity="${index === 0 ? 1 : 0.4}"/><text x="${gutter - 5}" y="${y(tick) + 2.4}" text-anchor="end" font-size="7" fill="${colors.muted}">${escapeXml(labels[index])}</text>`,
+      )
+      .join('');
     const bars = seriesTableRows(series)
       .map((row, i) => {
-        const x = 12 + i * 39;
+        const center = gutter + slot * (i + 0.5);
+        const x = center - barWidth / 2;
         const label = escapeXml(pdfText(month(i) + (row.status === 'current' ? '*' : '')));
         const bar =
           row.value === null || row.status === 'future'
             ? ''
-            : `<rect x="${x}" y="${Math.min(zero, y(row.value))}" width="24" height="${Math.max(0.6, Math.abs(zero - y(row.value)))}" fill="url(#${series.id}-${i})"/>`;
-        return `${bar}<text x="${x + 12}" y="${height - 7}" text-anchor="middle" font-size="9" fill="${colors.muted}">${label}</text>`;
+            : `<rect x="${x}" y="${y(row.value)}" width="${barWidth}" height="${Math.max(0.6, bottom - y(row.value))}" fill="url(#${series.id}-${i})"/>`;
+        return `${bar}<text x="${center}" y="${height - 7}" text-anchor="middle" font-size="9" fill="${colors.muted}">${label}</text>`;
       })
       .join('');
     return {
       stack: [
         { text: series.label, id: series.id, bold: true, fontSize: 13, margin: [0, 10, 0, 4] },
         small(
-          `${c.unit}: ${series.unit}${series.id === 'chart-reach' ? ` · ${c.sum}` : ''} · ${nf(min)}–${nf(max)}`,
+          `${c.unit}: ${series.unit}${series.id === 'chart-reach' ? ` · ${c.sum}` : ''}${zoomed && min > 0 ? ` · ${c.axisZoomed}` : ''}`,
         ),
         {
-          svg: `<svg xmlns="http://www.w3.org/2000/svg" width="487" height="${height}"><defs>${gradients}</defs><line x1="8" y1="${zero}" x2="480" y2="${zero}" stroke="${colors.muted}" stroke-width="0.4"/>${bars}</svg>`,
+          svg: `<svg xmlns="http://www.w3.org/2000/svg" width="487" height="${height}"><defs>${gradients}</defs>${grid}${bars}</svg>`,
           width: pdfLayout.width,
         },
         reference(
@@ -295,10 +311,10 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
     table(
       [
         c.month,
-        `${c.reach}\n(${c.count})`,
-        `${c.interactions}\n(${c.count})`,
-        `${c.threads}\n(${c.count})`,
-        `${c.engagement}\n(%)`,
+        { text: `${c.reach}\n(${c.count})`, right: true },
+        { text: `${c.interactions}\n(${c.count})`, right: true },
+        { text: `${c.threads}\n(${c.count})`, right: true },
+        { text: `${c.engagement}\n(%)`, right: true },
       ],
       s.report.months.map((p, i) => [
         { text: monthLabel(i) },
@@ -321,7 +337,7 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
   const followerSeries = doc.series.find((item) => item.id === 'chart-followers');
   if (followerSeries) {
     if (!hasPosts) content.push(small(c.colorLegend));
-    content.push(graph(followerSeries, 56));
+    content.push(graph(followerSeries, 84, true));
     content.push({
       text: `${c.table}: ${c.community}`,
       id: 'table-community',
@@ -330,7 +346,13 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
     });
     content.push(
       table(
-        [c.month, c.followers, c.netChange, c.follows, c.source],
+        [
+          c.month,
+          { text: c.followers, right: true },
+          { text: c.netChange, right: true },
+          { text: c.follows, right: true },
+          c.source,
+        ],
         s.community.map((p, i) => [
           { text: monthLabel(i) },
           { text: stateValue(followerSeries, i), alignment: 'right' },
@@ -380,8 +402,18 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
             text: `${c.reach}: ${nf(post.reach)}${post.complete ? '' : ' !'}    ·    ${c.interactions}: ${nf(post.interactions)}`,
             bold: true,
             fontSize: 10,
-            margin: [0, 7, 0, 4],
+            margin: [0, 7, 0, post.interactionDetail ? 2 : 4],
           },
+          ...(post.interactionDetail
+            ? [
+                {
+                  text: `${c.replies}: ${nf(post.interactionDetail.replies)}  ·  ${c.boosts}: ${nf(post.interactionDetail.boosts)}  ·  ${c.likes}: ${nf(post.interactionDetail.likes)}  ·  ${c.quotes}: ${nf(post.interactionDetail.quotes)}`,
+                  fontSize: 9,
+                  color: colors.muted,
+                  margin: [0, 0, 0, 4],
+                } as Content,
+              ]
+            : []),
           ...(safePdfUrl(post.url)
             ? [
                 {
@@ -402,12 +434,12 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
   content.push({ text: c.yearChange, bold: true, fontSize: 13, margin: [0, 4, 0, 5] });
   content.push(
     table(
-      [c.metric, c.yearChange, c.period],
+      [c.metric, { text: c.yearChange, right: true }, c.period],
       metricKeys.map((key) => {
         const change = titleChange(s, key);
         return [
           { text: c[key] },
-          { text: growthText(change), bold: true },
+          { text: growthText(change), bold: true, alignment: 'right' as const },
           {
             text:
               change?.basis === 'years'

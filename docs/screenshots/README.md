@@ -29,6 +29,7 @@ verwenden dagegen kontrollierte Testdaten.
 | `report-pdf-mobile.png` | Derselbe Exportdialog mit mobilem Direktdownload |
 | `report-pdf-page-1.png` | Gerasterte erste Seite des synthetischen PDF-Beispielberichts, kein Live-Report |
 | `report-pdf-charts.png` | Aktualisierte Demo-Diagrammseite mit Online-Farblogik Grün/Orange und vollständiger Tabellenzuordnung |
+| `report-pdf-followers.png` | Demo-Seite mit vergrößerter Follower-Achse, rechtsbündigen Tabellenköpfen und vollständiger Community-Tabelle |
 
 ## Aktualisieren
 

@@ -8,6 +8,7 @@ import { reportInsights } from './insights';
 import { cleanText, pdfSnapshotSchema, safePdfUrl } from './model';
 import { plainText, preparePdfSnapshot, selectTopPosts } from './prepare';
 import { pdfDefinition } from './render';
+import { axisLabels, chartAxis } from './axis';
 import { pdfText } from './glyphs';
 
 function post(id = '1', overrides: Partial<MastodonStatus> = {}): PostReach {
@@ -78,6 +79,12 @@ describe('PDF-Daten und Top 5', () => {
       ).map((p) => p.id),
     ).toEqual(['e', 'd', 'c', 'a', 'b']);
     expect(selectTopPosts([a], 2025)[0].interactions).toBe(14);
+    expect(selectTopPosts([a], 2025)[0].interactionDetail).toEqual({
+      replies: 3,
+      boosts: 2,
+      likes: 5,
+      quotes: 4,
+    });
     expect(selectTopPosts([], 2025)).toEqual([]);
     expect(selectTopPosts([a, b, c, d], 2025)).toHaveLength(4);
     expect(selectTopPosts([a, b, c, d, e, post('f')], 2025)).toHaveLength(5);
@@ -186,6 +193,49 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
       }
     },
   );
+  it('spreizt die Follower-Achse und richtet Tabellenköpfe über Zahlen rechts aus', () => {
+    const followers = pdfFixture().community.map((p) => p.followers);
+    const axis = chartAxis(followers, true);
+    expect(axis.min).toBeLessThan(1200);
+    expect(axis.max).toBeGreaterThan(1684);
+    expect(axis.max - axis.min).toBeLessThan(1684);
+    expect(axis.ticks[0]).toBe(axis.min);
+    expect(axis.ticks.at(-1)).toBe(axis.max);
+    expect(axis.ticks.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(axisLabels(axis, 'de')).size).toBe(axis.ticks.length);
+    expect(axisLabels(chartAxis([0, 18_000, 41_100]), 'de')).toContain('40 Tsd.');
+    expect(axisLabels(chartAxis([0, 80_000_000_000_000], false), 'de').at(-1)).toContain('Bio.');
+    expect(chartAxis([0, 0]).ticks).toEqual([0, 1]);
+    const doc = buildReportDocument(pdfFixture(), options);
+    const definition = pdfDefinition(doc, {
+      ink: '#17181b',
+      paper: '#faf9f5',
+      muted: '#5c5a62',
+      violet: '#5d4cf0',
+      lime: '#c7f36b',
+      riseSoft: '#93b873',
+      decline: '#ff9d55',
+      declineSoft: '#d99a63',
+    });
+    const nodes = (Array.isArray(definition.content) ? definition.content : []) as unknown as Array<
+      Record<string, unknown>
+    >;
+    const tables = nodes
+      .filter((node) => typeof node === 'object' && node !== null && 'table' in node)
+      .map(
+        (node) =>
+          node.table as {
+            body: Array<Array<{ text: string; alignment?: string }>>;
+          },
+      );
+    expect(tables[0].body[0][0].alignment).toBeUndefined();
+    for (let column = 1; column <= 4; column++)
+      expect(tables[0].body[0][column].alignment).toBe('right');
+    expect(tables[1].body[0][4].alignment).toBeUndefined();
+    const rendered = JSON.stringify(definition.content);
+    expect(rendered).toContain('Achse nicht bei null');
+    expect(rendered).toContain('Antworten: 50');
+  });
   it('lokalisiert und begrenzt Titel ohne HTML-Ausführung', () => {
     const de = buildReportDocument(pdfFixture(), options);
     const en = buildReportDocument(pdfFixture(), {

@@ -39,10 +39,16 @@ Follower und Engagement vergleichen Januar und Dezember beziehungsweise den
 letzten abgeschlossenen Monat. Vorjahresdaten werden erst beim PDF-Start geladen,
 nicht bei jedem Seitenaufruf. Fehlende Vergleichsdaten werden nicht geschätzt.
 Die Balken übernehmen Grün/Orange und die relative Farbintensität der Online-Version.
+Jede Grafik trägt eine beschriftete, gerundete Werteachse; beim Follower-Stand ist
+sie auf den Jahresbereich vergrößert und ausdrücklich als „Achse nicht bei null“
+gekennzeichnet. Die Top-5-Beiträge weisen Antworten, Boosts, Likes und Zitate
+einzeln aus; Tabellenköpfe stehen rechtsbündig über ihren Zahlenspalten.
 
 ![Erste Seite des synthetischen FediWings-Demoberichts mit fünf Kennzahlen, Veränderungsindikatoren und Executive Summary](docs/screenshots/report-pdf-page-1.png)
 
-![Monatsdiagramme des synthetischen PDF-Berichts mit Grün für steigende und Orange für fallende Monatswerte](docs/screenshots/report-pdf-charts.png)
+![Monatsdiagramme des synthetischen PDF-Berichts mit beschrifteten Werteachsen sowie Grün für steigende und Orange für fallende Monatswerte](docs/screenshots/report-pdf-charts.png)
+
+![Community-Seite des Demo-Berichts mit vergrößerter Follower-Achse, rechtsbündigen Zahlenspalten und vollständiger Datentabelle](docs/screenshots/report-pdf-followers.png)
 
 ![Desktop-UI-Demo des lokalen PDF-Exportdialogs mit Berichtstitel, Organisation, Sprache und Download](docs/screenshots/report-pdf-desktop.png)
 

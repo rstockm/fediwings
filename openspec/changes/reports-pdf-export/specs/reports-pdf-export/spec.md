@@ -36,11 +36,15 @@ Das PDF SHALL im A4-Hochformat Executive Summary, Monatsentwicklung, Community u
 
 ### Requirement: Professionelle Dokumentqualität
 
-Das PDF SHALL eingebettete Schriften, auswählbaren und durchsuchbaren Text, scharfe Vektordiagramme, funktionierende sichere Links und vollständige Tabellen ohne abgeschnittene Inhalte enthalten. Es SHALL auch in Graustufen verständlich sein, Informationen nicht allein über Farben vermitteln und Dokumenttitel sowie Dokumentsprache setzen.
+Das PDF SHALL eingebettete Schriften, auswählbaren und durchsuchbaren Text, scharfe Vektordiagramme mit gerundeten, beschrifteten Werteachsen, funktionierende sichere Links und vollständige Tabellen ohne abgeschnittene Inhalte enthalten. Es SHALL auch in Graustufen verständlich sein, Informationen nicht allein über Farben vermitteln und Dokumenttitel sowie Dokumentsprache setzen.
 
 #### Scenario: Lange Inhalte
 - **WHEN** lange Handles, Organisationsnamen, große Zahlen oder lange deutsche Beschriftungen vorkommen
 - **THEN** bleiben Seitenränder, Zahlenzuordnung und Lesbarkeit erhalten; kontrollierte Fortsetzungsseiten ersetzen Überläufe und Schriftverkleinerung unter die festgelegte Mindestgröße.
+
+#### Scenario: Diagrammachsen
+- **WHEN** ein Diagramm Werte über mehrere Größenordnungen oder einen engen Follower-Bereich zeigt
+- **THEN** trägt es eine gerundete, beschriftete Werteachse mit verständlichen Kürzeln; der Follower-Bereich ist vergrößert und als nicht bei null beginnend gekennzeichnet, während die Tabelle alle Absolutwerte nennt.
 
 ### Requirement: Vollständige Tabellen für alle Grafiken
 
@@ -61,6 +65,10 @@ Das PDF SHALL jede datenführende Grafik zusätzlich durch eine vollständige Ta
 #### Scenario: Zusätzlicher Platzbedarf
 - **WHEN** vollständige Tabellen nicht in das fünfseitige Referenzlayout passen
 - **THEN** ergänzt das PDF lesbare Fortsetzungsseiten mit wiederholten Tabellenköpfen, statt Werte wegzulassen oder die Mindestschriftgröße zu unterschreiten.
+
+#### Scenario: Zahlenkolumnen
+- **WHEN** eine Tabelle Zahlenspalten enthält
+- **THEN** stehen die zugehörigen Überschriften rechtsbündig über den Werten; Textspalten wie Monat oder Quelle bleiben linksbündig.
 
 ### Requirement: Farblogik wie in der Online-Version
 
@@ -104,11 +112,11 @@ Das PDF SHALL vorhandene Report-Aggregate ohne Änderung der Reichweitenformel v
 
 ### Requirement: Top 5 Beiträge
 
-Das PDF SHALL bis zu fünf öffentliche Threads des Berichtszeitraums nach FediWings-Reichweite absteigend darstellen. Ein Thread SHALL einmal zählen. Bei Gleichstand SHALL zuerst die höhere Report-Interaktionssumme, danach das jüngere Veröffentlichungsdatum und zuletzt die lexikografische Thread-ID entscheiden. Jeder Eintrag SHALL Rang, Datum, begrenzten Klartextauszug, Reichweite, Report-Interaktionssumme und bei vorhandener sicherer URL einen Original-Link enthalten.
+Das PDF SHALL bis zu fünf öffentliche Threads des Berichtszeitraums nach FediWings-Reichweite absteigend darstellen. Ein Thread SHALL einmal zählen. Bei Gleichstand entscheiden höhere Interaktionssumme, jüngeres Datum und lexikografische Thread-ID. Jeder Eintrag SHALL Rang, Datum, Klartextauszug, Reichweite, Interaktionssumme mit Einzelwerten sowie bei sicherer URL den Original-Link enthalten.
 
 #### Scenario: Rangliste
 - **WHEN** mindestens fünf auswertbare öffentliche Threads vorliegen
-- **THEN** zeigt das PDF genau die fünf höchstplatzierten mit derselben Interaktionsdefinition wie der Jahresreport, einschließlich Likes, Boosts, Antworten und verfügbarer Quotes.
+- **THEN** zeigt das PDF genau die fünf höchstplatzierten mit derselben Interaktionsdefinition wie der Jahresreport, einschließlich Likes, Boosts, Antworten und verfügbarer Quotes, und schlüsselt diese vier Werte je Beitrag einzeln auf.
 
 #### Scenario: Weniger als fünf Threads
 - **WHEN** nur ein bis vier öffentliche Threads vorliegen

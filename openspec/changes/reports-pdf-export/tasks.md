@@ -53,3 +53,9 @@
 - [x] 8.1 Grün/Orange und relative Intensität der Online-Monatsdiagramme im PDF wiederverwenden, inklusive Legende; Tests prüfen Anstieg, Rückgang, Gleichstand und unveränderte Datenlücken. Demo-PDFs und Rasterreferenzen aktualisieren, Diagrammseite visuell prüfen und lokalen Bericht erneut öffnen.
 - [x] 8.2 Follower als fünfte Titelkennzahl und farbige Veränderungsindikatoren ergänzen: Follower/Engagement Januar–Dezember, Reichweite/Interaktionen/Threads als Summen gegen das Vorjahr (laufendes Jahr: gleicher Zeitraum). Vorjahresdaten ausschließlich beim PDF-Start laden und im Snapshot erhalten; Nullnenner, fehlende Werte, Teilstände und Legacy testen. Vergleiche tabellieren und PDF-/Screenshotreferenzen aktualisieren.
 - [ ] 8.3 Nach grünen lokalen Prüfungen und Diff-Review den genehmigten GitHub-Pages-Deploy ausführen; Workflow-Ergebnis und Live-Erreichbarkeit prüfen.
+
+## 9. Nachschärfung von Diagrammen und Beitragsdetails
+
+- [x] 9.1 Alle PDF-Diagramme mit gerundeten, beschrifteten Werteachsen und Gitterlinien versehen; große Werte lokalisiert kürzen, den Follower-Stand auf den Jahresbereich vergrößern und als nicht bei null beginnend kennzeichnen. Tests prüfen Achsengrenzen, Tick-Abstände, eindeutige Beschriftungen und die Kennzeichnung; Rasterreferenzen aktualisieren.
+- [x] 9.2 Interaktionen der Top-5-Beiträge nach Antworten, Boosts, Likes und Zitaten einzeln ausweisen, ohne die Summenlogik zu ändern; Schema bleibt rückwärtskompatibel, Tests prüfen Aufschlüsselung, Summe und Legacy-Stände.
+- [x] 9.3 Tabellenköpfe über Zahlenspalten rechtsbündig setzen, Textspalten linksbündig lassen; Tests prüfen Monats-, Community- und Methodiktabelle und die gerasterte Seite.

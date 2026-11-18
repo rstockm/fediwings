@@ -44,23 +44,35 @@ export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
     })),
     topAvailable: true,
     rankingComplete: true,
-    topPosts: Array.from({ length: 5 }, (_, i) => ({
-      id: `demo-${i}`,
-      createdAt: `2025-${String(i + 2).padStart(2, '0')}-15T12:00:00.000Z`,
-      url: `https://example.social/@demo/demo-${i}`,
-      excerpt: [
-        'Bibliotheken verbinden Menschen, Wissen und neue Perspektiven. Unser Rückblick auf ein Jahr gemeinsamer Projekte und offener Begegnungen.',
-        'Ein neuer Raum für Austausch: Heute öffnen wir unsere Türen für Ideen aus der Stadtgesellschaft. Was möchten Sie gemeinsam mit uns gestalten?',
-        'Digitale Teilhabe braucht zugängliche Angebote. Wir stellen die nächsten Schritte unseres Programms vor und laden zum Mitmachen ein.',
-        'Wissen wächst, wenn wir es teilen. Danke an alle, die diesen offenen Workshop mit Erfahrungen und Fragen bereichert haben.',
-        'Eine starke Community entsteht im Dialog. Fünf Einblicke aus unserem Alltag und eine Einladung, die Zukunft gemeinsam zu entwickeln.',
-      ][i],
-      contentWarning: false,
-      sensitive: false,
-      reach: 17000 - i * 1000,
-      interactions: 500 - i * 50,
-      complete: true,
-    })),
+    topPosts: Array.from({ length: 5 }, (_, i) => {
+      const interactions = 500 - i * 50;
+      const quotes = Math.round(interactions * 0.05);
+      const replies = Math.round(interactions * 0.1);
+      const boosts = Math.round(interactions * 0.25);
+      return {
+        id: `demo-${i}`,
+        createdAt: `2025-${String(i + 2).padStart(2, '0')}-15T12:00:00.000Z`,
+        url: `https://example.social/@demo/demo-${i}`,
+        excerpt: [
+          'Bibliotheken verbinden Menschen, Wissen und neue Perspektiven. Unser Rückblick auf ein Jahr gemeinsamer Projekte und offener Begegnungen.',
+          'Ein neuer Raum für Austausch: Heute öffnen wir unsere Türen für Ideen aus der Stadtgesellschaft. Was möchten Sie gemeinsam mit uns gestalten?',
+          'Digitale Teilhabe braucht zugängliche Angebote. Wir stellen die nächsten Schritte unseres Programms vor und laden zum Mitmachen ein.',
+          'Wissen wächst, wenn wir es teilen. Danke an alle, die diesen offenen Workshop mit Erfahrungen und Fragen bereichert haben.',
+          'Eine starke Community entsteht im Dialog. Fünf Einblicke aus unserem Alltag und eine Einladung, die Zukunft gemeinsam zu entwickeln.',
+        ][i],
+        contentWarning: false,
+        sensitive: false,
+        reach: 17000 - i * 1000,
+        interactions,
+        interactionDetail: {
+          replies,
+          boosts,
+          likes: interactions - replies - boosts - quotes,
+          quotes,
+        },
+        complete: true,
+      };
+    }),
   };
   if (variant === 'partial') {
     snapshot.report.months[3].reachComplete = false;

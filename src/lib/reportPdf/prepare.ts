@@ -29,6 +29,13 @@ export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
       ) !== year
     )
       continue;
+    const detail = { replies: 0, boosts: 0, likes: 0, quotes: 0 };
+    for (const item of post.threadStatuses) {
+      detail.replies += item.replies_count;
+      detail.boosts += item.reblogs_count;
+      detail.likes += item.favourites_count;
+      detail.quotes += item.quotes_count ?? 0;
+    }
     selected.push({
       id: cleanText(status.id, 512),
       createdAt: date.toISOString(),
@@ -41,15 +48,8 @@ export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
       contentWarning: Boolean(status.spoiler_text),
       sensitive: Boolean(status.sensitive),
       reach: post.netReach,
-      interactions: post.threadStatuses.reduce(
-        (sum, item) =>
-          sum +
-          item.favourites_count +
-          item.reblogs_count +
-          item.replies_count +
-          (item.quotes_count ?? 0),
-        0,
-      ),
+      interactions: detail.replies + detail.boosts + detail.likes + detail.quotes,
+      interactionDetail: detail,
       complete: post.state === 'complete' && !post.threadTruncated,
     });
   }

@@ -28,6 +28,7 @@ results.sarif
 !/docs/screenshots/report-pdf-mobile.png
 !/docs/screenshots/report-pdf-page-1.png
 !/docs/screenshots/report-pdf-charts.png
+!/docs/screenshots/report-pdf-followers.png
 # Bedien-/Pruefdokumentation und klar gekennzeichnete PDF-Demos.
 !/docs/pdf-export.md
 !/docs/examples/

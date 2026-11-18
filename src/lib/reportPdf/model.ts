@@ -56,6 +56,14 @@ export const pdfSnapshotSchema = z.object({
         sensitive: z.boolean(),
         reach: z.number().finite().nonnegative(),
         interactions: z.number().finite().nonnegative(),
+        interactionDetail: z
+          .object({
+            replies: z.number().finite().nonnegative(),
+            boosts: z.number().finite().nonnegative(),
+            likes: z.number().finite().nonnegative(),
+            quotes: z.number().finite().nonnegative(),
+          })
+          .optional(),
         complete: z.boolean(),
       }),
     )
