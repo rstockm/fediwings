@@ -6,3 +6,5 @@
 | `sbom.test.mjs` | Prüft Erzeugung in isoliertem Verzeichnis, Reproduzierbarkeit, eindeutige Referenzen und Fehlerfälle; läuft mit `npm run test:sbom`. |
 | `audit.mjs` | Wertet vollständiges npm-Audit aus; blockiert nicht freigegebene hohe/kritische Befunde, prüft befristete, advisorygenaue Ausnahmen ausschließlich für dev-Lockfile-Pfade und löst transitive Referenzen auf. |
 | `audit.test.mjs` | Prüft Ausnahmengrenzen, Ablauf, kritische Eskalation, Produktionspfade, Referenzzyklen und fehlerhafte Berichte. |
+| `pdf-check.mjs` | Erzeugt feste PDF-Fixtures, prüft Text, Fonts, Grafik-/Tabellenwerte, Seitengrenzen und leere Seiten; rastert und vergleicht lokale Referenzhashes, CI nutzt semantischen Modus. |
+| `pdf-vendors.mjs` | Inventarisiert tatsächlich eingebettete pdfmake-Vendorquellen über Source-Map-Hashes; erneuert mitgelieferte Fremdlizenzhinweise. |

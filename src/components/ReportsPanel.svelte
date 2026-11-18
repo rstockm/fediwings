@@ -7,6 +7,10 @@
   import { onDestroy, untrack } from 'svelte';
   import { _, locale } from 'svelte-i18n';
   import ReportCharts from './ReportCharts.svelte';
+  import ReportPdfDialog from './ReportPdfDialog.svelte';
+  import { preparePdfSnapshot } from '../lib/reportPdf/prepare';
+  import type { ReportPdfSnapshot } from '../lib/reportPdf/model';
+  import { prepareAnnualComparison } from '../lib/reportPdf/comparisons';
   import { getAccount } from '../lib/api';
   import { canonicalAcct } from '../lib/oauth';
   import { loadReport, REPORT_CACHE_MS, type ReportLoadProgress } from '../lib/reportLoader';
@@ -52,6 +56,11 @@
 
   let year = $state(new Date().getFullYear());
   let report = $state<AggregatedReport | null>(null);
+  let pdfSnapshot = $state<ReportPdfSnapshot | null>(null);
+  let pdfOpen = $state(false);
+  let comparisonLoading = $state(false);
+  let comparisonUnavailable = $state(false);
+  let comparisonController: AbortController | null = null;
   let analyzedAt = $state('');
   let accountObservedAt = $state('');
   let currentAccount = $state<MastodonAccount | null>(null);
@@ -81,6 +90,7 @@
   let controller: AbortController | null = null;
   let previousIdentity = '';
   let previousYear: number | null = null;
+  let reportOperation = 0;
 
   const accountKey = $derived(currentAccount ? reportAccountKey(origin, currentAccount.id) : '');
   const saved = $derived(savedAt !== '');
@@ -193,6 +203,8 @@
     previousIdentity = identity;
     controller?.abort();
     report = null;
+    pdfSnapshot = null;
+    pdfOpen = false;
     currentAccount = null;
     observations = [];
     savedAt = '';
@@ -211,6 +223,8 @@
     previousYear = year;
     controller?.abort();
     report = null;
+    pdfSnapshot = null;
+    pdfOpen = false;
     currentAccount = null;
     observations = [];
     savedAt = '';
@@ -221,13 +235,66 @@
     untrack(() => void load());
   });
 
-  onDestroy(() => controller?.abort());
+  onDestroy(() => {
+    controller?.abort();
+    comparisonController?.abort();
+  });
+
+  function closePdf(): void {
+    comparisonController?.abort();
+    comparisonController = null;
+    comparisonLoading = false;
+    pdfOpen = false;
+  }
+
+  async function openPdf(): Promise<void> {
+    const base = pdfSnapshot;
+    if (!base || busy || !currentAccount) return;
+    pdfOpen = true;
+    comparisonUnavailable = false;
+    if (
+      base.annualComparison ||
+      base.origin !== 'live' ||
+      (!base.report.total.counterComplete && !base.report.total.reachComplete)
+    )
+      return;
+    comparisonController?.abort();
+    const active = new AbortController();
+    comparisonController = active;
+    comparisonLoading = true;
+    try {
+      const previous = await loadReport(
+        origin,
+        currentAccount.id,
+        currentAccount.followers_count,
+        base.year - 1,
+        active.signal,
+        () => {},
+        platform?.id !== 'pixelfed',
+        sessionKey ? { cacheKey: sessionKey } : undefined,
+      );
+      if (active.signal.aborted || pdfSnapshot !== base) return;
+      pdfSnapshot = {
+        ...$state.snapshot(base),
+        annualComparison: prepareAnnualComparison(base.year, base.analyzedAt, previous),
+      };
+    } catch {
+      if (!active.signal.aborted) comparisonUnavailable = true;
+    } finally {
+      if (comparisonController === active) {
+        comparisonLoading = false;
+        comparisonController = null;
+      }
+    }
+  }
 
   export async function refresh(): Promise<void> {
     await load(true);
   }
 
   async function load(refresh = false): Promise<void> {
+    closePdf();
+    reportOperation += 1;
     if (!validYear) {
       message = $_('reports.invalidYear');
       return;
@@ -238,8 +305,11 @@
     busy = true;
     onbusy?.(true);
     report = null;
+    pdfSnapshot = null;
+    pdfOpen = false;
     actionMessage = '';
     progress = null;
+    comparisonLoading = false;
     followerProgress = null;
     followersDone = !loadFollowerHistory;
     reportDone = false;
@@ -311,6 +381,16 @@
         message = $_('reports.partial');
       }
       if (history.status === 'rejected') message = $_('reports.partial');
+      pdfSnapshot = preparePdfSnapshot({
+        handle: canonicalAcct(fresh, origin),
+        displayName: fresh.display_name,
+        report: $state.snapshot(report),
+        analyzedAt,
+        followerObservation: { count: fresh.followers_count, observedAt },
+        posts: result.posts,
+        observations: $state.snapshot(observations),
+        history: history.status === 'rejected' ? null : $state.snapshot(followerHistory),
+      });
     } catch (error) {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
         message = error instanceof Error ? error.message : $_('reports.error');
@@ -325,13 +405,14 @@
   }
 
   async function store(): Promise<void> {
-    if (!report || !currentAccount || !accountKey) return;
+    if (!report || !currentAccount || !accountKey || !pdfSnapshot) return;
     if (saved && !window.confirm($_('reports.replaceConfirm'))) return;
     const storedAt = new Date().toISOString();
     try {
       await saveReport(
         {
-          version: 1,
+          version: 2,
+          pdfSnapshot: $state.snapshot(pdfSnapshot),
           key: reportKey(accountKey, year),
           accountKey,
           handle: canonicalAcct(currentAccount, origin),
@@ -355,6 +436,13 @@
       message = $_('reports.invalidYear');
       return;
     }
+    const operation = ++reportOperation;
+    const selectedYear = year;
+    const selectedIdentity = `${origin}|${account.id}`;
+    const stillSelected = () =>
+      operation === reportOperation &&
+      selectedYear === year &&
+      selectedIdentity === `${origin}|${account.id}`;
     try {
       const fresh = await getAccount(
         origin,
@@ -362,8 +450,10 @@
         undefined,
         platform?.id,
       );
+      if (!stillSelected()) return;
       const key = reportAccountKey(origin, fresh.id);
-      const stored = await readReport(key, year);
+      const stored = await readReport(key, selectedYear);
+      if (!stillSelected()) return;
       if (!stored) {
         message = $_('reports.notFound');
         return;
@@ -371,8 +461,21 @@
       currentAccount = fresh;
       accountObservedAt = new Date().toISOString();
       report = stored.report;
+      pdfOpen = false;
+      pdfSnapshot =
+        stored.version === 2
+          ? { ...stored.pdfSnapshot, origin: 'stored' }
+          : preparePdfSnapshot({
+              handle: stored.handle,
+              displayName: stored.handle,
+              report: stored.report,
+              analyzedAt: stored.analyzedAt,
+              legacy: true,
+            });
       analyzedAt = stored.analyzedAt;
-      observations = await listFollowerObservations(key);
+      const restoredObservations = await listFollowerObservations(key);
+      if (!stillSelected()) return;
+      observations = restoredObservations;
       savedAt = stored.savedAt;
       message = $_('reports.restored');
     } catch {
@@ -447,6 +550,15 @@
       title={!report ? $_('reports.saveHint') : undefined}
       onclick={() => void store()}>{$_('reports.save')}</button
     >
+    <button
+      type="button"
+      disabled={busy || !pdfSnapshot}
+      onclick={() => {
+        void openPdf();
+      }}
+    >
+      {$_('reports.pdf.action')}
+    </button>
   </form>
   {#if !report && !busy}<p class="reports-hint">{$_('reports.saveHint')}</p>{/if}
   {#if busy}
@@ -569,6 +681,17 @@
     <p>{$_('reports.storageNote')}</p>
   {/if}
 </section>
+
+{#if pdfOpen && pdfSnapshot && !busy}
+  <ReportPdfDialog
+    snapshot={pdfSnapshot}
+    preparing={comparisonLoading}
+    {comparisonUnavailable}
+    onclose={() => {
+      closePdf();
+    }}
+  />
+{/if}
 
 <style>
   .reports-panel {

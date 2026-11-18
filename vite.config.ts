@@ -22,7 +22,7 @@ function cspPlugin(): Plugin {
         "font-src 'self'",
         "img-src 'self' https: data:",
         `connect-src ${connectSrc}`,
-        'frame-src https://fair.tube',
+        'frame-src https://fair.tube blob:',
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'none'",

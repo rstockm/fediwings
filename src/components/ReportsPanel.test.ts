@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ReportsPanel from './ReportsPanel.svelte';
 import { loadReport } from '../lib/reportLoader';
 import { readReport } from '../lib/reportStorage';
+import { pdfFixture } from '../lib/reportPdf/fixtures';
 
 const fixture = vi.hoisted(() => ({
   id: '1',
@@ -49,6 +50,128 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('ReportsPanel', () => {
+  it('erhält den PDF-Export bei fehlgeschlagenem Vorjahresabruf', async () => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '');
+    };
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open');
+    };
+    vi.mocked(loadReport).mockResolvedValue({
+      posts: [],
+      historyComplete: true,
+      oldestFetchedAt: null,
+      error: null,
+    });
+    render(ReportsPanel, { account: fixture, origin: 'https://test.social', platform: null });
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'PDF-Bericht erstellen' })).toBeEnabled(),
+    );
+    vi.mocked(loadReport).mockRejectedValueOnce(new Error('previous-year unavailable'));
+    await fireEvent.click(screen.getByRole('button', { name: 'PDF-Bericht erstellen' }));
+    await waitFor(() =>
+      expect(screen.getByText(/Vorjahresdaten sind nicht verfügbar/)).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('button', { name: 'Vorschau erstellen' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'CSV herunterladen' })).toBeEnabled();
+  });
+  it('bricht einen laufenden Vorjahresabruf beim Schließen ab', async () => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '');
+    };
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open');
+    };
+    vi.mocked(loadReport).mockResolvedValue({
+      posts: [],
+      historyComplete: true,
+      oldestFetchedAt: null,
+      error: null,
+    });
+    render(ReportsPanel, { account: fixture, origin: 'https://test.social', platform: null });
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'PDF-Bericht erstellen' })).toBeEnabled(),
+    );
+    let signal!: AbortSignal;
+    vi.mocked(loadReport).mockImplementationOnce(
+      (_o, _a, _f, _y, active) =>
+        new Promise((_resolve, reject) => {
+          signal = active;
+          active.addEventListener('abort', () =>
+            reject(new DOMException('Abgebrochen', 'AbortError')),
+          );
+        }),
+    );
+    await fireEvent.click(screen.getByRole('button', { name: 'PDF-Bericht erstellen' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Vorschau erstellen' })).toBeDisabled(),
+    );
+    await fireEvent.click(screen.getByRole('button', { name: 'Schließen' }));
+    expect(signal.aborted).toBe(true);
+  });
+  it('lädt das Vorjahr erst beim PDF-Start und verwendet es anschließend erneut', async () => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '');
+    };
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open');
+    };
+    vi.mocked(loadReport).mockResolvedValue({
+      posts: [],
+      historyComplete: true,
+      oldestFetchedAt: null,
+      error: null,
+    });
+    render(ReportsPanel, { account: fixture, origin: 'https://test.social', platform: null });
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'PDF-Bericht erstellen' })).toBeEnabled(),
+    );
+    expect(loadReport).toHaveBeenCalledTimes(1);
+    const selectedYear = Number((screen.getByLabelText('Jahr') as HTMLSelectElement).value);
+    await fireEvent.click(screen.getByRole('button', { name: 'PDF-Bericht erstellen' }));
+    await waitFor(() => expect(loadReport).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(loadReport).mock.calls[1][3]).toBe(selectedYear - 1);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Vorschau erstellen' })).toBeEnabled(),
+    );
+    await fireEvent.click(screen.getByRole('button', { name: 'Schließen' }));
+    await fireEvent.click(screen.getByRole('button', { name: 'PDF-Bericht erstellen' }));
+    expect(loadReport).toHaveBeenCalledTimes(2);
+  });
+  it('verwirft einen verspätet geöffneten gespeicherten Stand nach Jahreswechsel', async () => {
+    render(ReportsPanel, { account: fixture, origin: 'https://test.social', platform: null });
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+    const selectedYear = Number((screen.getByLabelText('Jahr') as HTMLSelectElement).value);
+    let finish!: (value: Awaited<ReturnType<typeof readReport>>) => void;
+    vi.mocked(readReport).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const calls = vi.mocked(readReport).mock.calls.length;
+    await fireEvent.click(screen.getByRole('button', { name: 'Gespeicherten Stand öffnen' }));
+    await waitFor(() => expect(vi.mocked(readReport).mock.calls.length).toBe(calls + 1));
+    await fireEvent.change(screen.getByLabelText('Jahr'), {
+      target: { value: String(selectedYear - 1) },
+    });
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+    const snapshot = pdfFixture();
+    finish({
+      version: 1,
+      key: 'a',
+      accountKey: 'a',
+      handle: fixture.acct,
+      savedAt: snapshot.analyzedAt,
+      analyzedAt: snapshot.analyzedAt,
+      model: 'net-reach-v1',
+      report: { ...snapshot.report, year: selectedYear },
+    });
+    await waitFor(() =>
+      expect(screen.queryByText('Gespeicherter Stand geöffnet.')).not.toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText('Jahr')).toHaveValue(String(selectedYear - 1));
+  });
   it('wartet auch bei früher fertigem Follower-Verlauf auf den Report', async () => {
     let finishReport!: (value: Awaited<ReturnType<typeof loadReport>>) => void;
     vi.mocked(loadReport).mockImplementationOnce(

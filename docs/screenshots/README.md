@@ -25,8 +25,23 @@ verwenden dagegen kontrollierte Testdaten.
 | `reports-connect-mobile.png` | Derselbe Einstieg mobil |
 | `reports-loading-demo-desktop.png` | UI-Demo vom 18.11.2026: gemeinsamer Ladezustand, kontrollierte Antworten für alice@test.social; keine echte Anmeldung |
 | `reports-loading-demo-mobile.png` | Dieselbe UI-Demo bei 390 Pixel Breite |
+| `report-pdf-desktop.png` | PDF-Exportdialog, Desktop-UI-Demo vom 18.11.2026; kontrollierte Antworten und synthetische Sitzung, keine Live-Anmeldung |
+| `report-pdf-mobile.png` | Derselbe Exportdialog mit mobilem Direktdownload |
+| `report-pdf-page-1.png` | Gerasterte erste Seite des synthetischen PDF-Beispielberichts, kein Live-Report |
+| `report-pdf-charts.png` | Aktualisierte Demo-Diagrammseite mit Online-Farblogik Grün/Orange und vollständiger Tabellenzuordnung |
 
 ## Aktualisieren
+
+PDF-Beispiele: `npm run test:pdf -- --update-demo --update-reference`;
+die erste gerasterte Demoseite aus `test-results/pdf/complete-de-1.png`
+als `report-pdf-page-1.png` übernehmen. Den Dialog nach aktuellem Build mit
+`PDF_SCREENSHOTS=1 npx playwright test tests/e2e/report-pdf.spec.ts` aufnehmen.
+Die UI-Aufnahmen zeigen Chromium (1280 × 720) und das mobile Pixel-7-Testprofil.
+Alle Inhalte sind kontrollierte Demo-Daten, keine authentifizierten Live-Bereiche.
+
+Nach Ergänzung der Follower-Titelkennzahl und Veränderungs-Badges wurden
+Titel- und Diagrammseite am 18.11.2026 erneut gerastert. Die Diagrammseite ist
+`test-results/pdf/complete-de-2.png` und wird als `report-pdf-charts.png` übernommen.
 
 Die gemeinsamen Ladeanzeigen werden mit
 `UPDATE_COMBINED_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'waehrend des Ladens' --project=chromium`

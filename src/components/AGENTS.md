@@ -9,3 +9,5 @@
 | `FollowerPage.svelte` | Zeigt Statistiken nur für den ausgewählten Account; stellt die konkrete Server-Software nach OAuth/Reload aus vorhandenen Metadaten oder NodeInfo wieder her und kennzeichnet fehlgeschlagene Erkennung. Handle-Feld bleibt mit Sitzung bedienbar; Auswahl wird in alle Views durchgereicht. |
 | `ReportsPanel.svelte` | Koordiniert Report und Follower-Verlauf mit gemeinsamem Fortschritt, AbortSignal und Ergebnisfreigabe; nutzt kurzlebigen Accountcache; explizites Live-Laden aktualisiert beide Quellen. Jahresauswahl lädt automatisch; Speichern/Export erst nach Abschluss; Aktionsmeldungen direkt an der Leiste. |
 | `ReportsPanel.test.ts` | Prüft automatischen Reportabruf, Jahreswechsel, Speicherzustand und Kennzeichnung unvollständiger Daten. |
+| `ReportPdfDialog.svelte` | Lokaler PDF-Export mit Titel, Organisation, Sprache, Vorschau und identischem Download-Blob; verwirft veraltete Ergebnisse und gibt Blob-URLs frei. |
+| `ReportPdfDialog.test.ts` | Prüft Fehler/Wiederholung, Blob-Lebensdauer, Eingabeänderung sowie Account-/Jahreswechsel während der Erstellung. |

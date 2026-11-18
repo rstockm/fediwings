@@ -68,6 +68,15 @@ jobs:
         env:
           VITE_CARD_SERVICE_URL: ${{ vars.CARD_SERVICE_URL }}
       - run: npx playwright install --with-deps chromium
+      - name: PDF-Prüfwerkzeuge installieren
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: PDF-Inhalt und Satz prüfen
+        run: npm run test:pdf -- --semantic-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pdf-review-${{ github.sha }}
+          path: test-results/pdf/
+          if-no-files-found: error
       - run: npm run test:browser
 
   deploy:

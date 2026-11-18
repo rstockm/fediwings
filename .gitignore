@@ -24,6 +24,16 @@ results.sarif
 !/docs/screenshots/reports-connect-mobile.png
 !/docs/screenshots/reports-loading-demo-desktop.png
 !/docs/screenshots/reports-loading-demo-mobile.png
+!/docs/screenshots/report-pdf-desktop.png
+!/docs/screenshots/report-pdf-mobile.png
+!/docs/screenshots/report-pdf-page-1.png
+!/docs/screenshots/report-pdf-charts.png
+# Bedien-/Pruefdokumentation und klar gekennzeichnete PDF-Demos.
+!/docs/pdf-export.md
+!/docs/examples/
+/docs/examples/*
+!/docs/examples/report-demo-de.pdf
+!/docs/examples/report-demo-en.pdf
 /specs/
 /*.md
 !README.md

@@ -36,7 +36,7 @@ Nicht manuell editieren. `make check` enthält die Aktualitätsprüfung.
   einschließlich optionaler Plattformpakete. Die npm-Einstufung `dev` bleibt als
   Metadatum erhalten, ist aber keine Aussage darüber, was im Browser landet.
   Insbesondere Svelte und Teile seiner Abhängigkeiten werden mit ausgeliefert.
-- Zwei lokale Inter-Tight-Webfonts mit OFL-Lizenztext und SHA-256. Ihre genaue
+- Vier lokale Inter-Tight-Fonts (zwei WOFF2, zwei statische PDF-TTFs) mit OFL-Lizenztext und SHA-256. Ihre genaue
   Upstream-Version ist nicht dokumentiert; es wird keine Version erfunden.
 - Stand nach Verschlankung, 2026-11-08: 351 npm-Paketinstanzen, zwei Fontdateien
   und drei gehashte Validierungsschemas (nur Entwicklungswerkzeuge). Der zuvor
@@ -46,6 +46,23 @@ Nicht manuell editieren. `make check` enthält die Aktualitätsprüfung.
 - Das Inventar ist ein Quell-/Build-Inventar, keine exakte Liste der vom
   Tree-Shaking übriggelassenen Bundlebestandteile. npm-Lizenzangaben stammen aus
   dem Lockfile; License-/NOTICE-Texte müssen bei Weitergabe separat erhalten werden.
+- PDF-Erweiterung, 18.11.2026: 376 npm-Paketinstanzen und 26 zusätzlich
+  inventarisierte Komponenten des vorgebündelten pdfmake-Browserbuilds.
+  `scripts/pdf-vendors.mjs` liest dessen Source Map und hasht die tatsächlich
+  eingebetteten Quellen, einschließlich eingebetteter Build-Abhängigkeiten und
+  des vendorten SVG-to-PDFKit. Einzelversionen dieser eingebetteten Komponenten
+  werden nicht aus separat installierten npm-Paketen erfunden.
+  Das beseitigt die sonstige Lockfile-Lücke für den PDF-Browserbuild.
+- pdfmake 0.3.14 und seine neuen Komponenten verwenden hier MIT, BSD-3-Clause,
+  Apache-2.0 und BlueOak-1.0.0; kein neuer Copyleft-Zwang für Projektcode.
+  `public/licenses/pdfmake-vendors.txt` liefert Lizenz-/Copyright-Hinweise mit aus.
+  Erneuerung bei Engine-Wechsel: `node scripts/pdf-vendors.mjs`, dann SBOM neu erzeugen.
+  Für Pakete ohne separate Lizenzdatei bleiben MIT-Deklaration und Autor-Metadaten
+  erhalten; ein fehlendes Copyrightjahr wird nicht erfunden.
+- png-js 2.0.0 hat keine npm-Lizenzmetadaten, liefert aber eine eindeutige
+  MIT-LICENSE mit Copyright 2017 Devon Govett. Der Generator ergänzt ausschließlich
+  diese überprüfte Version bei passendem SHA-256 des Lizenztexts; geänderter
+  Lizenztext scheitert bis zur erneuten Prüfung.
 - Keine Betriebssystem-/Browserinventarisierung für die statische App. Der
   separat betriebene Card Service ist nicht Teil dieses Repositories und benötigt
   ein eigenes Inventar. Logos, Screenshots und andere Projektbilder sind keine
@@ -114,7 +131,7 @@ keine davon überschreibt die Bedingungen der eingebundenen Fremdkomponenten.
 | DOMPurify 3.4.17 | `(MPL-2.0 OR Apache-2.0)`: Wahlrecht, nicht beide gleichzeitig zwingend. Für eine permissive Distribution bietet sich Apache-2.0 an: Lizenz beilegen, relevante Hinweise und ggf. NOTICE übernehmen, eigene Änderungen kennzeichnen. Bei Wahl von MPL gelten dateibezogene Quellcodepflichten, nicht pauschal für die ganze App. Die Wahl ist vor Veröffentlichung der Notices festzuhalten. |
 | Dexie 4.4.7 | Apache-2.0: Lizenz und den mitgelieferten NOTICE-Hinweis von David Fahlander bei Weitergabe berücksichtigen; Änderungen an Dexie selbst wären zu kennzeichnen. Der allgemeine offene Punkt zur vollständigen JavaScript-Notice-Sammlung gilt auch hier. |
 | intl-messageformat 10.7.18 (transitiv über svelte-i18n) | BSD-3-Clause: Lizenz-/Copyright-/Haftungshinweise erhalten, kein Werben mit Namen der Autoren ohne Erlaubnis. |
-| Inter Tight (`public/fonts/*.woff2`) | OFL-1.1: Fonts bleiben unter OFL, Copyright und Lizenz mitliefern; keine OFL-Pflicht für den Anwendungscode. Bei Änderungen ggf. reservierte Fontnamen beachten; Fonts nicht allein verkaufen. `public/fonts/OFL.txt` wird bereits in den Build kopiert. |
+| Inter Tight (`public/fonts/*.woff2`, `*.ttf`) | OFL-1.1: Fonts bleiben unter OFL, Copyright und Lizenz mitliefern; keine OFL-Pflicht für den Anwendungscode. Bei Änderungen ggf. reservierte Fontnamen beachten; Fonts nicht allein verkaufen. `public/fonts/OFL.txt` wird bereits in den Build kopiert. PDF-TTF-Herkunft: `docs/pdf-export.md`. |
 | @axe-core/playwright und axe-core 4.13.0 | MPL-2.0, reine Testwerkzeuge: ihre Verwendung zum Testen macht die App nicht MPL-pflichtig. Falls diese Werkzeuge oder Änderungen daran selbst weitergegeben werden, gelten ihre eigenen Pflichten. |
 | TypeScript, Playwright und vendorte Validierungsschemas | Apache-2.0, Entwicklungswerkzeuge: keine automatische Umlizenzierung ihres Outputs; bei Weitergabe der Werkzeuge deren Bedingungen beachten. |
 | Ajv 6.15.0 | MIT, bereits vorhandenes Entwicklungswerkzeug zur Schemavalidierung. |

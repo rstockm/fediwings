@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := check
 
-.PHONY: check audit lint format format-check typecheck test test-browser build dev sbom sbom-check
+.PHONY: check audit lint format format-check typecheck test test-browser test-pdf build dev sbom sbom-check
 
-check: lint format-check typecheck test build sbom-check
+check: lint format-check typecheck test test-pdf build sbom-check
 
 sbom:
 	npm run sbom
@@ -32,6 +32,9 @@ test:
 
 test-browser:
 	npm run test:browser
+
+test-pdf:
+	npm run test:pdf
 
 build:
 	npm run build

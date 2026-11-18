@@ -23,6 +23,7 @@ test('SBOM is reproducible, complete, validated and rejects stale inputs', () =>
       'package.json',
       'package-lock.json',
       'scripts/sbom.mjs',
+      'scripts/pdf-vendors.mjs',
       'compliance/schemas',
       'public/fonts',
     ]) {
@@ -37,6 +38,14 @@ test('SBOM is reproducible, complete, validated and rejects stale inputs', () =>
     const snapshot = readFileSync(output, 'utf8');
     const bom = JSON.parse(snapshot);
     const refs = bom.components.map((component) => component['bom-ref']);
+    assert.ok(refs.includes('asset:public/fonts/inter-tight-pdf-regular.ttf'));
+    assert.ok(refs.includes('asset:public/fonts/inter-tight-pdf-bold.ttf'));
+    assert.ok(refs.includes('asset:pdfmake-bundle/core-js'));
+    assert.ok(refs.includes('asset:pdfmake-bundle/svg-to-pdfkit'));
+    assert.equal(
+      bom.components.find((component) => component.name === 'png-js').licenses[0].license.id,
+      'MIT',
+    );
     assert.equal(new Set(refs).size, refs.length, 'component references must be unique');
     assert.equal(
       bom.metadata.component.name,
@@ -55,6 +64,12 @@ test('SBOM is reproducible, complete, validated and rejects stale inputs', () =>
     writeFileSync(font, Buffer.concat([original, Buffer.from('changed')]));
     assert.match(run('--check').stderr, /SBOM is stale/);
     writeFileSync(font, original);
+
+    const pdfFont = `${dir}/public/fonts/inter-tight-pdf-regular.ttf`;
+    const originalPdfFont = readFileSync(pdfFont);
+    writeFileSync(pdfFont, Buffer.concat([originalPdfFont, Buffer.from('changed')]));
+    assert.match(run('--check').stderr, /SBOM is stale/);
+    writeFileSync(pdfFont, originalPdfFont);
 
     const lockPath = `${dir}/package-lock.json`;
     const lock = JSON.parse(readFileSync(lockPath, 'utf8'));

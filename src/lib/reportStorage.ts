@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { AggregatedReport } from './reports';
+import { pdfSnapshotSchema, type ReportPdfSnapshot } from './reportPdf/model';
 
 export interface FollowerObservation {
   accountKey: string;
@@ -7,8 +8,7 @@ export interface FollowerObservation {
   followers: number;
 }
 
-export interface StoredReport {
-  version: 1;
+interface StoredReportBase {
   key: string;
   accountKey: string;
   handle: string;
@@ -17,6 +17,8 @@ export interface StoredReport {
   model: 'net-reach-v1';
   report: AggregatedReport;
 }
+export type StoredReport = StoredReportBase &
+  ({ version: 1 } | { version: 2; pdfSnapshot: ReportPdfSnapshot });
 
 interface ReportDatabase extends Dexie {
   reports: EntityTable<StoredReport, 'key'>;
@@ -42,8 +44,12 @@ export async function saveReport(
   observation: FollowerObservation,
 ): Promise<void> {
   if (record.accountKey !== observation.accountKey) throw new Error('account-mismatch');
+  const safe =
+    record.version === 2
+      ? { ...record, pdfSnapshot: pdfSnapshotSchema.parse(record.pdfSnapshot) }
+      : record;
   await db.transaction('rw', db.reports, db.followers, async () => {
-    await db.reports.put(record);
+    await db.reports.put(safe);
     await db.followers.put(observation);
   });
 }
@@ -53,7 +59,23 @@ export async function readReport(
   year: number,
 ): Promise<StoredReport | undefined> {
   const record = await db.reports.get(reportKey(accountKey, year));
-  return record?.version === 1 ? record : undefined;
+  return decodeStoredReport(record, accountKey, year);
+}
+
+export function decodeStoredReport(
+  record: StoredReport | undefined,
+  accountKey: string,
+  year: number,
+): StoredReport | undefined {
+  if (!record || record.accountKey !== accountKey || record.report.year !== year) return undefined;
+  if (record?.version === 1) return record;
+  if (record?.version === 2) {
+    const parsed = pdfSnapshotSchema.safeParse(record.pdfSnapshot);
+    if (parsed.success && parsed.data.year === year && parsed.data.handle === record.handle) {
+      return { ...record, pdfSnapshot: parsed.data };
+    }
+  }
+  return undefined;
 }
 
 export async function removeReport(accountKey: string, year: number): Promise<void> {

@@ -1,7 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import { followerGrowth, monthEndFollowers, reportAccountKey, reportKey } from './reportStorage';
+import {
+  decodeStoredReport,
+  followerGrowth,
+  monthEndFollowers,
+  reportAccountKey,
+  reportKey,
+  type StoredReport,
+} from './reportStorage';
+import { pdfFixture } from './reportPdf/fixtures';
 
 describe('report storage', () => {
+  it('liest V1 und V2, prüft Snapshotzuordnung und übernimmt keine fremden Metadaten', () => {
+    const snapshot = pdfFixture();
+    const base = {
+      key: reportKey('a', 2025),
+      accountKey: 'a',
+      handle: snapshot.handle,
+      savedAt: snapshot.analyzedAt,
+      analyzedAt: snapshot.analyzedAt,
+      model: 'net-reach-v1' as const,
+      report: snapshot.report,
+    };
+    const legacy: StoredReport = { ...base, version: 1 };
+    expect(decodeStoredReport(legacy, 'a', 2025)).toEqual(legacy);
+    const current: StoredReport = {
+      ...base,
+      version: 2,
+      pdfSnapshot: { ...snapshot, accessToken: 'secret' } as typeof snapshot,
+    };
+    const parsed = decodeStoredReport(current, 'a', 2025);
+    expect(parsed?.version).toBe(2);
+    expect(parsed?.version === 2 && parsed.pdfSnapshot).not.toHaveProperty('accessToken');
+    expect(decodeStoredReport(current, 'b', 2025)).toBeUndefined();
+    expect(decodeStoredReport(current, 'a', 2026)).toBeUndefined();
+    expect(
+      decodeStoredReport({ ...current, pdfSnapshot: { ...snapshot, year: 2026 } }, 'a', 2025),
+    ).toBeUndefined();
+  });
   it('trennt Accounts, Instanzen und Jahre ohne Kollisionen', () => {
     const a = reportAccountKey('https://a.social', '1');
     const b = reportAccountKey('https://b.social', '1');

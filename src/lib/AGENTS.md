@@ -10,6 +10,7 @@
 | `reportIntegration.test.ts` | Prüft Thread-Zuordnung über Jahresgrenzen und unvollständige Reichweite im Report. |
 | `reportLoader.ts` | `loadReport` verbindet Jahresabruf, Thread-Gruppierung und Reichweitenmodell; fünfminütiger, sitzungsgebundener In-Memory-Cache für Beiträge und vollständige Jahresanalysen; ältere Jahre setzen vorhandene Paginierung fort, explizites Aktualisieren verwirft den Cache. |
 | `reportExport.ts` | Formelsicherer TSV-/CSV-Export inklusive Metadaten und lokalisierter Zahlen. |
+| `reportPdf/` | Lokaler Executive-PDF-Export: versionierter Snapshot, Top 5, regelbasierte Texte, Vektorgrafiken mit vollständigen Tabellen, lokale Fonts und lazy pdfmake-Engine; Tests/Fixtures prüfen Quellen und Zahlenkonsistenz. |
 | `reportCharts.ts` | Berechnet gerundete Achsenskalen, Balkenpositionen, den Mittelwert der sichtbaren Monate und die auf den größten Monatsunterschied normierte Farbrichtung und Intensität. |
 | `reportFollowers.ts` | Übernimmt vorhandene Follow-Monatswerte und verankerte Followerkurve unverändert in das gewählte Reportjahr. |
 | `reportStorage.ts` | Dexie-Snapshots und datierte Follower-Stände je Account; Monatsendstände nur am letzten Kalendertag. |

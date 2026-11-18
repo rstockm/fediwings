@@ -3224,6 +3224,72 @@
       ]
     },
     {
+      "bom-ref": "@noble/ciphers@1.3.0",
+      "type": "library",
+      "name": "@noble/ciphers",
+      "version": "1.3.0",
+      "scope": "required",
+      "purl": "pkg:npm/%40noble/ciphers@1.3.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@noble/ciphers"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@noble/ciphers/-/ciphers-1.3.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d88d209c854fb5f9ccc3d79ef61d5d246eeda7cd7ef0e6f73896f732fdfbaf1e4be34fdbd22edd8e3095bc6395a9cf40108432bf2bb58baca929d170f11f2043"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "@noble/hashes@1.8.0",
+      "type": "library",
+      "name": "@noble/hashes",
+      "version": "1.8.0",
+      "scope": "required",
+      "purl": "pkg:npm/%40noble/hashes@1.8.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@noble/hashes"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@noble/hashes/-/hashes-1.8.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8c2b3d95d77b370ce98170c87fa3f7f8dac787dfec0fa0907711f28d023e87feab0cda3cf32a41c71cf8e540ee647cfdaf7b4dcfb37f5489d256855db57108e0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "@playwright/test@1.62.1",
       "type": "library",
       "name": "@playwright/test",
@@ -4367,6 +4433,39 @@
       ]
     },
     {
+      "bom-ref": "@swc/helpers@0.5.24",
+      "type": "library",
+      "name": "@swc/helpers",
+      "version": "0.5.24",
+      "scope": "required",
+      "purl": "pkg:npm/%40swc/helpers@0.5.24",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@swc/helpers"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@swc/helpers/-/helpers-0.5.24.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ead717a38900f078063bb01599ac01e7b4588bfa6204f6151d570ee9d5e35fe499c3c1a81e68b6eb6b29e2fd876b690d3fd0b1f38a9e8b6ef24fe7e34b597182"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "@testing-library/dom@10.4.1",
       "type": "library",
       "name": "@testing-library/dom",
@@ -4759,6 +4858,80 @@
         {
           "alg": "SHA-512",
           "content": "0e1f2f02c577ea2839c1af4e5f8a57bcc73d0f755e89b7f0db08b1d0253060e0cb0fc9e48fd52c2e3012af8f673e0fb678acf184157ebfb2fca57bd3e1eeb7f5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "@types/pdfkit@0.17.7",
+      "type": "library",
+      "name": "@types/pdfkit",
+      "version": "0.17.7",
+      "scope": "optional",
+      "purl": "pkg:npm/%40types/pdfkit@0.17.7",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@types/pdfkit"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@types/pdfkit/-/pdfkit-0.17.7.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "54c3990d6c3b1ed36d2db8c8b87221540ae6f4f955d20c69cf7da3025d48b975a52206ebd65285a13b2bb6f13363c6bd048a502441390f034f283e74a2d4ecea"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "@types/pdfmake@0.3.3",
+      "type": "library",
+      "name": "@types/pdfmake",
+      "version": "0.3.3",
+      "scope": "optional",
+      "purl": "pkg:npm/%40types/pdfmake@0.3.3",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@types/pdfmake"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@types/pdfmake/-/pdfmake-0.3.3.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b9f6dc781e10ddd2a998550c2846d9bc971f2e2f3e0b96f5fab4c5546eaeaed912dc51f0693407e8d0a1fe21040c83650290b11ff5b7febb2af7da4fe44f7f24"
         }
       ],
       "licenses": [
@@ -5862,10 +6035,660 @@
       ]
     },
     {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/@noble/ciphers",
+      "name": "pdfmake-bundle/@noble/ciphers",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a5dda7c044ff10fcd7f2420c8324bb59987f241ae4f54477a25362ef5cc959b8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/@noble/hashes",
+      "name": "pdfmake-bundle/@noble/hashes",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0c9947b8568c057d8512d406e17ec202bc2045a520f5be45268510cbcf81275c"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/@swc/helpers",
+      "name": "pdfmake-bundle/@swc/helpers",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "77e2ee3a57fa7379759b4b5df61bd8aec153b64f11353a555e82a0bf5e0f7d9a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/base64-js",
+      "name": "pdfmake-bundle/base64-js",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "194652735879b9a112ae6516352dec0746d3a77c6173242066eac3b17a4eab80"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/brotli",
+      "name": "pdfmake-bundle/brotli",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "64cae03b0413fc527bc0cf9fc9fe378a14c77c399339a8f0c000ebc8b3d2dbcb"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/buffer",
+      "name": "pdfmake-bundle/buffer",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "420cb0b9ce6e606085a41653f45694aa3d0dab0cfaeb0c00e1eac83e30f11515"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/clone",
+      "name": "pdfmake-bundle/clone",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d99501a41e039aad7e37647619d2f489337709b308a98567d5f376117d30b263"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/core-js",
+      "name": "pdfmake-bundle/core-js",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "92f0a9f0ae9accec1bc2f71388cfb5de8350622e5e77ff3e1839bfe3cdd201bc"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/dfa",
+      "name": "pdfmake-bundle/dfa",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e22abfa182acd5b7daf7a280cf66461112ef343abe934fb98aa8e7983e36c4d0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/events",
+      "name": "pdfmake-bundle/events",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4a67f7b698fa211822a05391e19d7b354ef0c84096cb0da5f88d09561c6cf420"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/expose-loader",
+      "name": "pdfmake-bundle/expose-loader",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "baf22f5dbfb6a270ffb8491b7856a6b3267b7a37b022a93fc0e2d2452191496d"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/fast-deep-equal",
+      "name": "pdfmake-bundle/fast-deep-equal",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cd22aef547b2f0bc75f81e813777859c161679932c35849510df62d009bacf76"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/fflate",
+      "name": "pdfmake-bundle/fflate",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cfb19787db912054a2be1b2ae0cf861d1487ed077fcbe6669a24001d9ee9d600"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/file-saver",
+      "name": "pdfmake-bundle/file-saver",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "afd462866e473692acddab954c2876d74f0a88aa4c9e93f439da452140bbd07e"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/fontkit",
+      "name": "pdfmake-bundle/fontkit",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "63c96b8dcd7d20805d091b10c4d0e9585d4e4e9f3064fe36c53d853dde0217b4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/ieee754",
+      "name": "pdfmake-bundle/ieee754",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "dc4113452cf7a4c0ac76a5e8da616cea1555e069e1df73edb43e0f6a4cea7977"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/linebreak",
+      "name": "pdfmake-bundle/linebreak",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c8e8ce24ffc9279611ac42cef4096018be0b6a013fc8f6580bbd52d24ee0381d"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/pdfkit",
+      "name": "pdfmake-bundle/pdfkit",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "51feb554aafff0105b3fdc974e4744f09afe90ca586e5cea9b105c0c4d3bace0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/png-js",
+      "name": "pdfmake-bundle/png-js",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "74c7bcaab7f4fe4f86abe7830b9d3fb26948b568a265250ab79ffc8290db35ca"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/process",
+      "name": "pdfmake-bundle/process",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f13b715101231526626c9017204dc8fd3d726d7d72386af9c18f420eaa4d8251"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/restructure",
+      "name": "pdfmake-bundle/restructure",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "94bdf383049de69a561408a1f54979e08acd5a446f869175cec867230be2aba6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/sax",
+      "name": "pdfmake-bundle/sax",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5026c4044e6a495a0008fcb9597227ba7e12cd45064ac7cddbaf56db0e970069"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BlueOak-1.0.0"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/svg-to-pdfkit",
+      "name": "pdfmake-bundle/svg-to-pdfkit",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9a22f703c9d2ac26bce752358c54e6dead53739924b7b4f39e26708cec5e34d3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/tiny-inflate",
+      "name": "pdfmake-bundle/tiny-inflate",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "39ae6bb1f5c78d09fc327de231604b4ea6a99d71c179e43ac4f00d50c5cf9651"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/unicode-properties",
+      "name": "pdfmake-bundle/unicode-properties",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "870fec8da922eb62ce8cb3d8013a5107db3a2f51987a0ec2976580a62c5568e8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "asset:pdfmake-bundle/unicode-trie",
+      "name": "pdfmake-bundle/unicode-trie",
+      "description": "Embedded browser-bundle sources; individual upstream version not recorded by publisher. Identified by source-content SHA-256, not the separately installed npm package.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "55b9b3940faa5d59822d17cbff78e0ecb402b5ee3a6536022ccd4c5a4ec06897"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fediwings:bundled-in",
+          "value": "pdfmake/build/pdfmake.js"
+        }
+      ]
+    },
+    {
       "type": "file",
       "bom-ref": "asset:public/fonts/inter-tight-latin-ext.woff2",
       "name": "public/fonts/inter-tight-latin-ext.woff2",
-      "description": "Inter Tight webfont subset; upstream version not recorded, identified by SHA-256.",
+      "description": "Inter Tight font; upstream version not recorded, identified by SHA-256.",
       "hashes": [
         {
           "alg": "SHA-256",
@@ -5889,11 +6712,59 @@
       "type": "file",
       "bom-ref": "asset:public/fonts/inter-tight-latin.woff2",
       "name": "public/fonts/inter-tight-latin.woff2",
-      "description": "Inter Tight webfont subset; upstream version not recorded, identified by SHA-256.",
+      "description": "Inter Tight font; upstream version not recorded, identified by SHA-256.",
       "hashes": [
         {
           "alg": "SHA-256",
           "content": "77fefe8ca19b9f69b5284832c519e0493127c1f091f0a8936884be7721c4e618"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "OFL-1.1",
+            "text": {
+              "contentType": "text/plain",
+              "content": "Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttps://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n-----------------------------------------------------------\n\nPREAMBLE\nThe goals of the Open Font License (OFL) are to stimulate worldwide\ndevelopment of collaborative font projects, to support the font creation\nefforts of academic and linguistic communities, and to provide a free and\nopen framework in which fonts may be shared and improved in partnership\nwith others.\n\nThe OFL allows the licensed fonts to be used, studied, modified and\nredistributed freely as long as they are not sold by themselves. The\nfonts, including any derivative works, can be bundled, embedded, \nredistributed and/or sold with any software provided that any reserved\nnames are not used by derivative works. The fonts and derivatives,\nhowever, cannot be released under any other type of license. The\nrequirement for fonts to remain under this license does not apply\nto any document created using the fonts or their derivatives.\n\nDEFINITIONS\n\"Font Software\" refers to the set of files released by the Copyright\nHolder(s) under this license and clearly marked as such. This may\ninclude source files, build scripts and documentation.\n\n\"Reserved Font Name\" refers to any names specified as such after the\ncopyright statement(s).\n\n\"Original Version\" refers to the collection of Font Software components as\ndistributed by the Copyright Holder(s).\n\n\"Modified Version\" refers to any derivative made by adding to, deleting,\nor substituting -- in part or in whole -- any of the components of the\nOriginal Version, by changing formats or by porting the Font Software to a\nnew environment.\n\n\"Author\" refers to any designer, engineer, programmer, technical\nwriter or other person who contributed to the Font Software.\n\nPERMISSION & CONDITIONS\nPermission is hereby granted, free of charge, to any person obtaining\na copy of the Font Software, to use, study, copy, merge, embed, modify,\nredistribute, and sell modified and unmodified copies of the Font\nSoftware, subject to the following conditions:\n\n1) Neither the Font Software nor any of its individual components,\nin Original or Modified Versions, may be sold by itself.\n\n2) Original or Modified Versions of the Font Software may be bundled,\nredistributed and/or sold with any software, provided that each copy\ncontains the above copyright notice and this license. These can be\nincluded either as stand-alone text files, human-readable headers or\nin the appropriate machine-readable metadata fields within text or\nbinary files as long as those fields can be easily viewed by the user.\n\n3) No Modified Version of the Font Software may use the Reserved Font\nName(s) unless explicit written permission is granted by the corresponding\nCopyright Holder. This restriction only applies to the primary font name as\npresented to the users.\n\n4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font\nSoftware shall not be used to promote, endorse or advertise any\nModified Version, except to acknowledge the contribution(s) of the\nCopyright Holder(s) and the Author(s) or with their explicit written\npermission.\n\n5) The Font Software, modified or unmodified, in part or in whole,\nmust be distributed entirely under this license, and must not be\ndistributed under any other license. The requirement for fonts to\nremain under this license does not apply to any document created\nusing the Font Software.\n\nTERMINATION\nThis license becomes null and void if any of the above conditions are\nnot met.\n\nDISCLAIMER\nTHE FONT SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\nOF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE\nCOPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\nINCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL\nDAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM\nOTHER DEALINGS IN THE FONT SOFTWARE.\n"
+            }
+          }
+        }
+      ],
+      "copyright": "Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)"
+    },
+    {
+      "type": "file",
+      "bom-ref": "asset:public/fonts/inter-tight-pdf-bold.ttf",
+      "name": "public/fonts/inter-tight-pdf-bold.ttf",
+      "description": "Inter Tight font; upstream version not recorded, identified by SHA-256.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5f20d7df0079d93b9a4ed5d4ce891a1ab9c00db4c4ce73ba1da995f105cd31a9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "OFL-1.1",
+            "text": {
+              "contentType": "text/plain",
+              "content": "Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttps://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n-----------------------------------------------------------\n\nPREAMBLE\nThe goals of the Open Font License (OFL) are to stimulate worldwide\ndevelopment of collaborative font projects, to support the font creation\nefforts of academic and linguistic communities, and to provide a free and\nopen framework in which fonts may be shared and improved in partnership\nwith others.\n\nThe OFL allows the licensed fonts to be used, studied, modified and\nredistributed freely as long as they are not sold by themselves. The\nfonts, including any derivative works, can be bundled, embedded, \nredistributed and/or sold with any software provided that any reserved\nnames are not used by derivative works. The fonts and derivatives,\nhowever, cannot be released under any other type of license. The\nrequirement for fonts to remain under this license does not apply\nto any document created using the fonts or their derivatives.\n\nDEFINITIONS\n\"Font Software\" refers to the set of files released by the Copyright\nHolder(s) under this license and clearly marked as such. This may\ninclude source files, build scripts and documentation.\n\n\"Reserved Font Name\" refers to any names specified as such after the\ncopyright statement(s).\n\n\"Original Version\" refers to the collection of Font Software components as\ndistributed by the Copyright Holder(s).\n\n\"Modified Version\" refers to any derivative made by adding to, deleting,\nor substituting -- in part or in whole -- any of the components of the\nOriginal Version, by changing formats or by porting the Font Software to a\nnew environment.\n\n\"Author\" refers to any designer, engineer, programmer, technical\nwriter or other person who contributed to the Font Software.\n\nPERMISSION & CONDITIONS\nPermission is hereby granted, free of charge, to any person obtaining\na copy of the Font Software, to use, study, copy, merge, embed, modify,\nredistribute, and sell modified and unmodified copies of the Font\nSoftware, subject to the following conditions:\n\n1) Neither the Font Software nor any of its individual components,\nin Original or Modified Versions, may be sold by itself.\n\n2) Original or Modified Versions of the Font Software may be bundled,\nredistributed and/or sold with any software, provided that each copy\ncontains the above copyright notice and this license. These can be\nincluded either as stand-alone text files, human-readable headers or\nin the appropriate machine-readable metadata fields within text or\nbinary files as long as those fields can be easily viewed by the user.\n\n3) No Modified Version of the Font Software may use the Reserved Font\nName(s) unless explicit written permission is granted by the corresponding\nCopyright Holder. This restriction only applies to the primary font name as\npresented to the users.\n\n4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font\nSoftware shall not be used to promote, endorse or advertise any\nModified Version, except to acknowledge the contribution(s) of the\nCopyright Holder(s) and the Author(s) or with their explicit written\npermission.\n\n5) The Font Software, modified or unmodified, in part or in whole,\nmust be distributed entirely under this license, and must not be\ndistributed under any other license. The requirement for fonts to\nremain under this license does not apply to any document created\nusing the Font Software.\n\nTERMINATION\nThis license becomes null and void if any of the above conditions are\nnot met.\n\nDISCLAIMER\nTHE FONT SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\nOF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE\nCOPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\nINCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL\nDAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM\nOTHER DEALINGS IN THE FONT SOFTWARE.\n"
+            }
+          }
+        }
+      ],
+      "copyright": "Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)"
+    },
+    {
+      "type": "file",
+      "bom-ref": "asset:public/fonts/inter-tight-pdf-regular.ttf",
+      "name": "public/fonts/inter-tight-pdf-regular.ttf",
+      "description": "Inter Tight font; upstream version not recorded, identified by SHA-256.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8655b2e81072d5bdb621aaffb56459d11b61b98baf0fba5c4b64c6b0bcf3056c"
         }
       ],
       "licenses": [
@@ -6017,6 +6888,76 @@
       ]
     },
     {
+      "bom-ref": "base64-js@0.0.8",
+      "type": "library",
+      "name": "base64-js",
+      "version": "0.0.8",
+      "scope": "required",
+      "purl": "pkg:npm/base64-js@0.0.8",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/base64-js"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/base64-js/-/base64-js-0.0.8.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "dd7480d9c47f87fef71339575dd53a60dc9c99823bfa489c4f192ce1e260da0dfd6e21d1f38b25836f9d7acfa9ee21d885b460fee7484b84c3e7759a6dc39493"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "base64-js@1.5.1",
+      "type": "library",
+      "name": "base64-js",
+      "version": "1.5.1",
+      "scope": "required",
+      "purl": "pkg:npm/base64-js@1.5.1",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/brotli/node_modules/base64-js"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/unicode-properties/node_modules/base64-js"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "00aa5a6251e7f2de1255b3870b2f9be7e28a82f478bebb03f2f6efadb890269b3b7ca0d3923903af2ea38b4ad42630b49336cd78f2f0cf1abc8b2a68e35a9e58"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "brace-expansion@5.0.12",
       "type": "library",
       "name": "brace-expansion",
@@ -6043,6 +6984,39 @@
         {
           "alg": "SHA-512",
           "content": "628bd0debce168b308ac38cd0cc90d4b4d6d79af77aa11211b9c72f1febe47497e770dca8bee6c0a822823de368ae2d94c75a881692d830543854d3d88d12299"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "brotli@1.3.3",
+      "type": "library",
+      "name": "brotli",
+      "version": "1.3.3",
+      "scope": "required",
+      "purl": "pkg:npm/brotli@1.3.3",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/brotli"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/brotli/-/brotli-1.3.3.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a132a325d4a1983b865bde12cb26a842f0237f7d1d65a1e78c9f2e005faedbfbc626425b24f2404f580388e24fe6fd596fa7fd284c96ff51e9b9a5885ed1873e"
         }
       ],
       "licenses": [
@@ -6193,6 +7167,39 @@
         {
           "license": {
             "id": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "clone@2.1.2",
+      "type": "library",
+      "name": "clone",
+      "version": "2.1.2",
+      "scope": "required",
+      "purl": "pkg:npm/clone@2.1.2",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/clone"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/clone/-/clone-2.1.2.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "dcf7bf085d4d9fde21ca1218a63b622e1742a04a33d03a90fbdf3c13d826784750665a23c6739bef8c1cb45caec16407ceac9ff57ec2ecc1bc8ee529a81253f3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
           }
         }
       ]
@@ -6724,6 +7731,39 @@
         {
           "license": {
             "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "dfa@1.2.0",
+      "type": "library",
+      "name": "dfa",
+      "version": "1.2.0",
+      "scope": "required",
+      "purl": "pkg:npm/dfa@1.2.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/dfa"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/dfa/-/dfa-1.2.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "103de33fcb1a6b07854e37865fc1d03e3782d5863266cf7c8c6359c7a22206fc56ec91b9bf8f7691a980401de6db0a29d3b0af53f4509b370aafa6e0702e43fd"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
           }
         }
       ]
@@ -7904,13 +8944,9 @@
       "type": "library",
       "name": "fast-deep-equal",
       "version": "3.1.3",
-      "scope": "optional",
+      "scope": "required",
       "purl": "pkg:npm/fast-deep-equal@3.1.3",
       "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        },
         {
           "name": "cdx:npm:package:path",
           "value": "node_modules/fast-deep-equal"
@@ -8037,6 +9073,39 @@
         {
           "alg": "SHA-512",
           "content": "b486d8b596ee70eb340511aa3c992c84951874bf920c7edd54cf208f2f84469dd60148cb105244fb4da46a7c87b708d63a7c2b298062c0098cd29e242c90275e"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "fflate@0.8.3",
+      "type": "library",
+      "name": "fflate",
+      "version": "0.8.3",
+      "scope": "required",
+      "purl": "pkg:npm/fflate@0.8.3",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/fflate"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b5b64db89acbc06529df3b2106d772e16f8e47166e221f1ae629722044030b9ad8d5fdd4db424caf2d0b977581cd4e7c1192ac12e2455e16f9830bfc0ac3ef80"
         }
       ],
       "licenses": [
@@ -8191,6 +9260,39 @@
         {
           "license": {
             "id": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "fontkit@2.0.4",
+      "type": "library",
+      "name": "fontkit",
+      "version": "2.0.4",
+      "scope": "required",
+      "purl": "pkg:npm/fontkit@2.0.4",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/fontkit"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/fontkit/-/fontkit-2.0.4.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b327ad41a75a5040cd77176e8206bd0a911855a408c4ec24ec6970656599d7dfffa96e331396e49ce29e3010d80004b09e96921ca2484d12cc17d9b57e9decea"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
           }
         }
       ]
@@ -9360,6 +10462,39 @@
       ]
     },
     {
+      "bom-ref": "linebreak@1.1.0",
+      "type": "library",
+      "name": "linebreak",
+      "version": "1.1.0",
+      "scope": "required",
+      "purl": "pkg:npm/linebreak@1.1.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/linebreak"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/linebreak/-/linebreak-1.1.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "307a74dd4226795841ed766d8ddd04e27ebedf1af90eaffdc48ff9169b4693916b6c3477cda80f6b60d2e94f24b3fdc78db2961bd435336b9f3b3c55daa2d849"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "locate-character@3.0.0",
       "type": "library",
       "name": "locate-character",
@@ -10039,6 +11174,39 @@
       ]
     },
     {
+      "bom-ref": "pako@0.2.9",
+      "type": "library",
+      "name": "pako",
+      "version": "0.2.9",
+      "scope": "required",
+      "purl": "pkg:npm/pako@0.2.9",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/pako"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pako/-/pako-0.2.9.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "35473068ac54c56ad92e90c6fb3ff165a0a04084e403f0efe15fd3e9bc3b54e37a9755f3fd59eb06aad88d9435d936a6287cc84d37ce1086148f8f32d8a5c898"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "parse5@7.3.0",
       "type": "library",
       "name": "parse5",
@@ -10176,6 +11344,72 @@
         {
           "alg": "SHA-512",
           "content": "5948c6700a8fd6041a72841ef8e049b0503b2dde03c97b9422367971cef970b1ef27b76d36c4ee8298712000f0b294be02b68051e3c22ab495b4f2c58ff17cf3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "pdfkit@0.20.2",
+      "type": "library",
+      "name": "pdfkit",
+      "version": "0.20.2",
+      "scope": "required",
+      "purl": "pkg:npm/pdfkit@0.20.2",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/pdfkit"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pdfkit/-/pdfkit-0.20.2.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "43fc34dc80804325df1cd7d3b20d6e769d000deadd04dd2cedae9748f2fb27b468e8006769fa013820c1b2d20ef54d369afcc7115f07aef148c39895e5e8c844"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "pdfmake@0.3.14",
+      "type": "library",
+      "name": "pdfmake",
+      "version": "0.3.14",
+      "scope": "required",
+      "purl": "pkg:npm/pdfmake@0.3.14",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/pdfmake"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pdfmake/-/pdfmake-0.3.14.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "103c8e9708839c4f1ed1e2134a91f06425403ffbde5aad13c40d91ca1a033b47122dab7b1c418db4a50de94896f7e628bced8685c5a52bdf50eed8fdb287fd82"
         }
       ],
       "licenses": [
@@ -10330,6 +11564,43 @@
         {
           "license": {
             "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "png-js@2.0.0",
+      "type": "library",
+      "name": "png-js",
+      "version": "2.0.0",
+      "scope": "required",
+      "purl": "pkg:npm/png-js@2.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/png-js"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/png-js/-/png-js-2.0.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "19dcc9b9431ce994a9c45256571b4e1f56f3607ca6f933a7bdea948dbf952486d959b673ca24461622a16e289e95fa586e0325847561b09d054dacdfb9116430"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "text": {
+              "contentType": "text/plain",
+              "content": "MIT License\n\nCopyright (c) 2017 Devon Govett\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+            }
           }
         }
       ]
@@ -10853,6 +12124,39 @@
       ]
     },
     {
+      "bom-ref": "restructure@3.0.2",
+      "type": "library",
+      "name": "restructure",
+      "version": "3.0.2",
+      "scope": "required",
+      "purl": "pkg:npm/restructure@3.0.2",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/restructure"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/restructure/-/restructure-3.0.2.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8127e888e100d153c4e93ba492bafb234441744d2cec7d5e1420c1934e65d4a2104f550828d739259cba8ddc96e9e607dda4778396f73ee2fbeebab486fc2d03"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "rollup@4.63.1",
       "type": "library",
       "name": "rollup",
@@ -10992,6 +12296,39 @@
         {
           "license": {
             "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "sax@1.6.1",
+      "type": "library",
+      "name": "sax",
+      "version": "1.6.1",
+      "scope": "required",
+      "purl": "pkg:npm/sax@1.6.1",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/sax"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/sax/-/sax-1.6.1.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e36b415702d69da42f5b9cdce076d9ad3b9671c1020997c18bdd850eec2dab16ac1fe25b3c1dff14e29bd66db6d8ae364785b1bb1cf332c4ecc1fce0b52bbae1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BlueOak-1.0.0"
           }
         }
       ]
@@ -11573,6 +12910,39 @@
       ]
     },
     {
+      "bom-ref": "tiny-inflate@1.0.3",
+      "type": "library",
+      "name": "tiny-inflate",
+      "version": "1.0.3",
+      "scope": "required",
+      "purl": "pkg:npm/tiny-inflate@1.0.3",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/tiny-inflate"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/tiny-inflate/-/tiny-inflate-1.0.3.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a646357e3d5c2876f6b1e583cb4075e87796c9cce5240f7f596deeddce33fcd8960ec3b70ce5390fb9e14cb13d085d325effd064563bb042668f6e1d2be46bab"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "tinybench@2.9.0",
       "type": "library",
       "name": "tinybench",
@@ -12109,6 +13479,72 @@
         {
           "alg": "SHA-512",
           "content": "02cb82cdf7c61c9c9b49a46b9abe5e1ebf359b0254de48f0e8cfaea6b5af09788d78df52386c10dc99fc8dbf26dd9ea2cd58249e7d51d054c21003f642b2d8ff"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "unicode-properties@1.4.1",
+      "type": "library",
+      "name": "unicode-properties",
+      "version": "1.4.1",
+      "scope": "required",
+      "purl": "pkg:npm/unicode-properties@1.4.1",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/unicode-properties"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/unicode-properties/-/unicode-properties-1.4.1.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "08b8c208b43a52e3315a76c8ca5922b1b463df5ab11cf02eaef7a76bfd22c1255b4361b5558e7f1e357421169b3846c31e5cd9951742ac3e0d841d09b54e343e"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "unicode-trie@2.0.0",
+      "type": "library",
+      "name": "unicode-trie",
+      "version": "2.0.0",
+      "scope": "required",
+      "purl": "pkg:npm/unicode-trie@2.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/unicode-trie"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/unicode-trie/-/unicode-trie-2.0.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c7b6dcefac746e6e29adfd552e0efdba10332b0f0355ba0295237957126e43e2ca0ce5445bd09d1fe558ed23febd7ef109842acf3810a45ab3d79cde2ef02d65"
         }
       ],
       "licenses": [
@@ -12712,6 +14148,39 @@
       ]
     },
     {
+      "bom-ref": "xmldoc@2.0.3",
+      "type": "library",
+      "name": "xmldoc",
+      "version": "2.0.3",
+      "scope": "required",
+      "purl": "pkg:npm/xmldoc@2.0.3",
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/xmldoc"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/xmldoc/-/xmldoc-2.0.3.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ea0464e0d63f26f83aef19fb3b326ec4b46c1a089705a3d442995527ff65f7db88ba0c61e054ce7b0633e6273c592723ed7c7fd96be110d8902b090af51a44e3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "yaml@1.10.3",
       "type": "library",
       "name": "yaml",
@@ -13294,6 +14763,14 @@
       "dependsOn": []
     },
     {
+      "ref": "@noble/ciphers@1.3.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "@noble/hashes@1.8.0",
+      "dependsOn": []
+    },
+    {
       "ref": "@playwright/test@1.62.1",
       "dependsOn": [
         "playwright@1.62.1"
@@ -13435,6 +14912,10 @@
       ]
     },
     {
+      "ref": "@swc/helpers@0.5.24",
+      "dependsOn": []
+    },
+    {
       "ref": "@testing-library/dom@10.4.1",
       "dependsOn": [
         "@babel/code-frame@7.29.7",
@@ -13505,6 +14986,19 @@
       "ref": "@types/node@24.13.3",
       "dependsOn": [
         "undici-types@7.18.2"
+      ]
+    },
+    {
+      "ref": "@types/pdfkit@0.17.7",
+      "dependsOn": [
+        "@types/node@24.13.3"
+      ]
+    },
+    {
+      "ref": "@types/pdfmake@0.3.3",
+      "dependsOn": [
+        "@types/node@24.13.3",
+        "@types/pdfkit@0.17.7"
       ]
     },
     {
@@ -13726,11 +15220,123 @@
       "dependsOn": []
     },
     {
+      "ref": "asset:pdfmake-bundle/@noble/ciphers",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/@noble/hashes",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/@swc/helpers",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/base64-js",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/brotli",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/buffer",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/clone",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/core-js",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/dfa",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/events",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/expose-loader",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/fast-deep-equal",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/fflate",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/file-saver",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/fontkit",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/ieee754",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/linebreak",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/pdfkit",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/png-js",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/process",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/restructure",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/sax",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/svg-to-pdfkit",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/tiny-inflate",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/unicode-properties",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:pdfmake-bundle/unicode-trie",
+      "dependsOn": []
+    },
+    {
       "ref": "asset:public/fonts/inter-tight-latin-ext.woff2",
       "dependsOn": []
     },
     {
       "ref": "asset:public/fonts/inter-tight-latin.woff2",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:public/fonts/inter-tight-pdf-bold.ttf",
+      "dependsOn": []
+    },
+    {
+      "ref": "asset:public/fonts/inter-tight-pdf-regular.ttf",
       "dependsOn": []
     },
     {
@@ -13746,9 +15352,23 @@
       "dependsOn": []
     },
     {
+      "ref": "base64-js@0.0.8",
+      "dependsOn": []
+    },
+    {
+      "ref": "base64-js@1.5.1",
+      "dependsOn": []
+    },
+    {
       "ref": "brace-expansion@5.0.12",
       "dependsOn": [
         "balanced-match@4.0.4"
+      ]
+    },
+    {
+      "ref": "brotli@1.3.3",
+      "dependsOn": [
+        "base64-js@1.5.1"
       ]
     },
     {
@@ -13780,6 +15400,10 @@
         "memoizee@0.4.17",
         "timers-ext@0.1.8"
       ]
+    },
+    {
+      "ref": "clone@2.1.2",
+      "dependsOn": []
     },
     {
       "ref": "clsx@2.1.1",
@@ -13854,6 +15478,10 @@
     },
     {
       "ref": "dexie@4.4.7",
+      "dependsOn": []
+    },
+    {
+      "ref": "dfa@1.2.0",
       "dependsOn": []
     },
     {
@@ -14167,18 +15795,22 @@
         "@testing-library/jest-dom@6.9.1",
         "@testing-library/svelte@5.4.2",
         "@types/node@24.13.3",
+        "@types/pdfmake@0.3.3",
         "ajv@6.15.0",
         "asset:compliance/schemas/bom-1.5.schema.json",
         "asset:compliance/schemas/jsf-0.82.schema.json",
         "asset:compliance/schemas/spdx.schema.json",
         "asset:public/fonts/inter-tight-latin-ext.woff2",
         "asset:public/fonts/inter-tight-latin.woff2",
+        "asset:public/fonts/inter-tight-pdf-bold.ttf",
+        "asset:public/fonts/inter-tight-pdf-regular.ttf",
         "dexie@4.4.7",
         "dompurify@3.4.17",
         "eslint-plugin-svelte@3.23.0",
         "eslint@10.10.0",
         "globals@16.5.0",
         "jsdom@26.1.0",
+        "pdfmake@0.3.14",
         "prettier-plugin-svelte@4.1.1",
         "prettier@3.9.6",
         "svelte-check@4.7.6",
@@ -14190,6 +15822,10 @@
         "vitest@4.1.11",
         "zod@4.6.7"
       ]
+    },
+    {
+      "ref": "fflate@0.8.3",
+      "dependsOn": []
     },
     {
       "ref": "file-entry-cache@11.1.5",
@@ -14215,6 +15851,20 @@
     {
       "ref": "flatted@3.4.4",
       "dependsOn": []
+    },
+    {
+      "ref": "fontkit@2.0.4",
+      "dependsOn": [
+        "@swc/helpers@0.5.24",
+        "brotli@1.3.3",
+        "clone@2.1.2",
+        "dfa@1.2.0",
+        "fast-deep-equal@3.1.3",
+        "restructure@3.0.2",
+        "tiny-inflate@1.0.3",
+        "unicode-properties@1.4.1",
+        "unicode-trie@2.0.0"
+      ]
     },
     {
       "ref": "fsevents@2.3.2",
@@ -14394,6 +16044,13 @@
       "dependsOn": []
     },
     {
+      "ref": "linebreak@1.1.0",
+      "dependsOn": [
+        "base64-js@0.0.8",
+        "unicode-trie@2.0.0"
+      ]
+    },
+    {
       "ref": "locate-character@3.0.0",
       "dependsOn": []
     },
@@ -14498,6 +16155,10 @@
       ]
     },
     {
+      "ref": "pako@0.2.9",
+      "dependsOn": []
+    },
+    {
       "ref": "parse5@7.3.0",
       "dependsOn": [
         "entities@6.0.1"
@@ -14516,6 +16177,51 @@
       "dependsOn": []
     },
     {
+      "ref": "pdfkit@0.20.2",
+      "dependsOn": [
+        "@noble/ciphers@1.3.0",
+        "@noble/hashes@1.8.0",
+        "fflate@0.8.3",
+        "fontkit@2.0.4",
+        "linebreak@1.1.0",
+        "png-js@2.0.0"
+      ]
+    },
+    {
+      "ref": "pdfmake@0.3.14",
+      "dependsOn": [
+        "linebreak@1.1.0",
+        "pdfkit@0.20.2",
+        "xmldoc@2.0.3",
+        "asset:pdfmake-bundle/svg-to-pdfkit",
+        "asset:pdfmake-bundle/dfa",
+        "asset:pdfmake-bundle/events",
+        "asset:pdfmake-bundle/fast-deep-equal",
+        "asset:pdfmake-bundle/core-js",
+        "asset:pdfmake-bundle/@noble/hashes",
+        "asset:pdfmake-bundle/fflate",
+        "asset:pdfmake-bundle/@noble/ciphers",
+        "asset:pdfmake-bundle/restructure",
+        "asset:pdfmake-bundle/@swc/helpers",
+        "asset:pdfmake-bundle/unicode-properties",
+        "asset:pdfmake-bundle/fontkit",
+        "asset:pdfmake-bundle/linebreak",
+        "asset:pdfmake-bundle/png-js",
+        "asset:pdfmake-bundle/pdfkit",
+        "asset:pdfmake-bundle/base64-js",
+        "asset:pdfmake-bundle/brotli",
+        "asset:pdfmake-bundle/buffer",
+        "asset:pdfmake-bundle/clone",
+        "asset:pdfmake-bundle/expose-loader",
+        "asset:pdfmake-bundle/ieee754",
+        "asset:pdfmake-bundle/process",
+        "asset:pdfmake-bundle/sax",
+        "asset:pdfmake-bundle/tiny-inflate",
+        "asset:pdfmake-bundle/unicode-trie",
+        "asset:pdfmake-bundle/file-saver"
+      ]
+    },
+    {
       "ref": "picocolors@1.1.1",
       "dependsOn": []
     },
@@ -14532,6 +16238,12 @@
       "dependsOn": [
         "fsevents@2.3.2",
         "playwright-core@1.62.1"
+      ]
+    },
+    {
+      "ref": "png-js@2.0.0",
+      "dependsOn": [
+        "fflate@0.8.3"
       ]
     },
     {
@@ -14618,6 +16330,10 @@
       ]
     },
     {
+      "ref": "restructure@3.0.2",
+      "dependsOn": []
+    },
+    {
       "ref": "rollup@4.63.1",
       "dependsOn": [
         "@napi-rs/lzma-linux-x64-gnu@1.5.1",
@@ -14662,6 +16378,10 @@
     },
     {
       "ref": "safer-buffer@2.1.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "sax@1.6.1",
       "dependsOn": []
     },
     {
@@ -14784,6 +16504,10 @@
       ]
     },
     {
+      "ref": "tiny-inflate@1.0.3",
+      "dependsOn": []
+    },
+    {
       "ref": "tinybench@2.9.0",
       "dependsOn": []
     },
@@ -14862,6 +16586,20 @@
     {
       "ref": "undici-types@7.18.2",
       "dependsOn": []
+    },
+    {
+      "ref": "unicode-properties@1.4.1",
+      "dependsOn": [
+        "base64-js@1.5.1",
+        "unicode-trie@2.0.0"
+      ]
+    },
+    {
+      "ref": "unicode-trie@2.0.0",
+      "dependsOn": [
+        "pako@0.2.9",
+        "tiny-inflate@1.0.3"
+      ]
     },
     {
       "ref": "uri-js@4.4.1",
@@ -14974,6 +16712,12 @@
     {
       "ref": "xmlchars@2.2.0",
       "dependsOn": []
+    },
+    {
+      "ref": "xmldoc@2.0.3",
+      "dependsOn": [
+        "sax@1.6.1"
+      ]
     },
     {
       "ref": "yaml@1.10.3",

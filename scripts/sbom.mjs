@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
+import { pdfVendorComponents } from './pdf-vendors.mjs';
 
 process.chdir(fileURLToPath(new URL('../', import.meta.url)));
 const output = 'compliance/sbom.cdx.json';
@@ -75,6 +76,22 @@ const coveredPaths = new Set(
 );
 const missingPaths = Object.keys(lock.packages).filter((path) => path && !coveredPaths.has(path));
 if (missingPaths.length) throw new Error(`Incomplete SBOM: ${missingPaths.join(', ')}`);
+// png-js 2.0.0 omits package metadata, but ships an unambiguous MIT LICENSE.
+// Only enrich this reviewed release and exact license text; unknown changes fail.
+for (const component of npmComponents) {
+  if (component.name === 'png-js' && component.version === '2.0.0' && !component.licenses?.length) {
+    const text = readFileSync('node_modules/png-js/LICENSE', 'utf8');
+    if (
+      createHash('sha256').update(text).digest('hex') !==
+      'bdb26a2ec815931ed6a38f3416362566204ee85ecdef96702b636402da4c75c3'
+    ) {
+      throw new Error('Unreviewed png-js license text');
+    }
+    component.licenses = [
+      { license: { id: 'MIT', text: { contentType: 'text/plain', content: text } } },
+    ];
+  }
+}
 const unlicensed = npmComponents.filter((component) => !component.licenses?.length);
 if (unlicensed.length) {
   throw new Error(
@@ -84,7 +101,7 @@ if (unlicensed.length) {
 
 const fontRefs = [];
 for (const name of readdirSync('public/fonts')
-  .filter((name) => name.endsWith('.woff2'))
+  .filter((name) => /\.(woff2|ttf)$/u.test(name))
   .sort()) {
   const path = `public/fonts/${name}`;
   const ref = `asset:${path}`;
@@ -93,8 +110,7 @@ for (const name of readdirSync('public/fonts')
     type: 'file',
     'bom-ref': ref,
     name: path,
-    description:
-      'Inter Tight webfont subset; upstream version not recorded, identified by SHA-256.',
+    description: 'Inter Tight font; upstream version not recorded, identified by SHA-256.',
     hashes: [
       { alg: 'SHA-256', content: createHash('sha256').update(readFileSync(path)).digest('hex') },
     ],
@@ -117,6 +133,14 @@ const root = bom.dependencies.find(
   (dependency) => dependency.ref === bom.metadata.component['bom-ref'],
 );
 root.dependsOn.push(...fontRefs);
+const bundledPdf = pdfVendorComponents();
+bom.components.push(...bundledPdf);
+const pdfEngine = bom.components.find((item) => item.name === 'pdfmake');
+const pdfDependency = bom.dependencies.find((item) => item.ref === pdfEngine?.['bom-ref']);
+if (!pdfDependency) throw new Error('Missing PDF engine component');
+pdfDependency.dependsOn.push(...bundledPdf.map((component) => component['bom-ref']));
+for (const component of bundledPdf)
+  bom.dependencies.push({ ref: component['bom-ref'], dependsOn: [] });
 // Inventory the vendored validation schemas too; they are tooling, not app assets.
 for (const name of readdirSync('compliance/schemas')
   .filter((name) => name.endsWith('.json'))
