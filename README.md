@@ -29,6 +29,33 @@ Die älteren Aufnahmen vom **08.11.2026** verwenden öffentliche Live-Daten von 
 Der Einstieg hat nur eine Aktion: **Eigene Instanz verbinden**. Nach Auswahl des
 Handles öffnet sich die Freigabe; erst nach erfolgreicher Verbindung erscheinen
 Statistiken. Beim Trennen der Verbindung werden sie wieder ausgeblendet.
+Die Accountübersicht nennt die erkannte Server-Software, etwa Mastodon oder
+Pixelfed, auch nach Login und Neuladen. Schlägt die Erkennung fehl, steht dort
+ausdrücklich „Nicht erkannt“ statt der unspezifischen Protokollangabe „ActivityPub“.
+
+Report und Follower-Verlauf teilen sich **eine Fortschrittsanzeige und eine
+Abbrechen-Aktion**. Tabelle und Diagramme erscheinen gemeinsam nach Abschluss
+beider Abrufe; verfügbare Daten bleiben bei einem Teilfehler mit Hinweis nutzbar.
+Solange die Seitenzahl unbekannt ist, läuft die Anzeige ohne Prozentwert.
+Während der Reichweitenberechnung zeigt sie den Anteil der bearbeiteten Beiträge,
+nicht einen geschätzten Gesamtfortschritt.
+
+Account, geladene Beiträge und vollständige Jahresanalysen werden bis zu fünf
+Minuten im Arbeitsspeicher für denselben verbundenen Account wiederverwendet.
+Ein Jahreswechsel nutzt vorhandene Daten und lädt bei verfügbarer Paginierung nur
+fehlende ältere Beitragsseiten nach. **Live-Report laden** beziehungsweise
+**Verlauf neu laden** aktualisiert beide Datenquellen ausdrücklich. Ein
+Browser-Reload leert diese flüchtigen Caches; lokale gespeicherte Reports bleiben
+erhalten.
+
+**UI-Demo, aufgenommen am 18.11.2026:** Die folgenden aktuellen Aufnahmen verwenden
+kontrollierte Testantworten für `alice@test.social`, keine echte Anmeldung und
+keine privaten Accountdaten. Sie zeigen den gemeinsamen Ladezustand auf Desktop
+und Mobilgerät; authentifizierte Live-Aufnahmen sind damit nicht abgedeckt.
+
+![UI-Demo mit kontrollierten Testdaten: eine gemeinsame Fortschrittsanzeige für Report und Follower-Verlauf auf dem Desktop](docs/screenshots/reports-loading-demo-desktop.png)
+
+<img src="docs/screenshots/reports-loading-demo-mobile.png" alt="Mobile UI-Demo mit kontrollierten Testdaten: gemeinsamer Ladezustand und eine Abbrechen-Aktion" width="390" />
 
 ![Reports-Einstieg ohne Statistiken mit einer Aktion zum Verbinden der eigenen Instanz](docs/screenshots/reports-connect-desktop.png)
 
@@ -172,7 +199,7 @@ make check
 Einzelne Schritte:
 
 ```bash
-make audit          # Abhängigkeiten auf kritische Schwachstellen
+make audit          # Hohe/kritische Befunde; eng begrenzte genehmigte Ausnahme beachten
 make format         # Quellcode formatieren
 make lint           # ESLint
 make typecheck      # svelte-check
@@ -216,6 +243,13 @@ wird sie aktualisiert; `make sbom-check` prüft Schema und Aktualität auch in C
 Umfang, Lizenzfolgen und offene Entscheidungen stehen in
 [compliance/README.md](compliance/README.md). Für den eigenen FediWings-Code ist
 bislang keine ausdrückliche Projektlizenz festgelegt.
+
+Das Deployment prüft weiterhin alle hohen und kritischen npm-Auditbefunde.
+Für das ungepatchte Picomatch-Advisory `GHSA-fc5q-39xc-vjpf` wurde am 18.11.2026
+eine ausschließlich auf Entwicklungswerkzeuge begrenzte Ausnahme genehmigt,
+gültig bis zum 18.12.2026 (ausschließlich). Andere Advisories, Produktionspfade
+oder kritische Eskalationen bleiben blockiert. Begründung und Ablaufkontrolle:
+[Audit-Ausnahme](compliance/README.md#befristete-audit-ausnahme).
 
 ### Sicherheitsmaßnahmen
 

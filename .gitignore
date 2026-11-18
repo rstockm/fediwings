@@ -22,6 +22,8 @@ results.sarif
 !/docs/screenshots/reports-charts-mobile.png
 !/docs/screenshots/reports-connect-desktop.png
 !/docs/screenshots/reports-connect-mobile.png
+!/docs/screenshots/reports-loading-demo-desktop.png
+!/docs/screenshots/reports-loading-demo-mobile.png
 /specs/
 /*.md
 !README.md

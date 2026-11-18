@@ -22,6 +22,106 @@ function status(id: string, date: string, parent: string | null = null): Mastodo
 afterEach(() => vi.unstubAllGlobals());
 
 describe('loadReport', () => {
+  it('verwendet vollständige Reports erneut und aktualisiert nur auf ausdrückliche Aktion', async () => {
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      json: async () => [status('root', '2026-02-01T00:00:00Z')],
+    });
+    vi.stubGlobal('fetch', fetch);
+    const load = (refresh = false, cacheKey = 'cache-test') =>
+      loadReport(
+        'https://test.social',
+        'account',
+        100,
+        2026,
+        new AbortController().signal,
+        () => {},
+        true,
+        { cacheKey, refresh },
+      );
+    await load();
+    await load();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await load(true);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await load(false, 'different-session');
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('lädt beim Wechsel zu älteren Jahren nur fehlende Seiten nach', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({
+          Link: '<https://test.social/api/v1/accounts/account/statuses?max_id=old>; rel="next"',
+        }),
+        json: async () => [
+          status('root', '2026-02-01T00:00:00Z'),
+          status('old', '2025-12-30T00:00:00Z'),
+        ],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers(),
+        json: async () => [status('older', '2024-12-30T00:00:00Z')],
+      });
+    vi.stubGlobal('fetch', fetch);
+    const load = (year: number) =>
+      loadReport(
+        'https://test.social',
+        'account',
+        100,
+        year,
+        new AbortController().signal,
+        () => {},
+        true,
+        { cacheKey: 'pagination-test' },
+      );
+    await load(2026);
+    const older = await load(2025);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(String(fetch.mock.calls[1][0])).toContain('max_id=old');
+    expect(older.posts.map((post) => post.status.id)).toEqual(['old']);
+    await load(2026);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('lässt den Cache nach fünf Minuten ablaufen', async () => {
+    const now = vi.spyOn(Date, 'now');
+    now.mockReturnValue(1_000_000);
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      json: async () => [],
+    });
+    vi.stubGlobal('fetch', fetch);
+    const load = () =>
+      loadReport(
+        'https://test.social',
+        'account',
+        100,
+        2026,
+        new AbortController().signal,
+        () => {},
+        true,
+        { cacheKey: 'expiry-test' },
+      );
+    try {
+      await load();
+      now.mockReturnValue(1_000_000 + 300_001);
+      await load();
+      expect(fetch).toHaveBeenCalledTimes(2);
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it('ordnet Antworten über Jahresgrenzen dem Startthread zu und nutzt die vorhandene Reichweitenberechnung', async () => {
     const data = [
       status('new', '2027-01-01T01:00:00Z', 'root'),

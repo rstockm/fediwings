@@ -40,12 +40,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Abhängigkeiten auf kritische Schwachstellen prüfen
-        run: npm audit --audit-level=high
+        run: npm run audit
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:sbom
+      - run: npm run test:audit
       - run: npm run build
         env:
           VITE_CARD_SERVICE_URL: ${{ vars.CARD_SERVICE_URL }}

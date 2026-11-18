@@ -5,6 +5,8 @@
   "type": "module",
   "packageManager": "npm@10.9.8",
   "scripts": {
+    "audit": "node scripts/audit.mjs",
+    "test:audit": "node --test scripts/audit.test.mjs",
     "sbom": "node scripts/sbom.mjs",
     "sbom:check": "node scripts/sbom.mjs --check",
     "test:sbom": "node --test scripts/sbom.test.mjs",

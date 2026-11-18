@@ -16,6 +16,7 @@
   }
 
   interface HistoryCache {
+    createdAt: number;
     sessionKey: string;
     phase: 'ready' | 'partial';
     message: string;
@@ -36,7 +37,7 @@
 </script>
 
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import { _, date as _date, number as _number } from 'svelte-i18n';
   import HandleCombobox from './HandleCombobox.svelte';
   import ReportsPanel from './ReportsPanel.svelte';
@@ -44,7 +45,6 @@
   import {
     buildAnchoredSeries,
     buildMonthlySeries,
-    DEFAULT_MAX_PAGES,
     fetchFollowerEvents,
     type AnchoredSeries,
     type FollowerProgress,
@@ -58,6 +58,7 @@
   import { readLastAccount, writeLastAccount } from '../lib/lastAccount';
   import type { MastodonAccount, ServerPlatform } from '../lib/types';
   import { msg } from '../lib/i18n';
+  import { REPORT_CACHE_MS } from '../lib/reportLoader';
 
   let {
     prefillHandle = '',
@@ -122,10 +123,12 @@
   let requestsUsed = $state(0);
   let oldestDate = $state('');
   let historyIncomplete = $state(false);
-  let historyController: AbortController | null = null;
   let appliedSession = '';
   let appliedSelection = $state('');
   let initialized = $state(false);
+  let historyRun = 0;
+  let reportBusy = $state(true);
+  let reportsPanel = $state<ReportsPanel>();
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
   const connectedAccount = $derived(
@@ -135,9 +138,6 @@
       authSession.account.id === account.id,
   );
   const heroCollapsed = $derived(anonPhase === 'loading' || account !== null);
-  const progressPercent = $derived(
-    Math.min(100, Math.round((requestsUsed / DEFAULT_MAX_PAGES) * 100)),
-  );
   const months = $derived(monthly.map((point) => point.month));
   const monthLabels = $derived.by(() => {
     const every = Math.max(1, Math.ceil(months.length / 6));
@@ -176,6 +176,7 @@
 
   function restoreHistory(session: OAuthSession): boolean {
     if (!historyCache || historyCache.sessionKey !== historySessionKey(session)) return false;
+    if (Date.now() - historyCache.createdAt > REPORT_CACHE_MS) return false;
     historyPhase = historyCache.phase;
     historyMessage = historyCache.message;
     monthly = historyCache.monthly;
@@ -188,7 +189,7 @@
   }
 
   function resetHistory(): void {
-    historyController?.abort();
+    historyRun += 1;
     historyPhase = 'idle';
     historyMessage = '';
     monthly = [];
@@ -224,15 +225,41 @@
     applySelection(snapshot);
   });
 
+  // OAuth redirects restore the account, but not the in-memory software detection.
+  // Reuse the software recorded for this server before querying NodeInfo again.
+  $effect(() => {
+    if (!initialized || !connectedAccount || platform || !account) return;
+    const stored = readLastAccount();
+    if (stored?.origin === origin && stored.platformId !== 'unknown') {
+      platform = {
+        id: stored.platformId,
+        name: stored.platformName,
+        mastodonApi: true,
+      };
+      return;
+    }
+    const controller = new AbortController();
+    const selectedAccount = account;
+    const selectedOrigin = origin;
+    void detectPlatform(selectedOrigin, controller.signal)
+      .then((detected) => {
+        if (controller.signal.aborted) return;
+        platform = detected;
+        onselectaccount?.({ account: selectedAccount, origin: selectedOrigin, platform: detected });
+      })
+      .catch(() => {
+        // Cleanup aborts detection when the selected account or view changes.
+      });
+    return () => controller.abort();
+  });
+
   $effect(() => {
     if (!initialized) return;
     if (authSession && connectedAccount) {
       if (authSession.token !== appliedSession) {
         appliedSession = authSession.token;
-        if (!restoreHistory(authSession)) {
-          resetHistory();
-          void loadHistory();
-        }
+        resetHistory();
+        restoreHistory(authSession);
       }
       return;
     }
@@ -247,7 +274,6 @@
     if (anonPhase === 'loading') return;
     anonPhase = 'loading';
     anonMessage = '';
-    historyController?.abort();
     account = null;
     platform = null;
     try {
@@ -294,28 +320,52 @@
     }
   }
 
-  async function loadHistory(): Promise<void> {
+  async function loadHistory(
+    fresh: MastodonAccount,
+    signal: AbortSignal,
+    onProgress: (progress: FollowerProgress) => void,
+    refresh: boolean,
+  ): Promise<void> {
+    const run = ++historyRun;
     const session = authSession;
     if (!session) return;
-    historyController?.abort();
-    historyController = new AbortController();
-    const signal = historyController.signal;
+    if (!refresh && restoreHistory(session)) {
+      // Re-anchor cached events to the same current count used by the report.
+      const delta = fresh.followers_count - (anchored?.current ?? fresh.followers_count);
+      if (anchored && delta !== 0) {
+        anchored = {
+          ...anchored,
+          start: anchored.start + delta,
+          current: fresh.followers_count,
+          points: anchored.points.map((value) => value + delta),
+          historyIncomplete: anchored.start + delta < 0,
+        };
+        historyIncomplete = anchored.historyIncomplete;
+        if (historyCache) {
+          historyCache.anchored = anchored;
+          historyCache.historyIncomplete = historyIncomplete;
+        }
+      }
+      return;
+    }
     historyPhase = 'loading';
     historyMessage = '';
 
     try {
-      const currentFollowers = session.account.followers_count;
+      const currentFollowers = fresh.followers_count;
       const result = await fetchFollowerEvents(
         session.origin,
         session.token,
         signal,
         (progress: FollowerProgress) => {
+          if (signal.aborted || run !== historyRun) return;
           eventsCount = progress.events;
           requestsUsed = progress.requests;
           oldestDate = progress.oldest ?? '';
+          onProgress(progress);
         },
       );
-      if (signal.aborted) return;
+      if (signal.aborted || run !== historyRun) return;
 
       eventsCount = result.events.length;
       requestsUsed = result.requests;
@@ -328,6 +378,7 @@
         historyMessage = msg('follower.emptyHistory');
       }
       historyCache = {
+        createdAt: Date.now(),
         sessionKey: historySessionKey(session),
         phase: historyPhase,
         message: historyMessage,
@@ -339,7 +390,11 @@
         historyIncomplete,
       };
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (run !== historyRun) return;
+      if (signal.aborted) {
+        historyPhase = 'idle';
+        return;
+      }
       if (error instanceof Error && error.message === msg('error.followersExpired')) {
         anonPhase = 'ready';
         anonMessage = error.message;
@@ -350,14 +405,6 @@
       historyMessage = error instanceof Error ? error.message : msg('follower.historyFailed');
     }
   }
-
-  function stopHistory(): void {
-    historyController?.abort();
-  }
-
-  onDestroy(() => {
-    historyController?.abort();
-  });
 
   const chartA = { left: 38, right: 348, top: 14, bottom: 148 };
   const chartB = { left: 38, right: 348, top: 14, bottom: 148 };
@@ -508,7 +555,13 @@
         </div>
         <div>
           <span aria-hidden="true">&nbsp;</span>
-          <strong>{platform?.name ?? 'ActivityPub'}</strong>
+          <strong
+            >{!platform
+              ? $_('follower.detectingSoftware')
+              : platform.id === 'unknown'
+                ? $_('follower.unknownSoftware')
+                : platform.name}</strong
+          >
           <small>{$_('follower.serverSoftware')}</small>
         </div>
       </div>
@@ -519,11 +572,15 @@
     {/if}
   </section>
 
-  {#if connectedAccount && anonPhase === 'ready' && account && origin}
+  {#if connectedAccount && anonPhase === 'ready' && account && origin && platform}
     <ReportsPanel
+      bind:this={reportsPanel}
       {account}
       {origin}
       {platform}
+      sessionKey={authSession ? historySessionKey(authSession) : ''}
+      loadFollowerHistory={loadHistory}
+      onbusy={(value) => (reportBusy = value)}
       followerHistory={authSession &&
       authSession.origin === origin &&
       authSession.account.id === account.id &&
@@ -538,53 +595,17 @@
     />
   {/if}
 
-  {#if connectedAccount && authSession && account}
+  {#if connectedAccount && authSession && account && !reportBusy}
     <section class="follower-card" aria-labelledby="history-title">
       <p class="eyebrow">{$_('follower.stepHistory')}</p>
       <h2 id="history-title">@{account.acct}</h2>
 
-      {#if historyPhase === 'loading'}
-        <div class="follower-progress-block" role="status" aria-live="polite">
-          <div class="follower-progress-head">
-            <strong>{$_('follower.progressLabel')}</strong>
-            <span
-              >{$_('follower.progressPages', {
-                values: { requests: requestsUsed, budget: DEFAULT_MAX_PAGES },
-              })}</span
-            >
-          </div>
-          <div
-            class="follower-progress-track"
-            class:track-pending={requestsUsed === 0}
-            role="progressbar"
-            aria-label={$_('follower.progressLabel')}
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow={requestsUsed === 0 ? null : progressPercent}
-          >
-            <span
-              class:track-complete={progressPercent === 100}
-              style:width={`${requestsUsed === 0 ? 30 : progressPercent}%`}
-            ></span>
-          </div>
-          <p class="follower-progress">
-            {$_('follower.progressEvents', { values: { events: eventsCount } })}
-            {#if oldestDate}
-              · {$_('follower.progressOldest', {
-                values: { date: $_date(new Date(oldestDate), { format: 'date' }) },
-              })}
-            {/if}
-          </p>
-        </div>
-        <div class="follower-actions">
-          <button type="button" onclick={stopHistory}>{$_('follower.cancel')}</button>
-        </div>
-      {/if}
-
       {#if historyPhase === 'error'}
         <p class="follower-error" role="alert">{historyMessage}</p>
         <div class="follower-actions">
-          <button type="button" onclick={() => void loadHistory()}>{$_('follower.retry')}</button>
+          <button type="button" onclick={() => void reportsPanel?.refresh()}
+            >{$_('follower.retry')}</button
+          >
           <button
             type="button"
             class="logout-button"
@@ -767,7 +788,9 @@
         </div>
 
         <div class="follower-actions">
-          <button type="button" onclick={() => void loadHistory()}>{$_('follower.reload')}</button>
+          <button type="button" onclick={() => void reportsPanel?.refresh()}
+            >{$_('follower.reload')}</button
+          >
           <button
             type="button"
             class="logout-button"
@@ -779,7 +802,9 @@
       {:else if historyPhase === 'idle'}
         <p class="follower-muted">{$_('follower.idle')}</p>
         <div class="follower-actions">
-          <button type="button" onclick={() => void loadHistory()}>{$_('follower.reload')}</button>
+          <button type="button" onclick={() => void reportsPanel?.refresh()}
+            >{$_('follower.reload')}</button
+          >
           <button
             type="button"
             class="logout-button"

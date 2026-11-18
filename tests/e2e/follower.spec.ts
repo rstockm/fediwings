@@ -317,6 +317,9 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   await expect(page.getByText(/Unfollows fehlen/)).toBeVisible();
 
   await expect(page.getByText('Kumuliert aus 162 Follow-Ereignissen')).toBeVisible();
+  await expect(
+    page.locator('.follower-snapshot').getByText('Mastodon', { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: '@alice · verbunden' })).toBeVisible();
   await expect(page.getByLabel('Vollständiger Fediverse-Handle')).toBeEnabled();
 
@@ -326,14 +329,18 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
   expect(overflow).toBe(false);
 });
 
-test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
+test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }, testInfo) => {
   await mockInstance(page);
   await mockOAuthFlow(page);
   let firstNotifications = true;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   await page.route('https://test.social/api/v1/notifications?*', async (route) => {
     if (firstNotifications) {
       firstNotifications = false;
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await gate;
     }
     await route.fallback();
   });
@@ -343,11 +350,57 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }) => {
   await page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }).click();
   await connectOwnInstance(page);
 
-  const progress = page.getByRole('progressbar', { name: 'Follower-Verlauf wird geladen' });
+  const progress = page.getByRole('progressbar', {
+    name: 'Report und Follower-Verlauf werden geladen',
+  });
   await expect(progress).toBeVisible();
-  await expect(page.getByText('0 von 40 Seiten')).toBeVisible();
+  await expect(page.getByRole('progressbar')).toHaveCount(1);
+  await expect(page.getByRole('table')).toHaveCount(0);
+  await expect(page.locator('.follower-charts')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Report speichern' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Abbrechen', exact: true })).toHaveCount(1);
+  if (process.env.UPDATE_COMBINED_REPORT_SCREENSHOTS && testInfo.project.name === 'chromium') {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page
+      .locator('main')
+      .screenshot({ path: 'docs/screenshots/reports-loading-demo-desktop.png' });
+    await page.setViewportSize({ width: 390, height: 1100 });
+    await page
+      .locator('main')
+      .screenshot({ path: 'docs/screenshots/reports-loading-demo-mobile.png' });
+  }
+  release();
   await expect(progress).toBeHidden({ timeout: 15_000 });
   await expect(page.getByRole('img', { name: /Neue Follower pro Monat/ })).toBeVisible();
+});
+
+test('verwendet beide Ergebnisse beim Ansichtswechsel und Jahreswechsel erneut', async ({
+  page,
+}) => {
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  const requests: string[] = [];
+  page.on('request', (request) => {
+    if (/\/api\/v1\/(notifications|accounts\/.*\/statuses|accounts\/lookup)/.test(request.url())) {
+      requests.push(request.url());
+    }
+  });
+  await page.goto('/?view=reports');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }).click();
+  await connectOwnInstance(page);
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+  const count = requests.length;
+  await page.getByRole('link', { name: 'Analyse', exact: true }).click();
+  await page.getByRole('link', { name: 'Reports', exact: true }).click();
+  await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
+  expect(requests).toHaveLength(count);
+  await page.getByLabel('Jahr', { exact: true }).selectOption('2025');
+  await expect(page.getByRole('table')).toBeVisible();
+  expect(requests).toHaveLength(count);
+  await page.getByRole('button', { name: 'Live-Report laden' }).click();
+  await expect(page.getByRole('table')).toBeVisible();
+  expect(requests.length).toBeGreaterThan(count);
 });
 
 test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) => {
@@ -368,6 +421,9 @@ test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) 
 
   await page.reload();
   await expect(page.getByRole('heading', { name: '@alice', exact: true })).toBeVisible();
+  await expect(
+    page.locator('.follower-snapshot').getByText('Mastodon', { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Verlauf neu laden' })).toBeVisible();
   expect(tokenExchanges).toBe(1);
 
@@ -375,6 +431,33 @@ test('behält den Login über Reload und Ansichtswechsel bei', async ({ page }) 
   await expect(page.getByRole('img', { name: /Kumulierte Follower/ })).toBeVisible();
   expect(tokenExchanges).toBe(1);
 });
+
+for (const detectable of [true, false]) {
+  test(`erkennt die Server-Software nach Reload ohne gespeicherte Metadaten (${detectable ? 'Mastodon' : 'unbekannt'})`, async ({
+    page,
+  }) => {
+    await mockInstance(page);
+    await mockOAuthFlow(page);
+    await page.goto('/?view=reports');
+    await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+    await page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }).click();
+    await connectOwnInstance(page);
+    await expect(page.getByRole('table')).toBeVisible();
+    await page.evaluate(() => sessionStorage.removeItem('fediscope:last-account-v1'));
+    if (!detectable) {
+      await page.route('https://test.social/.well-known/nodeinfo', async (route) => {
+        await route.fulfill({ status: 503, json: {} });
+      });
+    }
+    await page.reload();
+    await expect(
+      page
+        .locator('.follower-snapshot')
+        .getByText(detectable ? 'Mastodon' : 'Nicht erkannt', { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole('table')).toBeVisible();
+  });
+}
 
 test('löscht die Sitzung beim Abmelden und verlangt einen neuen Login', async ({ page }) => {
   await mockInstance(page);

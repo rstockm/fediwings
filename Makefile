@@ -11,7 +11,7 @@ sbom-check:
 	npm run sbom:check
 
 audit:
-	npm audit --audit-level=high
+	npm run audit
 
 lint:
 	npm run lint
@@ -28,6 +28,7 @@ typecheck:
 test:
 	npm test
 	npm run test:sbom
+	npm run test:audit
 
 test-browser:
 	npm run test:browser

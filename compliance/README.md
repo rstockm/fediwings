@@ -57,6 +57,41 @@ Nicht manuell editieren. `make check` enthält die Aktualitätsprüfung.
   eindeutige Referenzen sowie die Ablehnung veralteter Snapshots, geänderter Fonts,
   fehlender Lizenzangaben und ungültiger Schemadaten. Läuft in `make check` und CI.
 
+## Befristete Audit-Ausnahme
+
+`make audit` / `npm run audit` wertet weiterhin den vollständigen npm-Auditbericht
+aus und blockiert alle nicht genehmigten hohen und kritischen Befunde. Netz-,
+Parser- und unvollständige Berichtsdaten führen ebenfalls zu einem Fehler.
+Moderate Befunde bleiben wie bisher unterhalb der Deployment-Schwelle und werden
+in der Zusammenfassung ausgewiesen.
+
+Am **18.11.2026** hat der Projektverantwortliche die Ausnahme für
+**GHSA-fc5q-39xc-vjpf / CVE-2026-112366** ausdrücklich genehmigt, befristet
+**bis ausschließlich 18.12.2026**. Die maschinenlesbare Freigabe steht in
+`audit-exceptions.json`; `scripts/audit.mjs` prüft Advisory-URL, Paketname,
+Schweregrad, Gültigkeit und die `dev`-Markierung aller betroffenen Lockfile-Pfade.
+Auch indirekte npm-`via`-Referenzen werden auf die tatsächlichen Advisories
+aufgelöst. Ein neuer Befund im selben Paket, eine kritische Eskalation oder ein
+Produktionspfad erhält diese Ausnahme nicht. Acht Regressionstests sichern die
+Grenzen ab (`npm run test:audit`, auch in `make check` und CI).
+
+**Risikoabwägung:** Picomatch kann bei speziell präparierten wiederholten
+Extglob-Mustern durch exponentielles Regex-Backtracking einen Node-Prozess
+blockieren (ReDoS). Hier wird es ausschließlich von Entwicklungswerkzeugen
+verwendet; die Dateimuster sind projektkontrolliert und werden nicht aus
+öffentlichen Account-/API-Eingaben erzeugt. Stand 18.11.2026 existiert auch für
+die aktuelle Version 4.0.7 kein veröffentlichter Patch. Die npm-Empfehlung eines
+erzwungenen Vite-Downgrades behebt die zugrunde liegende ungepatchte Bibliothek
+nicht verlässlich und wird nicht übernommen. Die Ausnahme ist kein allgemeines
+Abschalten des Audits. Nach Veröffentlichung eines Patches Abhängigkeiten und
+SBOM aktualisieren und die Ausnahme entfernen; bei Erreichen des Ablaufdatums
+blockiert der weiterhin vorhandene Befund wieder.
+
+Quelle: [GitHub Advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
+Der npm-Bericht vom 18.11.2026 enthält neun hohe Einträge entlang dieser
+Abhängigkeitsketten und neun weitere moderate Einträge; letztere sind nicht
+Gegenstand der Ausnahme.
+
 ## Bedeutung für die Lizenz von FediWings
 
 **Befund: Die geprüften Abhängigkeiten erzwingen keine bestimmte Lizenz für den

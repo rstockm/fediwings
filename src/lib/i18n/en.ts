@@ -2,6 +2,14 @@ import type { Messages } from './de';
 
 export const en: Messages = {
   reports: {
+    combinedLoading: 'Loading report and follower history',
+    preparing: 'Preparing',
+    finalizing: 'Combining results',
+    fetching: 'Fetching posts and follower history',
+    analyzing: 'Calculating reach',
+    waitingFollowers: 'Report ready · finishing follower history',
+    requestCount: 'API requests: {count}',
+    rateLimitWait: 'API limit reached · resuming after waiting',
     connectFirst: 'Connect your own instance to load all statistics together.',
     title: 'Monthly and annual report',
     intro: 'Analyse public posts by publication month.',
@@ -481,6 +489,8 @@ export const en: Messages = {
     loading: 'Loading…',
     followersNote: 'current followers',
     serverSoftware: 'Server software',
+    detectingSoftware: 'Detecting …',
+    unknownSoftware: 'Not detected',
     loginButton: 'Connect your instance',
     connectMismatch: 'Not connected yet: @{account}. Connect your instance to load the statistics.',
     stepLogin: 'Step 2 · login',

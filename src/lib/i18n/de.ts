@@ -1,5 +1,13 @@
 export const de = {
   reports: {
+    combinedLoading: 'Report und Follower-Verlauf werden geladen',
+    preparing: 'Vorbereitung',
+    finalizing: 'Ergebnisse zusammenführen',
+    fetching: 'Beiträge und Follower-Verlauf laden',
+    analyzing: 'Reichweite berechnen',
+    waitingFollowers: 'Report bereit · Follower-Verlauf abschließen',
+    requestCount: 'API-Abfragen: {count}',
+    rateLimitWait: 'API-Limit erreicht · Fortsetzung nach Wartezeit',
     connectFirst: 'Verbinde deine eigene Instanz, um alle Statistiken gemeinsam zu laden.',
     title: 'Monats- und Jahresreport',
     intro: 'Öffentliche Beiträge nach Veröffentlichungsmonat auswerten.',
@@ -485,6 +493,8 @@ export const de = {
     loading: 'Lädt…',
     followersNote: 'aktuelle Follower',
     serverSoftware: 'Server-Software',
+    detectingSoftware: 'Wird erkannt …',
+    unknownSoftware: 'Nicht erkannt',
     loginButton: 'Eigene Instanz verbinden',
     connectMismatch:
       'Noch nicht verbunden: @{account}. Verbinde die eigene Instanz, um die Statistiken zu laden.',

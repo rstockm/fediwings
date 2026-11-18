@@ -246,6 +246,8 @@ export async function getStatuses(
 
 export interface ReportStatusCollection extends StatusCollection {
   error: string | null;
+  nextUrl?: string | null;
+  exhausted?: boolean;
 }
 
 /**
@@ -260,6 +262,7 @@ export async function getReportStatuses(
   onProgress?: (requests: number, oldestFetchedAt: string | null) => void,
   maxPages = 100,
   pixelfed = false,
+  previous?: ReportStatusCollection,
 ): Promise<ReportStatusCollection> {
   const boundary = Date.UTC(year - 1, 11, 31, 23);
   const params = new URLSearchParams({
@@ -269,12 +272,14 @@ export async function getReportStatuses(
   let url: string | null = pixelfed
     ? `${origin}/api/pixelfed/v1/accounts/${encodeURIComponent(accountId)}/statuses?limit=${PIXELFED_STATUSES_PER_PAGE}`
     : `${origin}/api/v1/accounts/${encodeURIComponent(accountId)}/statuses?${params}`;
-  const statuses: MastodonStatus[] = [];
-  const seen = new Set<string>();
+  if (previous) url = previous.nextUrl ?? null;
+  const statuses: MastodonStatus[] = [...(previous?.statuses ?? [])];
+  const seen = new Set<string>(statuses.map((status) => status.id));
   const visited = new Set<string>();
   let requests = 0;
-  let oldestFetchedAt: string | null = null;
+  let oldestFetchedAt: string | null = previous?.oldestFetchedAt ?? null;
   let historyComplete = false;
+  let exhausted = previous?.exhausted ?? false;
   let error: string | null = null;
 
   while (url && requests < maxPages) {
@@ -299,16 +304,15 @@ export async function getReportStatuses(
       const nextDeclared = page.link
         ?.split(',')
         .some((entry) => new RegExp(`;\\s*rel="?${relation}"?(?:\\s*;|\\s*$)`, 'i').test(entry));
-      if (
-        (oldestFetchedAt !== null && Date.parse(oldestFetchedAt) < boundary) ||
-        (!next &&
-          !nextDeclared &&
-          page.data.length < (pixelfed ? PIXELFED_STATUSES_PER_PAGE : STATUSES_PER_PAGE))
-      ) {
+      exhausted =
+        !next &&
+        !nextDeclared &&
+        page.data.length < (pixelfed ? PIXELFED_STATUSES_PER_PAGE : STATUSES_PER_PAGE);
+      url = next;
+      if ((oldestFetchedAt !== null && Date.parse(oldestFetchedAt) < boundary) || exhausted) {
         historyComplete = true;
         break;
       }
-      url = next;
     } catch (caught) {
       if (signal.aborted || (caught instanceof DOMException && caught.name === 'AbortError')) {
         throw caught;
@@ -317,7 +321,7 @@ export async function getReportStatuses(
       break;
     }
   }
-  return { statuses, requests, oldestFetchedAt, historyComplete, error };
+  return { statuses, requests, oldestFetchedAt, historyComplete, error, nextUrl: url, exhausted };
 }
 
 export function getRebloggers(

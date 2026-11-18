@@ -1,0 +1,10 @@
+[
+  {
+    "package": "picomatch",
+    "advisory": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+    "severity": "high",
+    "approvedOn": "2026-11-18",
+    "expiresOn": "2026-12-18",
+    "reason": "Vom Projektverantwortlichen am 18.11.2026 ausdrücklich genehmigt. ReDoS durch manipulierte Glob-Muster; ausschließlich Build-/Testwerkzeuge mit projektkontrollierten Mustern, keine öffentlichen Nutzereingaben. Noch keine gepatchte Version veröffentlicht. Nur dev-markierte Lockfile-Pfade zulässig; bei Patchverfügbarkeit entfernen, spätestens zum Ablauf neu bewerten."
+  }
+]

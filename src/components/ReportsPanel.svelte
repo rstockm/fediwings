@@ -1,10 +1,16 @@
+<script module lang="ts">
+  import type { MastodonAccount as CachedAccount } from '../lib/types';
+  let accountCache: { key: string; at: number; account: CachedAccount } | null = null;
+</script>
+
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
   import { _, locale } from 'svelte-i18n';
   import ReportCharts from './ReportCharts.svelte';
   import { getAccount } from '../lib/api';
   import { canonicalAcct } from '../lib/oauth';
-  import { loadReport, type ReportLoadProgress } from '../lib/reportLoader';
+  import { loadReport, REPORT_CACHE_MS, type ReportLoadProgress } from '../lib/reportLoader';
+  import type { FollowerProgress } from '../lib/followers';
   import { aggregateReport, type AggregatedReport } from '../lib/reports';
   import {
     listFollowerObservations,
@@ -26,11 +32,22 @@
     origin,
     platform,
     followerHistory = null,
+    sessionKey = '',
+    loadFollowerHistory,
+    onbusy,
   }: {
     account: MastodonAccount;
     origin: string;
     platform: ServerPlatform | null;
     followerHistory?: ReportFollowerHistory | null;
+    sessionKey?: string;
+    loadFollowerHistory?: (
+      account: MastodonAccount,
+      signal: AbortSignal,
+      onProgress: (progress: FollowerProgress) => void,
+      refresh: boolean,
+    ) => Promise<void>;
+    onbusy?: (busy: boolean) => void;
   } = $props();
 
   let year = $state(new Date().getFullYear());
@@ -45,6 +62,22 @@
   let actionMessage = $state('');
   let actionError = $state(false);
   let progress = $state<ReportLoadProgress | null>(null);
+  let followerProgress = $state<FollowerProgress | null>(null);
+  let followersDone = $state(false);
+  let reportDone = $state(false);
+  const measurable = $derived(
+    !reportDone && progress?.phase === 'reach' && (progress.analysis?.totalPosts ?? 0) > 0,
+  );
+  const percent = $derived(
+    measurable && progress?.analysis
+      ? Math.round((progress.analysis.completedPosts / progress.analysis.totalPosts) * 100)
+      : null,
+  );
+  const requests = $derived(
+    (progress?.requests ?? 0) +
+      (progress?.analysis?.requests ?? 0) +
+      (followerProgress?.requests ?? 0),
+  );
   let controller: AbortController | null = null;
   let previousIdentity = '';
   let previousYear: number | null = null;
@@ -155,7 +188,7 @@
   );
 
   $effect(() => {
-    const identity = `${origin}|${account.id}|${account.acct}`;
+    const identity = `${sessionKey}|${origin}|${account.id}|${account.acct}`;
     if (identity === previousIdentity) return;
     previousIdentity = identity;
     controller?.abort();
@@ -190,7 +223,11 @@
 
   onDestroy(() => controller?.abort());
 
-  async function load(): Promise<void> {
+  export async function refresh(): Promise<void> {
+    await load(true);
+  }
+
+  async function load(refresh = false): Promise<void> {
     if (!validYear) {
       message = $_('reports.invalidYear');
       return;
@@ -199,31 +236,60 @@
     const active = new AbortController();
     controller = active;
     busy = true;
+    onbusy?.(true);
+    report = null;
+    actionMessage = '';
     progress = null;
+    followerProgress = null;
+    followersDone = !loadFollowerHistory;
+    reportDone = false;
     message = '';
     try {
-      const fresh = await getAccount(
-        origin,
-        canonicalAcct(account, origin),
-        active.signal,
-        platform?.id,
-      );
-      const observedAt = new Date().toISOString();
-      const result = await loadReport(
+      const identity = `${sessionKey}|${origin}|${account.id}`;
+      const reuseAccount =
+        !refresh &&
+        accountCache?.key === identity &&
+        Date.now() - accountCache.at < REPORT_CACHE_MS;
+      const fresh =
+        reuseAccount && accountCache
+          ? accountCache.account
+          : await getAccount(origin, canonicalAcct(account, origin), active.signal, platform?.id);
+      if (active.signal.aborted) return;
+      if (!reuseAccount) accountCache = { key: identity, at: Date.now(), account: fresh };
+      const observedAt = new Date(accountCache!.at).toISOString();
+      const followerTask = loadFollowerHistory
+        ? loadFollowerHistory(
+            fresh,
+            active.signal,
+            (value) => {
+              if (!active.signal.aborted) followerProgress = value;
+            },
+            refresh,
+          ).finally(() => {
+            if (!active.signal.aborted) followersDone = true;
+          })
+        : Promise.resolve();
+      const reportTask = loadReport(
         origin,
         fresh.id,
         fresh.followers_count,
         year,
         active.signal,
         (value) => {
-          progress = value;
+          if (!active.signal.aborted) progress = value;
         },
         platform?.id !== 'pixelfed',
-      );
+        sessionKey ? { cacheKey: sessionKey, refresh } : undefined,
+      ).finally(() => {
+        if (!active.signal.aborted) reportDone = true;
+      });
+      const [loaded, history] = await Promise.allSettled([reportTask, followerTask]);
       if (active.signal.aborted) return;
+      if (loaded.status === 'rejected') throw loaded.reason;
+      const result = loaded.value;
       currentAccount = fresh;
       accountObservedAt = observedAt;
-      analyzedAt = new Date().toISOString();
+      analyzedAt = result.analyzedAt ?? new Date().toISOString();
       report = aggregateReport(year, result.posts, new Date(analyzedAt), result.historyComplete);
       const key = reportAccountKey(origin, fresh.id);
       try {
@@ -244,6 +310,7 @@
       ) {
         message = $_('reports.partial');
       }
+      if (history.status === 'rejected') message = $_('reports.partial');
     } catch (error) {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
         message = error instanceof Error ? error.message : $_('reports.error');
@@ -251,6 +318,7 @@
     } finally {
       if (controller === active) {
         busy = false;
+        onbusy?.(false);
         controller = null;
       }
     }
@@ -357,7 +425,7 @@
     class="reports-actions reports-toolbar"
     onsubmit={(event) => {
       event.preventDefault();
-      void load();
+      void refresh();
     }}
   >
     <label for="report-year">{$_('reports.year')}</label>
@@ -382,15 +450,49 @@
   </form>
   {#if !report && !busy}<p class="reports-hint">{$_('reports.saveHint')}</p>{/if}
   {#if busy}
-    <p role="status">
-      {$_('reports.loading')}
-      {progress?.requests ?? 0}
-      {#if progress?.analysis}
-        · {progress.analysis.completedPosts}/{progress.analysis.totalPosts}{/if}
-    </p>
+    <div class="follower-progress-block reports-progress" role="status" aria-live="polite">
+      <div class="follower-progress-head">
+        <strong>{$_('reports.combinedLoading')}</strong>
+        <span
+          >{percent === null
+            ? $_('reports.preparing')
+            : `${$_('reports.analyzing')} · ${percent}%`}</span
+        >
+      </div>
+      <div
+        class="follower-progress-track"
+        class:track-pending={percent === null}
+        role="progressbar"
+        aria-label={$_('reports.combinedLoading')}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={percent ?? undefined}
+      >
+        <span style:width={`${percent ?? 30}%`}></span>
+      </div>
+      <p class="follower-progress">
+        {reportDone
+          ? followersDone
+            ? $_('reports.finalizing')
+            : $_('reports.waitingFollowers')
+          : progress?.phase === 'reach'
+            ? $_('reports.analyzing')
+            : $_('reports.fetching')}
+        {#if progress?.analysis && progress.analysis.totalPosts > 0}
+          · {progress.analysis.completedPosts}/{progress.analysis.totalPosts}
+        {/if}
+        · {$_('reports.requestCount', { values: { count: requests } })}
+        {#if followerProgress}
+          · {$_('follower.progressEvents', { values: { events: followerProgress.events } })}
+        {/if}
+        {#if progress?.analysis?.waitingUntil}
+          · {$_('reports.rateLimitWait')}
+        {/if}
+      </p>
+    </div>
   {/if}
   {#if message}<p role="status">{message}</p>{/if}
-  {#if report}
+  {#if report && !busy}
     <p>
       {$_('reports.asOf')}: {new Date(analyzedAt).toLocaleString($locale === 'en' ? 'en' : 'de')} · {$_(
         'reports.modelNote',

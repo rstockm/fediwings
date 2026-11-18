@@ -2,7 +2,9 @@
 
 Stand: **08.11.2026**. Echte Chromium-Aufnahmen der FediWings-Oberfläche mit
 öffentlichen Daten von [rstockm@chaos.social](https://chaos.social/@rstockm).
-Keine API-Mocks, erfundenen Kennzahlen oder angemeldeten Sitzungen.
+Diese älteren Live-Aufnahmen verwenden keine API-Mocks oder angemeldeten
+Sitzungen. Die unten ausdrücklich als UI-Demo bezeichneten neueren Aufnahmen
+verwenden dagegen kontrollierte Testdaten.
 
 | Datei                   | Bereich                                                                           |
 | ----------------------- | --------------------------------------------------------------------------------- |
@@ -21,8 +23,17 @@ Keine API-Mocks, erfundenen Kennzahlen oder angemeldeten Sitzungen.
 | `reports-charts-mobile.png` | Balkendiagramme desselben Reports; Mobilansicht |
 | `reports-connect-desktop.png` | Aktueller Reports-Einstieg ohne Verbindung und ohne Statistiken |
 | `reports-connect-mobile.png` | Derselbe Einstieg mobil |
+| `reports-loading-demo-desktop.png` | UI-Demo vom 18.11.2026: gemeinsamer Ladezustand, kontrollierte Antworten für alice@test.social; keine echte Anmeldung |
+| `reports-loading-demo-mobile.png` | Dieselbe UI-Demo bei 390 Pixel Breite |
 
 ## Aktualisieren
+
+Die gemeinsamen Ladeanzeigen werden mit
+`UPDATE_COMBINED_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'waehrend des Ladens' --project=chromium`
+nach einem aktuellen Build aufgenommen (1440 × 1000 und 390 × 1100).
+Der Test hält die Benachrichtigungsantwort gezielt zurück und prüft, dass genau
+ein Fortschritt und ein Abbruch erscheinen und Ergebnisse bis zum Abschluss
+verborgen bleiben. Die Aufnahmen sind UI-Demos, kein Nachweis eines Live-Logins.
 
 Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
 `LIVE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'optionale öffentliche' --project=chromium`.
