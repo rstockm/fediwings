@@ -12,7 +12,7 @@ Die Anwendung bleibt statisch und lokal. Vorhandene Änderungen im Arbeitsbaum, 
 
 **Goals:** Fachliche Daten, redaktionelle Aussagen und PDF-Rendering trennen; Vorschau und Download aus demselben Stand; hochwertige, testbare Pagination; rückwärtskompatible Speicherung.
 
-**Non-Goals:** Kein allgemeines Dokumentenframework, kein HTML-Screenshot, keine Änderung der bestehenden Bildschirmdiagramme oder Tabellenexporte, keine zusätzlichen API-Abfragen für Top-Beiträge.
+**Non-Goals:** Kein allgemeines Dokumentenframework, kein HTML-Screenshot, keine Änderung der bestehenden Bildschirmdiagramme oder Tabellenexporte, keine zusätzlichen API-Abfragen beim Live-Report. Ausnahme sind ältere gespeicherte Stände ohne Bildfelder: Sie werden beim Öffnen einmalig und best-effort um Avatar und Beitragsbilder ergänzt, ohne Kennzahlen oder Text zu verändern.
 
 ## Decisions
 
@@ -101,7 +101,11 @@ Rangfolge nach Reichweite, dann Report-Interaktionen, dann Veröffentlichungszei
 
 Auszüge aus dem Root-Beitrag: HTML in Klartext umwandeln, Absatzabstände normalisieren, Steuerzeichen entfernen, auf höchstens 240 Unicode-Zeichen und die vorgesehene Zeilenhöhe begrenzen, Kürzung markieren. Bei Inhaltswarnung nur deren Text; bei markiert sensiblen Inhalten ohne Warntext neutraler Hinweis statt Auszug. Remote-Fonts bleiben ausgeschlossen.
 
-Avatar und Beitragsbilder sind optional und werden ausschließlich als vorab geladene Data-URLs in das PDF eingebettet; pdfmake behält die Sperre für Remote-URLs. Der Avatar stammt aus `avatar_static`, das Beitragsbild bevorzugt aus `preview_url` des Thread-Roots. Sensible Beiträge und Beiträge mit Inhaltswarnung erhalten kein Bild. CORS-Fehler, Netzwerkfehler, übergroße Dateien und Zeitüberschreitungen führen still zum Rückfall auf Initialen beziehungsweise Text, damit der Export nie an Medien scheitert. Vor der Einbettung werden die Bilder verkleinert (Avatar 96 px rund, Beitragsbild 240 × 180 px).
+Avatar und Beitragsbilder sind optional und werden ausschließlich als vorab geladene Data-URLs in das PDF eingebettet; pdfmake behält die Sperre für Remote-URL-Zugriff. Der Avatar stammt aus `avatar_static`, das Beitragsbild bevorzugt aus `preview_url` des Thread-Roots. Sensible Beiträge und Beiträge mit Inhaltswarnung erhalten kein Bild. CORS-Fehler, Netzwerkfehler, übergroße Dateien und Zeitüberschreitungen führen still zum Rückfall auf Initialen beziehungsweise Text, damit der Export nie an Medien scheitert. Vor der Einbettung werden die Bilder verkleinert (Avatar 96 px rund, Beitragsbild 240 × 180 px).
+
+Gespeicherte V2-Stände aus der Zeit vor den Bildfeldern werden beim Öffnen ergänzt: Avatar aus dem aktuellen Account, Beitragsbilder über die Status-API mit Zeitlimit. Nur fehlende Felder werden nachgeladen; Kennzahlen, Texte und Top-5-Auswahl bleiben unverändert, und ein Fehlschlag lässt den Stand ohne Bild. Der Dialog wartet auf diesen einmaligen Nachlauf, damit ein direkt gestarteter Export keine halben Medien sieht.
+
+Die PDF-Engine von pdfmake komprimiert Datenströme über einen aus dem eigenen Bundle erzeugten Blob-Worker. Die CSP erlaubt deshalb `worker-src 'self' blob:`; ohne diese Direktive blockiert der Browser den Worker und die Erstellung mit Bildern bleibt ohne Ergebnis. Externe Worker-Quellen bleiben ausgeschlossen.
 
 Links nur aus vorhandenen validierten HTTP-/HTTPS-URLs ohne Zugangsdaten; fehlen sie, entfällt die Aktion. Keine abgeleiteten Fantasie-URLs. Für Teilstände wird der Ranglistentitel auf den vorhandenen Datenstand begrenzt.
 

@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
-const account = {
+const baseAccount = {
   id: 'pdf-demo',
   username: 'demo',
   acct: 'demo',
@@ -12,7 +12,40 @@ const account = {
   avatar_static: '',
   followers_count: 1500,
 };
-async function demoReport(page: Page) {
+const pixelPng = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+function demoStatus(index: number, media: boolean) {
+  return {
+    id: `demo-post-${index}`,
+    created_at: `2025-0${index + 1}-15T12:00:00Z`,
+    url: `https://test.social/@demo/demo-post-${index}`,
+    content: `<p>DEMO · Öffentliche Bibliotheken verbinden Menschen, Wissen und neue Perspektiven. Beitrag ${index + 1}.</p>`,
+    spoiler_text: '',
+    visibility: 'public',
+    favourites_count: 600 + index * 50,
+    reblogs_count: 0,
+    replies_count: 10,
+    quotes_count: 2,
+    in_reply_to_id: null,
+    in_reply_to_account_id: null,
+    media_attachments: media
+      ? [
+          {
+            type: 'image',
+            url: `https://test.social/media/demo-${index}.png`,
+            preview_url: `https://test.social/media/demo-${index}.png`,
+            description: 'DEMO · synthetisches Beitragsbild',
+          },
+        ]
+      : [],
+  };
+}
+
+async function demoReport(page: Page, media = false) {
+  const account = { ...baseAccount, avatar_static: media ? 'https://test.social/avatar.png' : '' };
   await page.addInitScript((account) => {
     sessionStorage.setItem(
       'fediscope:follower-session-v2',
@@ -28,23 +61,15 @@ async function demoReport(page: Page) {
   }, account);
   await page.route('https://test.social/**', async (route) => {
     const url = new URL(route.request().url());
-    if (url.pathname.includes('/statuses')) {
+    if (url.pathname.endsWith('.png')) {
       await route.fulfill({
-        json: Array.from({ length: 6 }, (_, i) => ({
-          id: `demo-post-${i}`,
-          created_at: `2025-0${i + 1}-15T12:00:00Z`,
-          url: `https://test.social/@demo/demo-post-${i}`,
-          content: `<p>DEMO · Öffentliche Bibliotheken verbinden Menschen, Wissen und neue Perspektiven. Beitrag ${i + 1}.</p>`,
-          spoiler_text: '',
-          visibility: 'public',
-          favourites_count: 600 + i * 50,
-          reblogs_count: 0,
-          replies_count: 10,
-          quotes_count: 2,
-          in_reply_to_id: null,
-          in_reply_to_account_id: null,
-          media_attachments: [],
-        })),
+        body: pixelPng,
+        contentType: 'image/png',
+        headers: { 'access-control-allow-origin': '*' },
+      });
+    } else if (url.pathname.includes('/statuses')) {
+      await route.fulfill({
+        json: Array.from({ length: 6 }, (_, i) => demoStatus(i, media)),
       });
     } else if (url.pathname.includes('notifications')) await route.fulfill({ json: [] });
     else if (
@@ -192,4 +217,69 @@ test('PDF lokal mit Top 5, Tabellen, Vorschau und Speicherung exportieren', asyn
   expect(restoredText).not.toContain('New live content');
   expect(restoredText).not.toContain('Interaktionen: 10.012');
   expect(errors).toEqual([]);
+});
+
+test('ergänzt Avatar und Beitragsbilder für gespeicherte Stände ohne Bildfelder', async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(90000);
+  await demoReport(page, true);
+  const mediaAccount = { ...baseAccount, avatar_static: 'https://test.social/avatar.png' };
+  // LIFO route order: single-status hydration wins over the list endpoint.
+  await page.route('https://test.social/api/v1/statuses/demo-post-*', async (route) => {
+    const id = new URL(route.request().url()).pathname.split('/').pop() ?? '';
+    const index = Number(id.replace('demo-post-', ''));
+    await route.fulfill({ json: { ...demoStatus(index, true), account: mediaAccount } });
+  });
+  const action = page.getByRole('button', { name: 'PDF-Bericht erstellen' });
+  await page.getByRole('button', { name: 'Report speichern', exact: true }).click();
+  await expect(page.getByText('Report lokal gespeichert.')).toBeVisible();
+  // Emulate a snapshot written before media support: the fields are absent.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const request = indexedDB.open('fediwings-reports');
+      request.onsuccess = () => resolve(request.result);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction('reports', 'readwrite');
+      const cursorRequest = transaction.objectStore('reports').openCursor();
+      cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result;
+        if (!cursor) return;
+        const record = cursor.value;
+        if (record.pdfSnapshot) {
+          delete record.pdfSnapshot.avatarUrl;
+          for (const post of record.pdfSnapshot.topPosts ?? []) delete post.imageUrl;
+          cursor.update(record);
+        }
+        cursor.continue();
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    db.close();
+  });
+  await page.reload();
+  await page.getByLabel('Jahr', { exact: true }).selectOption('2025');
+  await expect(action).toBeEnabled();
+  await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
+  await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();
+  await action.click();
+  await page.getByRole('button', { name: 'Vorschau erstellen' }).click();
+  await expect(page.getByRole('link', { name: 'PDF herunterladen' })).toBeVisible({
+    timeout: 30000,
+  });
+  const download = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'PDF herunterladen' }).click();
+  const path = testInfo.outputPath('restored-media.pdf');
+  await (await download).saveAs(path);
+  const bytes = readFileSync(path);
+  expect(bytes.subarray(0, 4).toString()).toBe('%PDF');
+  const raw = bytes.toString('latin1');
+  // Five scaled post thumbnails plus the round avatar (with alpha mask).
+  expect(raw.match(/\/Width 240\b/g)).toHaveLength(5);
+  expect(raw.match(/\/Width 96\b/g)).toHaveLength(2);
+  expect(raw).toContain('/SMask');
+  const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' });
+  expect(text).toContain('Interaktionen: 862');
 });

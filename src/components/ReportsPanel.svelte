@@ -8,10 +8,10 @@
   import { _, locale } from 'svelte-i18n';
   import ReportCharts from './ReportCharts.svelte';
   import ReportPdfDialog from './ReportPdfDialog.svelte';
-  import { preparePdfSnapshot } from '../lib/reportPdf/prepare';
+  import { preparePdfSnapshot, hydrateSnapshotMedia } from '../lib/reportPdf/prepare';
   import type { ReportPdfSnapshot } from '../lib/reportPdf/model';
   import { prepareAnnualComparison } from '../lib/reportPdf/comparisons';
-  import { getAccount } from '../lib/api';
+  import { getAccount, getStatus } from '../lib/api';
   import { canonicalAcct } from '../lib/oauth';
   import { loadReport, REPORT_CACHE_MS, type ReportLoadProgress } from '../lib/reportLoader';
   import type { FollowerProgress } from '../lib/followers';
@@ -57,6 +57,7 @@
   let year = $state(new Date().getFullYear());
   let report = $state<AggregatedReport | null>(null);
   let pdfSnapshot = $state<ReportPdfSnapshot | null>(null);
+  let mediaTask: Promise<void> | null = null;
   let pdfOpen = $state(false);
   let comparisonLoading = $state(false);
   let comparisonUnavailable = $state(false);
@@ -248,6 +249,7 @@
   }
 
   async function openPdf(): Promise<void> {
+    if (mediaTask) await mediaTask;
     const base = pdfSnapshot;
     if (!base || busy || !currentAccount) return;
     pdfOpen = true;
@@ -474,6 +476,34 @@
               legacy: true,
             });
       analyzedAt = stored.analyzedAt;
+      const restored = pdfSnapshot;
+      const missingMedia =
+        restored &&
+        (restored.avatarUrl === undefined ||
+          restored.topPosts.some((post) => post.imageUrl === undefined));
+      if (restored && missingMedia) {
+        const hydration = hydrateSnapshotMedia(restored, fresh.avatar_static, (id) =>
+          getStatus(origin, id, AbortSignal.timeout(6000)),
+        )
+          .then((enriched) => {
+            if (!stillSelected() || !pdfSnapshot) return;
+            if (
+              pdfSnapshot.year !== restored.year ||
+              pdfSnapshot.analyzedAt !== restored.analyzedAt
+            )
+              return;
+            pdfSnapshot = {
+              ...pdfSnapshot,
+              avatarUrl: pdfSnapshot.avatarUrl ?? enriched.avatarUrl,
+              topPosts: enriched.topPosts,
+            };
+          })
+          .catch(() => {});
+        mediaTask = hydration;
+        void hydration.finally(() => {
+          if (mediaTask === hydration) mediaTask = null;
+        });
+      }
       const restoredObservations = await listFollowerObservations(key);
       if (!stillSelected()) return;
       observations = restoredObservations;

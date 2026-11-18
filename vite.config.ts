@@ -5,7 +5,8 @@ import { defineConfig } from 'vitest/config';
 /**
  * Injects a strict Content-Security-Policy meta tag.
  * - Production: only same-origin scripts/styles, HTTPS for images and API calls,
- *   single external frame for the PeerTube keynote video.
+ *   single external frame for the PeerTube keynote video. Blob workers are
+ *   allowed because the PDF engine compresses streams in a generated worker.
  * - Development: additionally allows inline styles and WebSocket HMR endpoints.
  */
 function cspPlugin(): Plugin {
@@ -18,6 +19,7 @@ function cspPlugin(): Plugin {
       const policy = [
         "default-src 'none'",
         "script-src 'self'",
+        "worker-src 'self' blob:",
         `style-src ${styleSrc}`,
         "font-src 'self'",
         "img-src 'self' https: data:",

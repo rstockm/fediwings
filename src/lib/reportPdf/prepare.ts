@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import type { PostReach } from '../types';
+import type { MastodonMediaAttachment, MastodonStatus, PostReach } from '../types';
 import type { AggregatedReport } from '../reports';
 import { monthEndFollowers, type FollowerObservation } from '../reportStorage';
 import { reportFollowerHistory, type ReportFollowerHistory } from '../reportFollowers';
@@ -12,6 +12,17 @@ export function plainText(html: string, limit = 240): string {
     'text/html',
   );
   return cleanText(doc.body.textContent ?? '', limit);
+}
+
+/** Root/thread image for a public post, or null for sensitive/withheld media. */
+export function topPostImageUrl(
+  status: MastodonStatus,
+  fallback: MastodonMediaAttachment | null = null,
+): string | null {
+  if (status.sensitive || status.spoiler_text) return null;
+  const image =
+    status.media_attachments.find((attachment) => attachment.type.startsWith('image')) ?? fallback;
+  return safePdfUrl(image?.preview_url ?? image?.url ?? null);
 }
 
 export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
@@ -36,17 +47,11 @@ export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
       detail.likes += item.favourites_count;
       detail.quotes += item.quotes_count ?? 0;
     }
-    const rootImage =
-      status.media_attachments.find((attachment) => attachment.type.startsWith('image')) ??
-      post.thumbnail;
     selected.push({
       id: cleanText(status.id, 512),
       createdAt: date.toISOString(),
       url: safePdfUrl(status.url),
-      imageUrl:
-        status.sensitive || status.spoiler_text
-          ? null
-          : safePdfUrl(rootImage?.preview_url ?? rootImage?.url ?? null),
+      imageUrl: topPostImageUrl(status, post.thumbnail),
       excerpt: status.spoiler_text
         ? plainText(status.spoiler_text)
         : status.sensitive
@@ -155,4 +160,30 @@ export function preparePdfSnapshot(input: {
     topAvailable: !input.legacy && input.posts !== undefined,
     rankingComplete: report.total.counterComplete && report.total.reachComplete,
   };
+}
+
+/**
+ * Best-effort media refresh for stored snapshots that predate the image fields.
+ * Metrics and text stay frozen; failures keep the existing snapshot.
+ */
+export async function hydrateSnapshotMedia(
+  snapshot: ReportPdfSnapshot,
+  avatarUrl: string | null,
+  loadStatus: (id: string) => Promise<MastodonStatus>,
+): Promise<ReportPdfSnapshot> {
+  const avatar = snapshot.avatarUrl ?? safePdfUrl(avatarUrl);
+  const topPosts = await Promise.all(
+    snapshot.topPosts.map(async (post) => {
+      if (post.imageUrl) return post;
+      try {
+        const imageUrl = topPostImageUrl(await loadStatus(post.id));
+        return imageUrl ? { ...post, imageUrl } : post;
+      } catch {
+        return post;
+      }
+    }),
+  );
+  const changed =
+    avatar !== snapshot.avatarUrl || topPosts.some((post, i) => post !== snapshot.topPosts[i]);
+  return changed ? { ...snapshot, avatarUrl: avatar, topPosts } : snapshot;
 }

@@ -16,7 +16,10 @@ const fixture = vi.hoisted(() => ({
   followers_count: 100,
 }));
 
-vi.mock('../lib/api', () => ({ getAccount: vi.fn(async () => fixture) }));
+vi.mock('../lib/api', () => ({
+  getAccount: vi.fn(async () => fixture),
+  getStatus: vi.fn(async () => ({ media_attachments: [], sensitive: false, spoiler_text: '' })),
+}));
 vi.mock('../lib/reportLoader', () => ({
   REPORT_CACHE_MS: 300_000,
   loadReport: vi.fn(async () => ({

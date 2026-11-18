@@ -158,6 +158,10 @@ Vorschau und Download SHALL denselben eingefrorenen Datenstand verwenden. Neu ge
 - **WHEN** ein älterer Report keine Top-Beiträge oder Herkunftsinformationen enthält
 - **THEN** exportiert das System die vorhandenen Aggregate, bezeichnet die fehlenden Zusatzdaten sachlich und lädt nur nach ausdrücklicher Live-Aktualisierung einen neuen Reportstand.
 
+#### Scenario: Älterer V2-Stand ohne Medienfelder
+- **WHEN** ein gespeicherter V2-Stand noch keine Avatar- oder Beitragsbildfelder enthält und der PDF-Export geöffnet wird
+- **THEN** ergänzt das System fehlende Medien einmalig und best-effort aus dem aktuellen Account und der Status-API, ohne Kennzahlen, Texte oder Rangfolge zu verändern; scheitert der Abruf, bleibt der Stand ohne Bild und weiterhin exportierbar.
+
 #### Scenario: Wiederhergestellter neuer Report
 - **WHEN** ein neuer gespeicherter Report geöffnet wird
 - **THEN** stammen Kennzahlen, Followerdaten und Top-Beiträge aus seinem gespeicherten Exportstand und nicht aus einem späteren API-Abruf.

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { aggregateReport } from '../reports';
 import { initialReach } from '../reach';
 import type { MastodonStatus, PostReach } from '../types';
@@ -6,7 +6,7 @@ import { buildReportDocument, seriesTableRows } from './document';
 import { pdfFixture, pdfFixtureImages } from './fixtures';
 import { reportInsights } from './insights';
 import { cleanText, pdfSnapshotSchema, safePdfUrl } from './model';
-import { plainText, preparePdfSnapshot, selectTopPosts } from './prepare';
+import { plainText, preparePdfSnapshot, hydrateSnapshotMedia, selectTopPosts } from './prepare';
 import { pdfDefinition } from './render';
 import { axisLabels, chartAxis } from './axis';
 import { pdfText } from './glyphs';
@@ -164,6 +164,42 @@ describe('PDF-Daten und Top 5', () => {
     expect(safePdfUrl(null)).toBeNull();
     expect(cleanText('A\u0000B')).toBe('A B');
     expect(Array.from(plainText('😀'.repeat(300)))).toHaveLength(240);
+  });
+  it('ergänzt Medien älterer gespeicherter Stände, ohne Kennzahlen zu verändern', async () => {
+    const snapshot = pdfFixture();
+    delete snapshot.avatarUrl;
+    for (const post of snapshot.topPosts) delete post.imageUrl;
+    const media = [
+      {
+        type: 'image',
+        url: 'https://example.social/media/full.jpg',
+        preview_url: 'https://example.social/media/preview.jpg',
+      },
+    ];
+    const loadStatus = vi.fn(async (id: string) => post(id, { media_attachments: media }).status);
+    const hydrated = await hydrateSnapshotMedia(
+      snapshot,
+      'https://example.social/avatar.png',
+      loadStatus,
+    );
+    expect(hydrated.avatarUrl).toBe('https://example.social/avatar.png');
+    expect(hydrated.topPosts.map((entry) => entry.imageUrl)).toEqual(
+      Array(5).fill('https://example.social/media/preview.jpg'),
+    );
+    expect(hydrated.report).toBe(snapshot.report);
+    expect(hydrated.community).toEqual(snapshot.community);
+    expect(loadStatus).toHaveBeenCalledTimes(5);
+  });
+  it('behält fehlende Medien bei Ladefehlern ohne Abbruch', async () => {
+    const snapshot = pdfFixture();
+    delete snapshot.avatarUrl;
+    for (const post of snapshot.topPosts) delete post.imageUrl;
+    const hydrated = await hydrateSnapshotMedia(snapshot, null, async () => {
+      throw new Error('offline');
+    });
+    expect(hydrated.avatarUrl).toBeNull();
+    expect(hydrated.topPosts[0].imageUrl).toBeUndefined();
+    expect(hydrated.report).toBe(snapshot.report);
   });
   it('kennzeichnet rekonstruierte Veränderungen statt sie als Nettowachstum auszugeben', () => {
     const posts = [post()];

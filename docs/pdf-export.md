@@ -34,6 +34,8 @@ Nur „Report speichern“ persistiert den Exportstand: Aggregate, datierte
 Followerquellen und maximal fünf öffentliche Beitragsauszüge. Vorschau und
 Download speichern nichts dauerhaft. Version 1 bleibt lesbar; fehlende
 Zusatzdaten werden benannt, nicht durch heimliche Live-Abfragen ergänzt.
+Ausnahme sind fehlende Bildfelder in älteren V2-Ständen: Sie werden beim Öffnen
+einmalig best-effort nachgeladen, ohne Kennzahlen, Texte oder Rangfolge zu ändern.
 Version 2 ergänzt einen PDF-Snapshot ohne Änderung der IndexedDB-Indizes.
 Für Rollbacks einen V1/V2-kompatiblen Reader beibehalten; keine lokalen Daten löschen.
 
@@ -91,6 +93,14 @@ werden still übergangen: Dann erscheinen Initialen beziehungsweise nur der
 Text. Die Bilder werden vor der Einbettung verkleinert (Avatar 96 px rund,
 Beitragsbild 240 × 180 px), damit der Bericht kompakt bleibt.
 
+Ältere gespeicherte Stände, die noch keine Bildfelder enthielten, werden beim
+Öffnen ergänzt: Der Avatar kommt aus dem aktuellen Account, die Beitragsbilder
+werden über die Status-API nachgeladen (mit Zeitlimit). Kennzahlen, Texte und
+Auswahl der Top 5 bleiben unverändert; scheitert das Nachladen, wird der Bericht
+wie bisher mit Initialen und ohne Beitragsbild dargestellt. Die PDF-Engine
+komprimiert Datenströme in einem erzeugten Blob-Worker; die CSP erlaubt dafür
+`worker-src 'self' blob:`, sonst bliebe die Erstellung mit Bildern hängen.
+
 Die PDF-TTFs decken Latin-Zeichen ab. Andere Zeichen erscheinen sichtbar als
 `[U+…]`; Original-Links und Metadaten werden nicht als Schriftzeichenersatz verändert.
 Das ist kein mehrsprachiger Universalschriftsatz. PDF-Tags und Sprache sind gesetzt,
@@ -132,14 +142,14 @@ PDF-Engine im separaten lazy Chunk: rund 790 KB unkomprimiert / 296 KB gzip;
 zusätzliche lokale PDF-Fonts zusammen rund 116 KB. Kein Engine-Download beim
 normalen Report-Laden.
 
-Browser-Regressionsprüfung: **162 bestanden, 3 bewusst übersprungene optionale
+Browser-Regressionsprüfung: **165 bestanden, 3 bewusst übersprungene optionale
 Live-Screenshot-Tests** auf Desktop, Pixel-7-Profil und 320 CSS-Pixel Breite.
 Der PDF-Ablauf prüft auch die Wiederherstellung eines gespeicherten Stands,
 während der Live-Abruf inzwischen andere Beiträge liefert. Die gespeicherten
 Top-Beiträge bleiben dabei unverändert. Die Community-Seite wurde zusätzlich
 in Graustufen visuell geprüft.
 
-Abschluss nach Titel-, Farb-, Achsen- und Medien-Ergänzungen: `make check` erfolgreich, **213 Unit-/Komponententests**,
+Abschluss nach Titel-, Farb-, Achsen- und Medien-Ergänzungen: `make check` erfolgreich, **215 Unit-/Komponententests**,
 SBOM-/Audit-Regressionstests und Produktionsbuild erfolgreich. Die zusätzlichen
 PDF-Fixtures für sehr große Zahlen und lange Texte wurden auf Satz und vollständige
 Tabellen geprüft; sämtliche aktuellen Rasterreferenzen stimmen überein.
