@@ -22,7 +22,7 @@ export function topPostImageUrl(
   if (status.sensitive || status.spoiler_text) return null;
   const image =
     status.media_attachments.find((attachment) => attachment.type.startsWith('image')) ?? fallback;
-  return safePdfUrl(image?.preview_url ?? image?.url ?? null);
+  return safePdfUrl(image?.preview_url ?? null) ?? safePdfUrl(image?.url ?? null);
 }
 
 export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
@@ -174,7 +174,7 @@ export async function hydrateSnapshotMedia(
   const avatar = snapshot.avatarUrl ?? safePdfUrl(avatarUrl);
   const topPosts = await Promise.all(
     snapshot.topPosts.map(async (post) => {
-      if (post.imageUrl) return post;
+      if (post.imageUrl || post.sensitive || post.contentWarning) return post;
       try {
         const imageUrl = topPostImageUrl(await loadStatus(post.id));
         return imageUrl ? { ...post, imageUrl } : post;

@@ -250,6 +250,23 @@
 
   async function openPdf(): Promise<void> {
     if (mediaTask) await mediaTask;
+    const selected = pdfSnapshot;
+    if (!selected || busy || !currentAccount) return;
+    // Retry missing metadata at export time too: a failed restoration must not
+    // permanently decide whether this report contains pictures.
+    if (
+      selected.origin !== 'legacy' &&
+      (!selected.avatarUrl ||
+        selected.topPosts.some((post) => !post.imageUrl && !post.sensitive && !post.contentWarning))
+    ) {
+      const enriched = await hydrateSnapshotMedia(
+        $state.snapshot(selected),
+        currentAccount.avatar_static,
+        (id) => getStatus(origin, id, AbortSignal.timeout(6000)),
+      );
+      if (busy || pdfSnapshot !== selected) return;
+      pdfSnapshot = enriched;
+    }
     const base = pdfSnapshot;
     if (!base || busy || !currentAccount) return;
     pdfOpen = true;
@@ -479,8 +496,10 @@
       const restored = pdfSnapshot;
       const missingMedia =
         restored &&
-        (restored.avatarUrl === undefined ||
-          restored.topPosts.some((post) => post.imageUrl === undefined));
+        (!restored.avatarUrl ||
+          restored.topPosts.some(
+            (post) => !post.imageUrl && !post.sensitive && !post.contentWarning,
+          ));
       if (restored && missingMedia) {
         const hydration = hydrateSnapshotMedia(restored, fresh.avatar_static, (id) =>
           getStatus(origin, id, AbortSignal.timeout(6000)),

@@ -36,12 +36,6 @@ export function pdfDefinition(
     new Intl.DateTimeFormat(o.locale, { dateStyle: 'medium', timeZone: 'Europe/Berlin' }).format(
       new Date(value),
     );
-  const shortDate = (value: string) =>
-    new Intl.DateTimeFormat(o.locale, {
-      day: '2-digit',
-      month: '2-digit',
-      timeZone: 'Europe/Berlin',
-    }).format(new Date(value));
   const datetime = (value: string) =>
     new Intl.DateTimeFormat(o.locale, {
       dateStyle: 'medium',
@@ -106,6 +100,7 @@ export function pdfDefinition(
   ): ContentTable => ({
     ...(id ? { id } : {}),
     fontSize,
+    fontFeatures: ['tnum'],
     table: {
       headerRows: 1,
       dontBreakRows: true,
@@ -359,10 +354,6 @@ export function pdfDefinition(
   const followerSeries = doc.series.find((item) => item.id === 'chart-followers');
   if (followerSeries && !hasPosts) content.push(small(c.colorLegend));
   if (followerSeries) content.push(graph(followerSeries, 84, true));
-  const showFollows = Boolean(
-    followerSeries &&
-    s.community.some((p, i) => s.months[i] !== 'future' && p.follows !== p.netChange),
-  );
   content.push({
     text: `${c.table}: ${followerSeries ? c.tableAll : c.development}`,
     id: 'table-months',
@@ -371,33 +362,24 @@ export function pdfDefinition(
   });
   const headers: Array<string | { text: string; right: true }> = [c.month];
   if (followerSeries) {
-    headers.push(
-      { text: c.followers, right: true },
-      { text: showFollows ? `${c.netChange}\n${c.follows}` : c.netChange, right: true },
-    );
+    headers.push({ text: c.followers, right: true }, { text: c.netChange, right: true });
   }
   for (const series of metricSeries)
     headers.push({ text: `${series.label}\n(${c.count})`, right: true });
   headers.push({ text: `${c.engagement}\n(%)`, right: true });
-  type DataCell = { value: string; note?: string };
+  type DataCell = { value: string };
   const dataRows: DataCell[][] = s.report.months.map((p, i) => {
     const point = s.community[i];
-    const observedAt =
-      followerSeries && point.source === 'observed' && point.observedAt ? point.observedAt : null;
     const row: DataCell[] = [{ value: monthLabel(i) }];
     if (followerSeries) {
       row.push({
         value: stateValue(followerSeries, i),
-        ...(observedAt && s.months[i] !== 'future' ? { note: shortDate(observedAt) } : {}),
       });
       row.push({
         value:
           s.months[i] === 'future'
             ? ''
             : `${nf(point.netChange)}${point.netChangeSource === 'reconstructed' ? ' ~' : ''}`,
-        ...(showFollows && s.months[i] !== 'future'
-          ? { note: `${nf(point.follows)}${point.partial ? ' !' : ''}` }
-          : {}),
       });
     }
     for (const series of metricSeries) row.push({ value: stateValue(series, i) });
@@ -443,16 +425,7 @@ export function pdfDefinition(
           col === 0
             ? { text: cell.value }
             : {
-                text: cell.note
-                  ? [
-                      { text: cell.value },
-                      {
-                        text: `\n${cell.note}`,
-                        fontSize: Math.max(5.5, Math.min(7, tableFont * 0.82)),
-                        color: colors.muted,
-                      },
-                    ]
-                  : cell.value,
+                text: cell.value,
                 alignment: 'right' as const,
               },
         ),
@@ -463,7 +436,7 @@ export function pdfDefinition(
     ),
   );
   content.push(small(c.missing));
-  if (followerSeries) content.push(small(showFollows ? c.communityNote : c.communityNoteNoFollows));
+  if (followerSeries) content.push(small(c.communityNote));
   else content.push(small(s.origin === 'legacy' ? c.legacy : c.noCommunity));
   if (s.topPosts.length) {
     content.push(

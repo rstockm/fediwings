@@ -335,7 +335,7 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     expect(rendered).toContain('Antworten: 50');
     expect(rendered).toContain('Veränderung');
     expect(rendered).toContain('44 ~');
-    expect(rendered).toContain('rekonstruiertem Verlauf');
+    expect(rendered).toContain('rekonstruiertem Follower-Verlauf');
   });
   it('führt Community und Kennzahlen in einer Tabelle zusammen und lässt identische Follow-Spalten weg', () => {
     const tableOf = (snapshot: ReturnType<typeof pdfFixture>) => {
@@ -362,18 +362,15 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     };
     const combined = tableOf(pdfFixture());
     expect(combined.header).toHaveLength(7);
-    expect(combined.header.slice(0, 3)).toEqual([
-      'Monat',
-      'Follower-Stand',
-      'Veränderung\nFollow-Ereignisse',
-    ]);
+    expect(combined.header.slice(0, 3)).toEqual(['Monat', 'Follower-Stand', 'Veränderung']);
     expect(combined.header.slice(3)).toEqual([
       'FediWings-Reichweite\n(Anzahl)',
       'Interaktionen\n(Anzahl)',
       'Veröffentlichte Threads\n(Anzahl)',
       'Engagement-Rate\n(%)',
     ]);
-    expect(JSON.stringify(combined.definition.content)).toContain('31.01.');
+    expect(JSON.stringify(combined.definition.content)).not.toContain('31.01.');
+    expect(JSON.stringify(combined.definition.content)).toContain('"fontFeatures":["tnum"]');
 
     const equal = pdfFixture();
     equal.community = equal.community.map((point) => ({ ...point, follows: point.netChange }));
@@ -382,7 +379,7 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     expect(deduped.header[2]).toBe('Veränderung');
     expect(deduped.header.join(' ')).not.toContain('Follow-Ereignisse');
     expect(JSON.stringify(deduped.definition.content)).toContain(
-      'Follow-Ereignisse entsprechen hier der Veränderung',
+      'Zuwachs aus rekonstruiertem Follower-Verlauf',
     );
   });
   it('bettet Avatar und Beitragsbilder ein und fällt ohne Bild auf Initialen zurück', () => {

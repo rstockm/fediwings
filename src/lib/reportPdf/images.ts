@@ -32,6 +32,9 @@ async function fetchBlob(url: string): Promise<Blob | null> {
     const response = await fetch(url, {
       mode: 'cors',
       credentials: 'omit',
+      // A preceding non-CORS <img> request can poison a CDN/browser cache entry.
+      // Always negotiate CORS independently of the path taken through the UI.
+      cache: 'no-store',
       signal: controller.signal,
     });
     if (!response.ok) return null;
@@ -116,7 +119,7 @@ function draw(
 async function loadImage(url: string | null, circle: boolean): Promise<string | null> {
   const safe = safePdfUrl(url);
   if (!safe) return null;
-  const blob = await fetchBlob(safe);
+  const blob = (await fetchBlob(safe)) ?? (await fetchBlob(safe));
   if (!blob) return null;
   const source = await decode(blob);
   if (!source) return null;
@@ -129,15 +132,22 @@ async function loadImage(url: string | null, circle: boolean): Promise<string | 
 
 /** Loads the account avatar and the top-post thumbnails; every failure is silent. */
 export async function loadReportPdfImages(snapshot: ReportPdfSnapshot): Promise<PdfImages> {
+  const avatar = loadImage(snapshot.avatarUrl ?? null, true);
   const entries = await Promise.all(
     snapshot.topPosts.map(
-      async (post) => [post.id, await loadImage(post.imageUrl ?? null, false)] as const,
+      async (post) =>
+        [
+          post.id,
+          post.sensitive || post.contentWarning
+            ? null
+            : await loadImage(post.imageUrl ?? null, false),
+        ] as const,
     ),
   );
   const posts: Record<string, string> = {};
   for (const [id, data] of entries) if (data) posts[id] = data;
   return {
-    avatar: await loadImage(snapshot.avatarUrl ?? null, true),
+    avatar: await avatar,
     posts,
   };
 }

@@ -32,8 +32,9 @@ Die älteren Aufnahmen vom **08.11.2026** verwenden öffentliche Live-Daten von 
 [Example report English](docs/examples/report-demo-en.pdf).
 Die Berichte sind durchsuchbar, enthalten eingebettete Inter-Tight-Schriften und
 klickbare Original-Links. Alle Grafiken sind zusätzlich vollständig tabelliert;
-Community- und Kennzahlenwerte stehen gemeinsam in der Monatstabelle, Follow-Ereignisse
-nur dann als eigene Zeile, wenn sie sich von der Veränderung unterscheiden.
+Community- und Kennzahlenwerte stehen gemeinsam in der Monatstabelle. Beim
+Follower-Zuwachs erscheint genau ein Wert pro Monat, ohne kleine Zweitwerte;
+gleich breite Tabellenziffern sorgen für sauber ausgerichtete Zahlen.
 Die Titelseite zeigt fünf Kennzahlen einschließlich Follower-Stand mit
 farbigen Veränderungsindikatoren. Reichweite, Interaktionen und Threads
 vergleichen Jahressummen mit dem Vorjahr (YTD: gleicher Zeitraum);

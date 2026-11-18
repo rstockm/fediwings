@@ -119,6 +119,15 @@ Damit löst der PDF-Pfad den Widerspruch zwischen der ursprünglichen Netto-Wach
 
 Veränderungen zum Vormonat werden aus demselben effektiven Followerstand berechnet, der in der gemeinsamen Monatstabelle steht: erfasste Monatsendstände haben Vorrang, sonst der rekonstruierte Verlauf. Die Berechnungsbasis bleibt je Zelle erhalten. Differenzen zwischen zwei erfassten Monatsendständen gelten als Nettoveränderung; sobald ein rekonstruierter Wert beteiligt ist, kennzeichnet `~` die Veränderung als Näherung ohne Unfollows. Der Snapshot speichert die Basis optional, ältere Stände ohne dieses Feld werden als beobachtet gelesen. Community- und Kennzahlenwerte stehen in einer einzigen Monatstabelle; Follow-Ereignisse erscheinen nur dann als eigene zweite Zeile, wenn sie sich von der Veränderung unterscheiden. Spaltenbreiten und Schriftgrad skalieren mit dem längsten Spaltenwert, damit auch große Zahlen im Satzspiegel bleiben.
 
+Die Monatsübersicht zeigt nach weiterer Vereinfachung nur den Follower-Zuwachs,
+keine kleinen Zweitwerte für Follow-Ereignisse oder Stichtagsdaten. Tabellen
+nutzen die vorhandene `tnum`-Funktion der Inter-Tight-TTF für gleich breite
+Ziffern. Fehlende Bildmetadaten (`undefined` oder `null`) werden bei jedem
+PDF-Start erneut best-effort ergänzt, sensible/CW-Beiträge bleiben ausgeschlossen.
+Bildbytes werden mit CORS ohne Browsercache geladen und bei Abruffehlern einmal
+wiederholt; dadurch hängt die Chance auf Medien nicht vom vorherigen
+Wiederherstellen eines gespeicherten Stands ab.
+
 ### 8. Qualität als funktionale und visuelle Prüfung
 
 Ergänzung auf Nutzerwunsch: Follower und Engagement vergleichen Januar mit Dezember beziehungsweise dem letzten abgeschlossenen Monat. Reichweite, Interaktionen und Threads vergleichen die Gesamtsummen mit dem Vorjahr; bei laufenden Jahren wird der Vorjahreszeitraum auf das entsprechende Berliner Datum begrenzt. Ein optionaler Snapshot-Zusatz erhält datierte aktuelle Followerstände und Vorjahresaggregate rückwärtskompatibel. Das Vorjahr wird ausschließlich beim expliziten PDF-Start geladen, nicht beim normalen Reportabruf. Der Dialog zeigt den Ladezustand; Schließen verwirft/stoppt den Abruf. Bereits vorhandene Vergleichsdaten werden wiederverwendet und nur auf „Report speichern“ persistiert. Alte gespeicherte Stände werden nicht heimlich mit Live-Vorjahresdaten vermischt.

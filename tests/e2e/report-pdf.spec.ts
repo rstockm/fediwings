@@ -219,67 +219,73 @@ test('PDF lokal mit Top 5, Tabellen, Vorschau und Speicherung exportieren', asyn
   expect(errors).toEqual([]);
 });
 
-test('ergänzt Avatar und Beitragsbilder für gespeicherte Stände ohne Bildfelder', async ({
-  page,
-}, testInfo) => {
-  test.setTimeout(90000);
-  await demoReport(page, true);
-  const mediaAccount = { ...baseAccount, avatar_static: 'https://test.social/avatar.png' };
-  // LIFO route order: single-status hydration wins over the list endpoint.
-  await page.route('https://test.social/api/v1/statuses/demo-post-*', async (route) => {
-    const id = new URL(route.request().url()).pathname.split('/').pop() ?? '';
-    const index = Number(id.replace('demo-post-', ''));
-    await route.fulfill({ json: { ...demoStatus(index, true), account: mediaAccount } });
-  });
-  const action = page.getByRole('button', { name: 'PDF-Bericht erstellen' });
-  await page.getByRole('button', { name: 'Report speichern', exact: true }).click();
-  await expect(page.getByText('Report lokal gespeichert.')).toBeVisible();
-  // Emulate a snapshot written before media support: the fields are absent.
-  await page.evaluate(async () => {
-    const db = await new Promise<IDBDatabase>((resolve) => {
-      const request = indexedDB.open('fediwings-reports');
-      request.onsuccess = () => resolve(request.result);
+for (const missing of ['live', 'absent', 'null'] as const) {
+  test(`bettet Avatar und Beitragsbilder ein: ${missing}`, async ({ page }, testInfo) => {
+    test.setTimeout(90000);
+    await demoReport(page, true);
+    const mediaAccount = { ...baseAccount, avatar_static: 'https://test.social/avatar.png' };
+    // LIFO route order: single-status hydration wins over the list endpoint.
+    await page.route('https://test.social/api/v1/statuses/demo-post-*', async (route) => {
+      const id = new URL(route.request().url()).pathname.split('/').pop() ?? '';
+      const index = Number(id.replace('demo-post-', ''));
+      await route.fulfill({ json: { ...demoStatus(index, true), account: mediaAccount } });
     });
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction('reports', 'readwrite');
-      const cursorRequest = transaction.objectStore('reports').openCursor();
-      cursorRequest.onsuccess = () => {
-        const cursor = cursorRequest.result;
-        if (!cursor) return;
-        const record = cursor.value;
-        if (record.pdfSnapshot) {
-          delete record.pdfSnapshot.avatarUrl;
-          for (const post of record.pdfSnapshot.topPosts ?? []) delete post.imageUrl;
-          cursor.update(record);
-        }
-        cursor.continue();
-      };
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
+    const action = page.getByRole('button', { name: 'PDF-Bericht erstellen' });
+    if (missing !== 'live') {
+      await page.getByRole('button', { name: 'Report speichern', exact: true }).click();
+      await expect(page.getByText('Report lokal gespeichert.')).toBeVisible();
+      // Emulate a snapshot written before media support: the fields are absent.
+      await page.evaluate(async (missing) => {
+        const db = await new Promise<IDBDatabase>((resolve) => {
+          const request = indexedDB.open('fediwings-reports');
+          request.onsuccess = () => resolve(request.result);
+        });
+        await new Promise<void>((resolve, reject) => {
+          const transaction = db.transaction('reports', 'readwrite');
+          const cursorRequest = transaction.objectStore('reports').openCursor();
+          cursorRequest.onsuccess = () => {
+            const cursor = cursorRequest.result;
+            if (!cursor) return;
+            const record = cursor.value;
+            if (record.pdfSnapshot) {
+              if (missing === 'absent') delete record.pdfSnapshot.avatarUrl;
+              else record.pdfSnapshot.avatarUrl = null;
+              for (const post of record.pdfSnapshot.topPosts ?? []) {
+                if (missing === 'absent') delete post.imageUrl;
+                else post.imageUrl = null;
+              }
+              cursor.update(record);
+            }
+            cursor.continue();
+          };
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        });
+        db.close();
+      }, missing);
+      await page.reload();
+      await page.getByLabel('Jahr', { exact: true }).selectOption('2025');
+      await expect(action).toBeEnabled();
+      await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
+      await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();
+    }
+    await action.click();
+    await page.getByRole('button', { name: 'Vorschau erstellen' }).click();
+    await expect(page.getByRole('link', { name: 'PDF herunterladen' })).toBeVisible({
+      timeout: 30000,
     });
-    db.close();
+    const download = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'PDF herunterladen' }).click();
+    const path = testInfo.outputPath('restored-media.pdf');
+    await (await download).saveAs(path);
+    const bytes = readFileSync(path);
+    expect(bytes.subarray(0, 4).toString()).toBe('%PDF');
+    const raw = bytes.toString('latin1');
+    // Five scaled post thumbnails plus the round avatar (with alpha mask).
+    expect(raw.match(/\/Width 240\b/g)).toHaveLength(5);
+    expect(raw.match(/\/Width 96\b/g)).toHaveLength(2);
+    expect(raw).toContain('/SMask');
+    const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' });
+    expect(text).toContain('Interaktionen: 862');
   });
-  await page.reload();
-  await page.getByLabel('Jahr', { exact: true }).selectOption('2025');
-  await expect(action).toBeEnabled();
-  await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
-  await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();
-  await action.click();
-  await page.getByRole('button', { name: 'Vorschau erstellen' }).click();
-  await expect(page.getByRole('link', { name: 'PDF herunterladen' })).toBeVisible({
-    timeout: 30000,
-  });
-  const download = page.waitForEvent('download');
-  await page.getByRole('link', { name: 'PDF herunterladen' }).click();
-  const path = testInfo.outputPath('restored-media.pdf');
-  await (await download).saveAs(path);
-  const bytes = readFileSync(path);
-  expect(bytes.subarray(0, 4).toString()).toBe('%PDF');
-  const raw = bytes.toString('latin1');
-  // Five scaled post thumbnails plus the round avatar (with alpha mask).
-  expect(raw.match(/\/Width 240\b/g)).toHaveLength(5);
-  expect(raw.match(/\/Width 96\b/g)).toHaveLength(2);
-  expect(raw).toContain('/SMask');
-  const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' });
-  expect(text).toContain('Interaktionen: 862');
-});
+}

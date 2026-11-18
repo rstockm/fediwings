@@ -73,9 +73,7 @@ export const de = {
       reconstructed: 'Rekonstruiert',
       noCommunity: 'Für diesen Datenstand ist keine Community-Historie enthalten.',
       communityNote:
-        'Zweite Zeile unter der Veränderung: Follow-Ereignisse (inkl. möglicher Anfragen, ohne Unfollows); sie sind keine Nettoveränderung. Stichtage stehen als Datum unter dem Follower-Stand. ~ = Veränderung aus rekonstruiertem Verlauf (Näherung).',
-      communityNoteNoFollows:
-        'Stichtage stehen als Datum unter dem Follower-Stand; übrige Werte sind aus dem Verlauf rekonstruiert. Follow-Ereignisse entsprechen hier der Veränderung; Unfollows werden nicht erfasst. ~ = Veränderung aus rekonstruiertem Verlauf (Näherung).',
+        '~ = Zuwachs aus rekonstruiertem Follower-Verlauf (Näherung ohne Unfollows). Unmarkierte Veränderungen beruhen auf erfassten Monatsendständen.',
       noPosts: 'Im Berichtszeitraum sind keine öffentlichen Beiträge für die Rangliste enthalten.',
       legacy:
         'In diesem gespeicherten Stand sind Beitragsdetails und historische Followerquellen nicht enthalten.',

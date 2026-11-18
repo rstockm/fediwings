@@ -21,6 +21,19 @@ describe('PDF-Medien', () => {
       avatar: null,
       posts: {},
     });
+    expect(fetch).toHaveBeenCalledTimes(12);
+  });
+
+  it('lädt auch vorhandene URLs sensibler Beiträge nicht', async () => {
+    const snapshot = withImages();
+    snapshot.topPosts.forEach((post) => {
+      post.sensitive = true;
+    });
+    const request = vi.fn().mockRejectedValue(new TypeError('offline'));
+    vi.stubGlobal('fetch', request);
+    await loadReportPdfImages(snapshot);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(request.mock.calls.every(([url]) => url.endsWith('avatar.png'))).toBe(true);
   });
 
   it('ruft für unsichere Bildquellen kein Netzwerk ab', async () => {
@@ -30,7 +43,7 @@ describe('PDF-Medien', () => {
     snapshot.avatarUrl = 'javascript:alert(1)';
     snapshot.topPosts[0].imageUrl = 'data:image/png;base64,AAAA';
     await loadReportPdfImages(snapshot);
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(8);
     expect(fetchMock).not.toHaveBeenCalledWith('javascript:alert(1)', expect.anything());
     expect(fetchMock).not.toHaveBeenCalledWith('data:image/png;base64,AAAA', expect.anything());
   });
@@ -74,10 +87,13 @@ describe('PDF-Medien', () => {
     );
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        blob: async () => new Blob(['image'], { type: 'image/png' }),
-      })),
+      vi
+        .fn()
+        .mockRejectedValueOnce(new TypeError('transient failure'))
+        .mockImplementation(async () => ({
+          ok: true,
+          blob: async () => new Blob(['image'], { type: 'image/png' }),
+        })),
     );
 
     const images = await loadReportPdfImages(withImages());
@@ -86,5 +102,9 @@ describe('PDF-Medien', () => {
     expect(images.posts['demo-0']).toBe('data:image/jpeg;base64,AAAA');
     expect(drawImage).toHaveBeenCalledTimes(6);
     expect(close).toHaveBeenCalledTimes(6);
+    expect(fetch).toHaveBeenCalledWith(
+      'https://example.social/avatar.png',
+      expect.objectContaining({ mode: 'cors', credentials: 'omit', cache: 'no-store' }),
+    );
   });
 });

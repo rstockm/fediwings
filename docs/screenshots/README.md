@@ -54,6 +54,10 @@ Top-5-Seite; beide Raster wurden aktualisiert. Die Demo-Medien sind
 deterministische, synthetische Platzhalter, keine echten Account- oder
 Beitragsfotos.
 
+Die Community-Seite wurde am 18.11.2026 nochmals mit vereinfachter Tabelle
+aufgenommen: nur ein Zuwachswert je Monat, keine kleinen Zweitwerte und
+gleich breite Tabellenziffern.
+
 Die gemeinsamen Ladeanzeigen werden mit
 `UPDATE_COMBINED_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'waehrend des Ladens' --project=chromium`
 nach einem aktuellen Build aufgenommen (1440 × 1000 und 390 × 1100).

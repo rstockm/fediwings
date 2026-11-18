@@ -79,12 +79,12 @@ der ausgewiesenen Interaktionszahl. Tabellenköpfe mit Zahlen stehen rechtsbünd
 über ihren Spalten.
 
 Die Monatstabelle führt Community- und Kennzahlenwerte in einer Übersicht
-zusammen: Follower-Stand, Veränderung, Follow-Ereignisse, Reichweite,
-Interaktionen, Threads und Engagement-Rate stehen nebeneinander. Die Veränderung
-zum Vormonat steht in der ersten Zeile, Follow-Ereignisse als kleinere zweite
-Zeile darunter. Sind beide Werte für alle Monate identisch, entfällt die zweite
-Zeile; die Fußnote erklärt dann die Gleichsetzung. Stichtage erscheinen als Datum
-unter dem Follower-Stand. Differenzen zwischen erfassten Monatsendständen sind
+zusammen: Follower-Stand, Veränderung, Reichweite,
+Interaktionen, Threads und Engagement-Rate stehen nebeneinander. Beim Follower-
+Zuwachs erscheint genau ein Wert, ohne Follow-Ereignisse oder Datumszahlen als
+kleine zweite Zeile. Die eingebettete Schrift unterstützt `tnum`: Alle Ziffern
+haben damit dieselbe Breite, die Zahlenspalten bleiben rechtsbündig.
+Differenzen zwischen erfassten Monatsendständen sind
 echte Nettoveränderungen. Mit `~` markierte Werte stammen aus dem rekonstruierten
 Follower-Verlauf, enthalten keine Unfollows und sind deshalb keine belastbare
 Nettoveränderung.
@@ -110,6 +110,34 @@ Auswahl der Top 5 bleiben unverändert; scheitert das Nachladen, wird der Berich
 wie bisher mit Initialen und ohne Beitragsbild dargestellt. Die PDF-Engine
 komprimiert Datenströme in einem erzeugten Blob-Worker; die CSP erlaubt dafür
 `worker-src 'self' blob:`, sonst bliebe die Erstellung mit Bildern hängen.
+
+### Voraussetzungen und Fehlersuche bei Bildern
+
+- Live-Reports übernehmen sichere HTTPS-Medien-URLs aus Account und Top-Threads.
+  Fehlende URLs werden auch unmittelbar beim PDF-Start nachgeladen, unabhängig
+  davon, ob zuvor ein gespeicherter Stand geöffnet wurde. Sowohl fehlende Felder
+  als auch `null` erlauben einen erneuten Versuch; Kennzahlen und Texte bleiben
+  eingefroren. Legacy-V1-Reports ohne Top-Beitragsdaten bleiben ausgenommen.
+- Sensible Beiträge und Inhaltswarnungen sind grundsätzlich ausgeschlossen,
+  auch bei gespeicherten Bild-URLs. Beiträge ohne Bildanhang bleiben ohne Bild.
+- Medienserver müssen CORS erlauben. Sichtbarkeit im HTML-`img` genügt nicht:
+  Für die PDF-Einbettung muss der Browser die Bildbytes lesen dürfen.
+  Der Abruf erfolgt ohne Cookies und ohne Browsercache (`cache: no-store`),
+  damit vorherige Nicht-CORS-Bildaufrufe die Klickstrecke nicht beeinflussen.
+- Jede URL erhält bei einem fehlgeschlagenen Abruf einen zweiten Versuch.
+  Pro Versuch gelten 6 Sekunden und maximal 8 MB. Avatar und Beitragsbilder
+  starten parallel. Dauerhafte CORS-Sperren werden dadurch nicht umgangen.
+- Zulässig sind PNG, JPEG, WebP, GIF und AVIF mit passendem MIME-Typ und
+  erfolgreicher Browser-Decodierung. SVG, falscher MIME-Typ, HTTP-Fehler,
+  abgelaufene URLs, Offlinebetrieb, Timeout oder Canvas-Fehler führen weiterhin
+  zu Initialen beziehungsweise reinem Text.
+
+Die berichtete Erfolgsquote ist ohne konkrete betroffene URLs nicht reproduziert.
+Die bisherigen Codepfade konnten fehlende Metadaten je nach Klickstrecke anders
+behandeln; ein Cache/CORS-Konflikt ist eine weitere mögliche, nicht am Live-Fall
+nachgewiesene Ursache. Browsertests prüfen den direkten Live-Export und
+gespeicherte Stände mit fehlenden Feldern und `null`; Unit-Tests prüfen
+Cachemodus, Wiederholung und Ausschlüsse.
 
 Die PDF-TTFs decken Latin-Zeichen ab. Andere Zeichen erscheinen sichtbar als
 `[U+…]`; Original-Links und Metadaten werden nicht als Schriftzeichenersatz verändert.
