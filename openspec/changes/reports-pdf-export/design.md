@@ -117,7 +117,7 @@ Version-1-Reports erhalten keinen heimlichen Live-Nachabruf und keine aus aktuel
 
 Damit löst der PDF-Pfad den Widerspruch zwischen der ursprünglichen Netto-Wachstums-Spec und aktuellen Follower-Fallbacks durch getrennte Quellendarstellung, ohne die bestehende Bildschirm-/CSV-Semantik in diesem Change umzuschreiben.
 
-Veränderungen zum Vormonat werden aus demselben effektiven Followerstand berechnet, der in der Community-Tabelle steht: erfasste Monatsendstände haben Vorrang, sonst der rekonstruierte Verlauf. Die Berechnungsbasis bleibt je Zelle erhalten. Differenzen zwischen zwei erfassten Monatsendständen gelten als Nettoveränderung; sobald ein rekonstruierter Wert beteiligt ist, kennzeichnet `~` die Veränderung als Näherung ohne Unfollows. Der Snapshot speichert die Basis optional, ältere Stände ohne dieses Feld werden als beobachtet gelesen.
+Veränderungen zum Vormonat werden aus demselben effektiven Followerstand berechnet, der in der gemeinsamen Monatstabelle steht: erfasste Monatsendstände haben Vorrang, sonst der rekonstruierte Verlauf. Die Berechnungsbasis bleibt je Zelle erhalten. Differenzen zwischen zwei erfassten Monatsendständen gelten als Nettoveränderung; sobald ein rekonstruierter Wert beteiligt ist, kennzeichnet `~` die Veränderung als Näherung ohne Unfollows. Der Snapshot speichert die Basis optional, ältere Stände ohne dieses Feld werden als beobachtet gelesen. Community- und Kennzahlenwerte stehen in einer einzigen Monatstabelle; Follow-Ereignisse erscheinen nur dann als eigene zweite Zeile, wenn sie sich von der Veränderung unterscheiden. Spaltenbreiten und Schriftgrad skalieren mit dem längsten Spaltenwert, damit auch große Zahlen im Satzspiegel bleiben.
 
 ### 8. Qualität als funktionale und visuelle Prüfung
 

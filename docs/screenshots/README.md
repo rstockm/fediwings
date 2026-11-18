@@ -29,7 +29,7 @@ verwenden dagegen kontrollierte Testdaten.
 | `report-pdf-mobile.png` | Derselbe Exportdialog mit mobilem Direktdownload |
 | `report-pdf-page-1.png` | Gerasterte erste Seite des synthetischen PDF-Beispielberichts mit Account-Avatar, kein Live-Report |
 | `report-pdf-charts.png` | Aktualisierte Demo-Diagrammseite mit Online-Farblogik Grün/Orange und vollständiger Tabellenzuordnung |
-| `report-pdf-followers.png` | Demo-Seite mit vergrößerter Follower-Achse, rechtsbündigen Tabellenköpfen und vollständiger Community-Tabelle |
+| `report-pdf-followers.png` | Demo-Seite mit vergrößerter Follower-Achse, rechtsbündigen Tabellenköpfen und zusammengeführter Monats- und Community-Tabelle |
 | `report-pdf-top-posts.png` | Demo-Top-5-Seite mit Beitragsbildern, Einzelinteraktionen und Original-Links |
 
 ## Aktualisieren
@@ -44,7 +44,9 @@ Top-5-Seite aus `test-results/pdf/complete-de-4.png` als
 Die UI-Aufnahmen zeigen Chromium (1280 × 720) und das mobile Pixel-7-Testprofil.
 Alle Inhalte sind kontrollierte Demo-Daten, keine authentifizierten Live-Bereiche.
 
-Nach Ergänzung der Follower-Titelkennzahl und Veränderungs-Badges wurden
+Nach dem Zusammenführen von Community- und Kennzahlentabelle wurde die
+Community-Seite am 18.11.2026 erneut gerastert. Zuvor, nach Ergänzung der
+Follower-Titelkennzahl und Veränderungs-Badges, wurden
 Titel- und Diagrammseite am 18.11.2026 erneut gerastert. Die Diagrammseite ist
 `test-results/pdf/complete-de-2.png` und wird als `report-pdf-charts.png` übernommen.
 Am selben Tag ergänzten Avatar und Beitragsbilder die Titelseite und die

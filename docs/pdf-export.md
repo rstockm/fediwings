@@ -78,11 +78,21 @@ weisen Antworten, Boosts, Likes und Zitate einzeln aus; ihre Summe entspricht
 der ausgewiesenen Interaktionszahl. Tabellenköpfe mit Zahlen stehen rechtsbündig
 über ihren Spalten.
 
-Die Community-Tabelle weist Veränderungen zum Vormonat aus. Differenzen
-zwischen erfassten Monatsendständen sind echte Nettoveränderungen. Mit `~`
-markierte Werte stammen aus dem rekonstruierten Follower-Verlauf, enthalten
-keine Unfollows und sind deshalb keine belastbare Nettoveränderung; die
-Tabellenfußnote erläutert die Kennzeichnung.
+Die Monatstabelle führt Community- und Kennzahlenwerte in einer Übersicht
+zusammen: Follower-Stand, Veränderung, Follow-Ereignisse, Reichweite,
+Interaktionen, Threads und Engagement-Rate stehen nebeneinander. Die Veränderung
+zum Vormonat steht in der ersten Zeile, Follow-Ereignisse als kleinere zweite
+Zeile darunter. Sind beide Werte für alle Monate identisch, entfällt die zweite
+Zeile; die Fußnote erklärt dann die Gleichsetzung. Stichtage erscheinen als Datum
+unter dem Follower-Stand. Differenzen zwischen erfassten Monatsendständen sind
+echte Nettoveränderungen. Mit `~` markierte Werte stammen aus dem rekonstruierten
+Follower-Verlauf, enthalten keine Unfollows und sind deshalb keine belastbare
+Nettoveränderung.
+
+Spaltenbreiten und Schriftgrad skalieren gemeinsam mit dem längsten Wert einer
+Spalte. Dadurch bleiben auch sehr große Zahlen und lange Spaltenköpfe innerhalb
+der Seitenränder, ohne dass schmale Spalten unnötig Platz verlieren; lange
+Bindestrichwörter wie „Engagement-Rate“ brechen am Bindestrich um.
 
 Avatar und Beitragsbilder werden vor dem Satz im Browser geladen und als
 Data-URL eingebettet; pdfmake erhält keinen Remote-URL-Zugriff. Der Avatar

@@ -36,6 +36,12 @@ export function pdfDefinition(
     new Intl.DateTimeFormat(o.locale, { dateStyle: 'medium', timeZone: 'Europe/Berlin' }).format(
       new Date(value),
     );
+  const shortDate = (value: string) =>
+    new Intl.DateTimeFormat(o.locale, {
+      day: '2-digit',
+      month: '2-digit',
+      timeZone: 'Europe/Berlin',
+    }).format(new Date(value));
   const datetime = (value: string) =>
     new Intl.DateTimeFormat(o.locale, {
       dateStyle: 'medium',
@@ -96,9 +102,10 @@ export function pdfDefinition(
     rows: Content[][],
     widths: Array<number | '*' | 'auto'>,
     id?: string,
+    fontSize: number = pdfLayout.table,
   ): ContentTable => ({
     ...(id ? { id } : {}),
-    fontSize: pdfLayout.table,
+    fontSize,
     table: {
       headerRows: 1,
       dontBreakRows: true,
@@ -178,7 +185,7 @@ export function pdfDefinition(
         reference(
           `${c.table} · ${c.see}`,
           series.tableId,
-          series.tableId === 'table-community' ? c.community : c.development,
+          series.id === 'chart-followers' ? c.tableAll : c.development,
         ),
       ],
       unbreakable: true,
@@ -340,96 +347,124 @@ export function pdfDefinition(
     ...(!total.counterComplete || !total.reachComplete ? [small(c.partialNote)] : []),
   ];
   const hasPosts = (total.threads ?? 0) > 0;
-  const monthlySeries = doc.series.filter((item) => item.tableId === 'table-months');
+  const metricSeries = doc.series.filter((item) => item.id !== 'chart-followers');
   if (hasPosts) {
     content.push(heading(c.development, 'section-development'));
     content.push(small(c.colorLegend));
-    for (const series of monthlySeries) content.push(graph(series));
+    for (const series of metricSeries) content.push(graph(series));
   }
   content.push(heading(c.community, 'section-community'));
   if (hasPosts)
     content.push(reference(`${c.chart} · ${c.see}`, 'section-development', c.development));
+  const followerSeries = doc.series.find((item) => item.id === 'chart-followers');
+  if (followerSeries && !hasPosts) content.push(small(c.colorLegend));
+  if (followerSeries) content.push(graph(followerSeries, 84, true));
+  const showFollows = Boolean(
+    followerSeries &&
+    s.community.some((p, i) => s.months[i] !== 'future' && p.follows !== p.netChange),
+  );
   content.push({
-    text: `${c.table}: ${c.development}`,
+    text: `${c.table}: ${followerSeries ? c.tableAll : c.development}`,
     id: 'table-months',
     bold: true,
-    margin: [0, 4, 0, 4],
+    margin: [0, 6, 0, 4],
   });
+  const headers: Array<string | { text: string; right: true }> = [c.month];
+  if (followerSeries) {
+    headers.push(
+      { text: c.followers, right: true },
+      { text: showFollows ? `${c.netChange}\n${c.follows}` : c.netChange, right: true },
+    );
+  }
+  for (const series of metricSeries)
+    headers.push({ text: `${series.label}\n(${c.count})`, right: true });
+  headers.push({ text: `${c.engagement}\n(%)`, right: true });
+  type DataCell = { value: string; note?: string };
+  const dataRows: DataCell[][] = s.report.months.map((p, i) => {
+    const point = s.community[i];
+    const observedAt =
+      followerSeries && point.source === 'observed' && point.observedAt ? point.observedAt : null;
+    const row: DataCell[] = [{ value: monthLabel(i) }];
+    if (followerSeries) {
+      row.push({
+        value: stateValue(followerSeries, i),
+        ...(observedAt && s.months[i] !== 'future' ? { note: shortDate(observedAt) } : {}),
+      });
+      row.push({
+        value:
+          s.months[i] === 'future'
+            ? ''
+            : `${nf(point.netChange)}${point.netChangeSource === 'reconstructed' ? ' ~' : ''}`,
+        ...(showFollows && s.months[i] !== 'future'
+          ? { note: `${nf(point.follows)}${point.partial ? ' !' : ''}` }
+          : {}),
+      });
+    }
+    for (const series of metricSeries) row.push({ value: stateValue(series, i) });
+    row.push({
+      value:
+        s.months[i] === 'future'
+          ? ''
+          : `${nf(p.engagement, true)}${!p.counterComplete || !p.reachComplete ? ' !' : ''}`,
+    });
+    return row;
+  });
+  // Column widths scale with the widest value or label. Scaling the whole table by one
+  // factor keeps every figure inside the page while staying as large as possible.
+  const headerLabels = headers.map((header) =>
+    (typeof header === 'string' ? header : header.text).replace(/-(?=\S)/gu, '-\n'),
+  );
+  const headerLengths = headerLabels.map((label) =>
+    label
+      .split('\n')
+      .flatMap((line) => line.split(' '))
+      .reduce((longest, token) => Math.max(longest, token.length), 0),
+  );
+  const valueLengths = dataRows[0].map((_, col) =>
+    Math.max(0, ...dataRows.map((row) => row[col]?.value.length ?? 0)),
+  );
+  const baseFont = followerSeries ? 8.5 : pdfLayout.table;
+  const required = valueLengths.map((length, col) =>
+    col === 0 ? 48 : Math.max(length * baseFont * 0.55, headerLengths[col] * baseFont * 0.56) + 3,
+  );
+  const available = pdfLayout.width - 48 - headers.length * 8;
+  const requiredSum = required.slice(1).reduce((sum, width) => sum + width, 0);
+  const scale = Math.min(1, available / requiredSum);
+  const tableFont = baseFont * scale;
+  const widths = required.map((width, col) => (col === 0 ? 48 : width * scale));
+  const displayHeaders = headers.map((header, col) =>
+    typeof header === 'string' ? headerLabels[col] : { ...header, text: headerLabels[col] },
+  );
   content.push(
     table(
-      [
-        c.month,
-        { text: `${c.reach}\n(${c.count})`, right: true },
-        { text: `${c.interactions}\n(${c.count})`, right: true },
-        { text: `${c.threads}\n(${c.count})`, right: true },
-        { text: `${c.engagement}\n(%)`, right: true },
-      ],
-      s.report.months.map((p, i) => [
-        { text: monthLabel(i) },
-        ...monthlySeries.map((series) => ({
-          text: stateValue(series, i),
-          alignment: 'right' as const,
-        })),
-        {
-          text:
-            s.months[i] === 'future'
-              ? ''
-              : `${nf(p.engagement, true)}${!p.counterComplete || !p.reachComplete ? ' !' : ''}`,
-          alignment: 'right',
-        },
-      ]),
-      [64, '*', '*', '*', '*'],
+      displayHeaders,
+      dataRows.map((row) =>
+        row.map((cell, col) =>
+          col === 0
+            ? { text: cell.value }
+            : {
+                text: cell.note
+                  ? [
+                      { text: cell.value },
+                      {
+                        text: `\n${cell.note}`,
+                        fontSize: Math.max(5.5, Math.min(7, tableFont * 0.82)),
+                        color: colors.muted,
+                      },
+                    ]
+                  : cell.value,
+                alignment: 'right' as const,
+              },
+        ),
+      ),
+      widths,
+      undefined,
+      tableFont,
     ),
   );
   content.push(small(c.missing));
-  const followerSeries = doc.series.find((item) => item.id === 'chart-followers');
-  if (followerSeries) {
-    if (!hasPosts) content.push(small(c.colorLegend));
-    content.push(graph(followerSeries, 84, true));
-    content.push({
-      text: `${c.table}: ${c.community}`,
-      id: 'table-community',
-      bold: true,
-      margin: [0, 4, 0, 4],
-    });
-    content.push(
-      table(
-        [
-          c.month,
-          { text: c.followers, right: true },
-          { text: c.netChange, right: true },
-          { text: c.follows, right: true },
-          c.source,
-        ],
-        s.community.map((p, i) => [
-          { text: monthLabel(i) },
-          { text: stateValue(followerSeries, i), alignment: 'right' },
-          {
-            text:
-              s.months[i] === 'future'
-                ? ''
-                : `${nf(p.netChange)}${p.netChangeSource === 'reconstructed' ? ' ~' : ''}`,
-            alignment: 'right',
-          },
-          {
-            text: s.months[i] === 'future' ? '' : `${nf(p.follows)}${p.partial ? ' !' : ''}`,
-            alignment: 'right',
-          },
-          {
-            text:
-              p.source === 'observed'
-                ? `${c.observed} ${p.observedAt ? new Intl.DateTimeFormat(o.locale, { day: '2-digit', month: '2-digit', timeZone: 'Europe/Berlin' }).format(new Date(p.observedAt)) : ''}`
-                : p.source === 'reconstructed'
-                  ? c.reconstructed
-                  : '—',
-          },
-        ]),
-        [64, '*', '*', '*', '*'],
-      ),
-    );
-    content.push(reference(`${c.chart} · ${c.see}`, 'chart-followers', c.followers));
-    content.push(small(c.communityNote));
-  } else content.push(small(s.origin === 'legacy' ? c.legacy : c.noCommunity));
+  if (followerSeries) content.push(small(showFollows ? c.communityNote : c.communityNoteNoFollows));
+  else content.push(small(s.origin === 'legacy' ? c.legacy : c.noCommunity));
   if (s.topPosts.length) {
     content.push(
       heading(s.rankingComplete ? c.top : c.topPartial, 'section-top'),

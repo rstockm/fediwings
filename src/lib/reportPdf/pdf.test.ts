@@ -282,7 +282,7 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     (variant) => {
       const doc = buildReportDocument(pdfFixture(variant), options);
       for (const series of doc.series) {
-        expect(['table-months', 'table-community']).toContain(series.tableId);
+        expect(series.tableId).toBe('table-months');
         expect(seriesTableRows(series)).toEqual(
           series.values.map((value, month) => ({
             month,
@@ -314,23 +314,76 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
       Record<string, unknown>
     >;
     const tables = nodes
-      .filter((node) => typeof node === 'object' && node !== null && 'table' in node)
+      .filter(
+        (node) =>
+          'table' in node &&
+          (node.table as { body?: Array<Array<{ text?: unknown }>> }).body?.[0]?.[0]?.text ===
+            'Monat',
+      )
       .map(
         (node) =>
           node.table as {
             body: Array<Array<{ text: string; alignment?: string }>>;
           },
       );
+    expect(tables).toHaveLength(1);
     expect(tables[0].body[0][0].alignment).toBeUndefined();
-    for (let column = 1; column <= 4; column++)
+    for (let column = 1; column < tables[0].body[0].length; column++)
       expect(tables[0].body[0][column].alignment).toBe('right');
-    expect(tables[1].body[0][4].alignment).toBeUndefined();
     const rendered = JSON.stringify(definition.content);
     expect(rendered).toContain('Achse nicht bei null');
     expect(rendered).toContain('Antworten: 50');
     expect(rendered).toContain('Veränderung');
     expect(rendered).toContain('44 ~');
     expect(rendered).toContain('rekonstruiertem Verlauf');
+  });
+  it('führt Community und Kennzahlen in einer Tabelle zusammen und lässt identische Follow-Spalten weg', () => {
+    const tableOf = (snapshot: ReturnType<typeof pdfFixture>) => {
+      const doc = buildReportDocument(snapshot, options);
+      const definition = pdfDefinition(doc, palette);
+      const nodes = (Array.isArray(definition.content)
+        ? definition.content
+        : []) as unknown as Array<Record<string, unknown>>;
+      const tables = nodes
+        .filter(
+          (node) =>
+            'table' in node &&
+            (node.table as { body?: Array<Array<{ text?: unknown }>> }).body?.[0]?.[0]?.text ===
+              'Monat',
+        )
+        .map(
+          (node) =>
+            node.table as { body: Array<Array<{ text: string | Array<{ text: string }> }>> },
+        );
+      const header = tables[0].body[0].map((cell) =>
+        typeof cell.text === 'string' ? cell.text.replace(/-\n/gu, '-') : '',
+      );
+      return { definition, header };
+    };
+    const combined = tableOf(pdfFixture());
+    expect(combined.header).toHaveLength(7);
+    expect(combined.header.slice(0, 3)).toEqual([
+      'Monat',
+      'Follower-Stand',
+      'Veränderung\nFollow-Ereignisse',
+    ]);
+    expect(combined.header.slice(3)).toEqual([
+      'FediWings-Reichweite\n(Anzahl)',
+      'Interaktionen\n(Anzahl)',
+      'Veröffentlichte Threads\n(Anzahl)',
+      'Engagement-Rate\n(%)',
+    ]);
+    expect(JSON.stringify(combined.definition.content)).toContain('31.01.');
+
+    const equal = pdfFixture();
+    equal.community = equal.community.map((point) => ({ ...point, follows: point.netChange }));
+    const deduped = tableOf(equal);
+    expect(deduped.header).toHaveLength(7);
+    expect(deduped.header[2]).toBe('Veränderung');
+    expect(deduped.header.join(' ')).not.toContain('Follow-Ereignisse');
+    expect(JSON.stringify(deduped.definition.content)).toContain(
+      'Follow-Ereignisse entsprechen hier der Veränderung',
+    );
   });
   it('bettet Avatar und Beitragsbilder ein und fällt ohne Bild auf Initialen zurück', () => {
     const snapshot = pdfFixture();
@@ -364,20 +417,33 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
       Record<string, unknown>
     >;
     const tables = nodes
-      .filter((node) => typeof node === 'object' && node !== null && 'table' in node)
-      .map((node) => node.table as { body: Array<Array<{ text: string }>> });
+      .filter(
+        (node) =>
+          'table' in node &&
+          (node.table as { body?: Array<Array<{ text?: unknown }>> }).body?.[0]?.[0]?.text ===
+            'Monat',
+      )
+      .map(
+        (node) =>
+          node.table as {
+            body: Array<Array<{ text: string | Array<{ text: string }> }>>;
+          },
+      );
     for (const series of doc.series) {
-      const table = tables[series.tableId === 'table-months' ? 0 : 1];
-      const column =
-        series.tableId === 'table-months'
-          ? doc.series.filter((s) => s.tableId === 'table-months').indexOf(series) + 1
-          : 1;
+      const table = tables[0];
+      const header = table.body[0].map((cell) =>
+        typeof cell.text === 'string' ? cell.text.replace(/-\n/gu, '-').split('\n')[0] : '',
+      );
+      const column = header.indexOf(series.label);
+      expect(column).toBeGreaterThan(0);
       for (const row of seriesTableRows(series)) {
         const expected =
           row.status === 'future'
             ? ''
             : `${row.value === null ? '—' : new Intl.NumberFormat('de', { maximumFractionDigits: 0 }).format(row.value)}${row.partial ? ' !' : ''}`;
-        expect(table.body[row.month + 1][column].text).toBe(expected);
+        const cell = table.body[row.month + 1][column];
+        const actual = Array.isArray(cell.text) ? (cell.text[0]?.text ?? '') : cell.text;
+        expect(actual).toBe(expected);
       }
     }
   });

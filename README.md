@@ -31,7 +31,9 @@ Die älteren Aufnahmen vom **08.11.2026** verwenden öffentliche Live-Daten von 
 [Beispielbericht Deutsch](docs/examples/report-demo-de.pdf) ·
 [Example report English](docs/examples/report-demo-en.pdf).
 Die Berichte sind durchsuchbar, enthalten eingebettete Inter-Tight-Schriften und
-klickbare Original-Links. Alle Grafiken sind zusätzlich vollständig tabelliert.
+klickbare Original-Links. Alle Grafiken sind zusätzlich vollständig tabelliert;
+Community- und Kennzahlenwerte stehen gemeinsam in der Monatstabelle, Follow-Ereignisse
+nur dann als eigene Zeile, wenn sie sich von der Veränderung unterscheiden.
 Die Titelseite zeigt fünf Kennzahlen einschließlich Follower-Stand mit
 farbigen Veränderungsindikatoren. Reichweite, Interaktionen und Threads
 vergleichen Jahressummen mit dem Vorjahr (YTD: gleicher Zeitraum);
@@ -50,7 +52,7 @@ Titelseite, ohne verfügbares Bild als Initialenfläche.
 
 ![Monatsdiagramme des synthetischen PDF-Berichts mit beschrifteten Werteachsen sowie Grün für steigende und Orange für fallende Monatswerte](docs/screenshots/report-pdf-charts.png)
 
-![Community-Seite des Demo-Berichts mit vergrößerter Follower-Achse, rechtsbündigen Zahlenspalten und vollständiger Datentabelle](docs/screenshots/report-pdf-followers.png)
+![Community-Seite des Demo-Berichts mit vergrößerter Follower-Achse, rechtsbündigen Zahlenspalten und zusammengeführter Monats- und Community-Tabelle](docs/screenshots/report-pdf-followers.png)
 
 ![Top-5-Seite des Demo-Berichts mit Beitragsbild, Datum, Auszug, Einzelinteraktionen und Original-Link](docs/screenshots/report-pdf-top-posts.png)
 

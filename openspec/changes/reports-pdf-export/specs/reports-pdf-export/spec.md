@@ -108,7 +108,7 @@ Das PDF SHALL vorhandene Report-Aggregate ohne Änderung der Reichweitenformel v
 
 #### Scenario: Unterschiedliche Followerquellen
 - **WHEN** Stichtagsdifferenzen, verankerte Followerwerte und Follow-Benachrichtigungen vorliegen
-- **THEN** unterscheidet der Bericht Nettoveränderungen aus erfassten Monatsendständen, mit `~` gekennzeichnete Veränderungen aus dem rekonstruierten Verlauf, rekonstruierte Stände und erfasste Follow-Ereignisse; eine gemischte Jahressumme wird nicht als Netto-Wachstum bezeichnet.
+- **THEN** unterscheidet der Bericht Nettoveränderungen aus erfassten Monatsendständen, mit `~` gekennzeichnete Veränderungen aus dem rekonstruierten Verlauf, rekonstruierte Stände und erfasste Follow-Ereignisse in einer gemeinsamen Monatstabelle; identische Veränderungs- und Follow-Werte werden nicht doppelt ausgewiesen und eine gemischte Jahressumme wird nicht als Netto-Wachstum bezeichnet.
 
 ### Requirement: Top 5 Beiträge
 

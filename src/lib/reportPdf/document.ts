@@ -46,7 +46,7 @@ export function buildReportDocument(
   if (snapshot.community.some((p) => p.followers !== null))
     series.push({
       id: 'chart-followers',
-      tableId: 'table-community',
+      tableId: 'table-months',
       label: copy.followers,
       unit: copy.count,
       values: snapshot.community.map((p) => p.followers),

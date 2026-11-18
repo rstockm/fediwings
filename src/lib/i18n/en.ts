@@ -63,6 +63,7 @@ export const en: Messages = {
         'Partial data is available for the marked metrics. The available values are shown.',
       missing: '— = unavailable · * = month in progress · ! = partial data',
       table: 'Data table',
+      tableAll: 'Monthly development & community',
       chart: 'Charts',
       see: 'see',
       followers: 'Follower count',
@@ -74,7 +75,9 @@ export const en: Messages = {
       reconstructed: 'Reconstructed',
       noCommunity: 'No community history is included in this data snapshot.',
       communityNote:
-        'Observed and reconstructed follower counts are identified separately. Follow events (including possible requests, without unfollows) are not a net change. ~ = change from the reconstructed series (approximation).',
+        'Second line below the change: follow events (including possible requests, without unfollows); they are not a net change. Observation dates appear below the follower count. ~ = change from the reconstructed series (approximation).',
+      communityNoteNoFollows:
+        'Observation dates appear below the follower count; all other values are reconstructed from history. Follow events equal the change here; unfollows are not recorded. ~ = change from the reconstructed series (approximation).',
       noPosts: 'No public posts are available for the ranking in this reporting period.',
       legacy: 'This saved report does not include post details or historical follower sources.',
       original: 'Open original post',

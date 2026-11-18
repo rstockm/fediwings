@@ -61,6 +61,7 @@ export const de = {
         'Für die markierten Kennzahlen liegt ein Teilstand vor. Die verfügbaren Werte sind ausgewiesen.',
       missing: '— = kein Wert verfügbar · * = laufender Monat · ! = Teilstand',
       table: 'Datentabelle',
+      tableAll: 'Monatsentwicklung & Community',
       chart: 'Grafiken',
       see: 'siehe',
       followers: 'Follower-Stand',
@@ -72,7 +73,9 @@ export const de = {
       reconstructed: 'Rekonstruiert',
       noCommunity: 'Für diesen Datenstand ist keine Community-Historie enthalten.',
       communityNote:
-        'Stichtage und rekonstruierte Followerstände sind getrennt gekennzeichnet. Follow-Ereignisse (inkl. möglicher Anfragen, ohne Unfollows) sind keine Nettoveränderung. ~ = Veränderung aus rekonstruiertem Verlauf (Näherung).',
+        'Zweite Zeile unter der Veränderung: Follow-Ereignisse (inkl. möglicher Anfragen, ohne Unfollows); sie sind keine Nettoveränderung. Stichtage stehen als Datum unter dem Follower-Stand. ~ = Veränderung aus rekonstruiertem Verlauf (Näherung).',
+      communityNoteNoFollows:
+        'Stichtage stehen als Datum unter dem Follower-Stand; übrige Werte sind aus dem Verlauf rekonstruiert. Follow-Ereignisse entsprechen hier der Veränderung; Unfollows werden nicht erfasst. ~ = Veränderung aus rekonstruiertem Verlauf (Näherung).',
       noPosts: 'Im Berichtszeitraum sind keine öffentlichen Beiträge für die Rangliste enthalten.',
       legacy:
         'In diesem gespeicherten Stand sind Beitragsdetails und historische Followerquellen nicht enthalten.',
