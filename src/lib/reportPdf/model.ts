@@ -14,6 +14,7 @@ export const pdfSnapshotSchema = z.object({
   model: z.literal('net-reach-v1'),
   handle: z.string().max(512),
   displayName: z.string().max(200),
+  avatarUrl: z.string().max(4096).nullable().optional(),
   year: z.number().int().min(2006).max(9999),
   analyzedAt: z.iso.datetime(),
   followerObservation: z
@@ -40,6 +41,7 @@ export const pdfSnapshotSchema = z.object({
         source: z.enum(['observed', 'reconstructed', 'missing']),
         observedAt: z.string().nullable(),
         netChange: value,
+        netChangeSource: z.enum(['observed', 'reconstructed']).nullable().optional(),
         follows: value,
         partial: z.boolean(),
       }),
@@ -51,6 +53,7 @@ export const pdfSnapshotSchema = z.object({
         id: z.string().max(512),
         createdAt: z.iso.datetime(),
         url: z.string().max(4096).nullable(),
+        imageUrl: z.string().max(4096).nullable().optional(),
         excerpt: z.string().max(1000),
         contentWarning: z.boolean(),
         sensitive: z.boolean(),

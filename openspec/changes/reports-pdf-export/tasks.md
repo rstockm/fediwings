@@ -59,3 +59,11 @@
 - [x] 9.1 Alle PDF-Diagramme mit gerundeten, beschrifteten Werteachsen und Gitterlinien versehen; große Werte lokalisiert kürzen, den Follower-Stand auf den Jahresbereich vergrößern und als nicht bei null beginnend kennzeichnen. Tests prüfen Achsengrenzen, Tick-Abstände, eindeutige Beschriftungen und die Kennzeichnung; Rasterreferenzen aktualisieren.
 - [x] 9.2 Interaktionen der Top-5-Beiträge nach Antworten, Boosts, Likes und Zitaten einzeln ausweisen, ohne die Summenlogik zu ändern; Schema bleibt rückwärtskompatibel, Tests prüfen Aufschlüsselung, Summe und Legacy-Stände.
 - [x] 9.3 Tabellenköpfe über Zahlenspalten rechtsbündig setzen, Textspalten linksbündig lassen; Tests prüfen Monats-, Community- und Methodiktabelle und die gerasterte Seite.
+
+## 10. Kopfaktionen, Follower-Veränderungen und Medien
+
+- [x] 10.1 PDF-, Excel- und CSV-Export im Reportkopf bündeln, ohne Aufklappmenü alle Formate direkt sichtbar halten und das Löschen des gespeicherten Stands an dessen Datumszeile verschieben; Komponenten- und Browsertests prüfen Reihenfolge, Erreichbarkeit und mobile Darstellung.
+- [x] 10.2 Veränderungen zum Vormonat aus dem effektiven Followerstand berechnen: erfasste Monatsendstände als Nettoveränderung, rekonstruierte Werte mit `~` gekennzeichnet; Snapshot-Feld rückwärtskompatibel ergänzen, Tests und Tabellenfußnote anpassen, Demo-PDF und Screenshot aktualisieren.
+- [x] 10.3 Avatar- und Beitragsbild-URLs rückwärtskompatibel im Snapshot ergänzen, sensible beziehungsweise Inhaltswarnungs-Beiträge ausschließen und Medien vor dem Satz als verkleinerte Data-URLs laden; CORS-, Netzwerk- und Größenfehler still auf Initialen beziehungsweise Text zurückfallen lassen. Avatar auf der Titelseite und Beitragsbild in den Top-5-Karten layouten; Fixtures, Fehlerfall und Legacy-Stände testen.
+- [x] 10.4 Doku, OpenSpec, Demo-PDFs und Raster-Screenshots auf den neuen Medienstand aktualisieren.
+- [ ] 10.5 `make check` und `make test-browser` ausführen, Rastervergleich und mobile Ansicht prüfen sowie den genehmigten Deploy erst nach grünem Ergebnis und Diff-Review ausführen.

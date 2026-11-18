@@ -76,6 +76,21 @@ weisen Antworten, Boosts, Likes und Zitate einzeln aus; ihre Summe entspricht
 der ausgewiesenen Interaktionszahl. Tabellenköpfe mit Zahlen stehen rechtsbündig
 über ihren Spalten.
 
+Die Community-Tabelle weist Veränderungen zum Vormonat aus. Differenzen
+zwischen erfassten Monatsendständen sind echte Nettoveränderungen. Mit `~`
+markierte Werte stammen aus dem rekonstruierten Follower-Verlauf, enthalten
+keine Unfollows und sind deshalb keine belastbare Nettoveränderung; die
+Tabellenfußnote erläutert die Kennzeichnung.
+
+Avatar und Beitragsbilder werden vor dem Satz im Browser geladen und als
+Data-URL eingebettet; pdfmake erhält keinen Remote-URL-Zugriff. Der Avatar
+stammt aus `avatar_static`, das Beitragsbild bevorzugt aus `preview_url` des
+Thread-Roots. Sensible Beiträge und Beiträge mit Inhaltswarnung erhalten kein
+Bild. Ladefehler, CORS-Sperren, zu große Dateien und Zeitüberschreitungen
+werden still übergangen: Dann erscheinen Initialen beziehungsweise nur der
+Text. Die Bilder werden vor der Einbettung verkleinert (Avatar 96 px rund,
+Beitragsbild 240 × 180 px), damit der Bericht kompakt bleibt.
+
 Die PDF-TTFs decken Latin-Zeichen ab. Andere Zeichen erscheinen sichtbar als
 `[U+…]`; Original-Links und Metadaten werden nicht als Schriftzeichenersatz verändert.
 Das ist kein mehrsprachiger Universalschriftsatz. PDF-Tags und Sprache sind gesetzt,
@@ -111,7 +126,8 @@ Referenzprüfung am 18.11.2026: lokale Schrift-Einbettung, deutsche/englische
 Lesereihenfolge, Tabellen, Seitenverweise und Original-Links geprüft.
 Demo-Werte sind synthetisch, keine echten Login-Daten.
 Die vollständigen Standardberichte haben fünf Seiten; lange Inhalte können
-lesbare Fortsetzungsseiten erzeugen. Die PDF-Dateien liegen mit Farbverläufen bei rund 70 KB.
+lesbare Fortsetzungsseiten erzeugen. Die PDF-Dateien liegen mit Farbverläufen
+und eingebetteten Demo-Medien bei rund 60–100 KB.
 PDF-Engine im separaten lazy Chunk: rund 790 KB unkomprimiert / 296 KB gzip;
 zusätzliche lokale PDF-Fonts zusammen rund 116 KB. Kein Engine-Download beim
 normalen Report-Laden.
@@ -123,7 +139,7 @@ während der Live-Abruf inzwischen andere Beiträge liefert. Die gespeicherten
 Top-Beiträge bleiben dabei unverändert. Die Community-Seite wurde zusätzlich
 in Graustufen visuell geprüft.
 
-Abschluss nach Titel-, Farb- und Achsen-Ergänzungen: `make check` erfolgreich, **207 Unit-/Komponententests**,
+Abschluss nach Titel-, Farb-, Achsen- und Medien-Ergänzungen: `make check` erfolgreich, **213 Unit-/Komponententests**,
 SBOM-/Audit-Regressionstests und Produktionsbuild erfolgreich. Die zusätzlichen
 PDF-Fixtures für sehr große Zahlen und lange Texte wurden auf Satz und vollständige
 Tabellen geprüft; sämtliche aktuellen Rasterreferenzen stimmen überein.

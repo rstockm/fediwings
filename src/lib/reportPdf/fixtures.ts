@@ -1,5 +1,7 @@
 import type { ReportPdfSnapshot } from './model';
 import { comparisonEnd, previousYearEnd } from './comparisons';
+import type { PdfImages } from './images';
+import { fixtureAvatar, fixturePostImages } from './fixtureImages';
 
 /** Synthetic, deterministic fixtures. Never presented as authenticated live data. */
 export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
@@ -38,7 +40,8 @@ export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
       followers: 1200 + i * 44,
       source: i % 2 ? 'reconstructed' : 'observed',
       observedAt: i % 2 ? null : new Date(Date.UTC(2025, i + 1, 0, 12)).toISOString(),
-      netChange: i === 0 ? 44 : null,
+      netChange: 44,
+      netChangeSource: i === 0 ? 'observed' : 'reconstructed',
       follows: 48 + i,
       partial: false,
     })),
@@ -112,6 +115,7 @@ export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
             ...p,
             followers: null,
             netChange: null,
+            netChangeSource: null,
             follows: null,
             source: 'missing',
             observedAt: null,
@@ -131,6 +135,7 @@ export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
       source: 'missing',
       observedAt: null,
       netChange: null,
+      netChangeSource: null,
       follows: null,
       partial: false,
     }));
@@ -167,4 +172,18 @@ export function pdfFixture(variant = 'complete'): ReportPdfSnapshot {
     };
   }
   return snapshot;
+}
+
+/** Deterministic synthetic media for the PDF fixtures (not part of the snapshot). */
+export function pdfFixtureImages(snapshot: ReportPdfSnapshot): PdfImages {
+  if (snapshot.origin === 'legacy') return { avatar: null, posts: {} };
+  return {
+    avatar: fixtureAvatar,
+    posts: Object.fromEntries(
+      snapshot.topPosts.map((post, index) => [
+        post.id,
+        fixturePostImages[index % fixturePostImages.length],
+      ]),
+    ),
+  };
 }

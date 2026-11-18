@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 import type { PostReach } from '../types';
 import type { AggregatedReport } from '../reports';
-import { followerGrowth, monthEndFollowers, type FollowerObservation } from '../reportStorage';
+import { monthEndFollowers, type FollowerObservation } from '../reportStorage';
 import { reportFollowerHistory, type ReportFollowerHistory } from '../reportFollowers';
 import { cleanText, safePdfUrl, type PdfTopPost, type ReportPdfSnapshot } from './model';
 
@@ -36,10 +36,17 @@ export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
       detail.likes += item.favourites_count;
       detail.quotes += item.quotes_count ?? 0;
     }
+    const rootImage =
+      status.media_attachments.find((attachment) => attachment.type.startsWith('image')) ??
+      post.thumbnail;
     selected.push({
       id: cleanText(status.id, 512),
       createdAt: date.toISOString(),
       url: safePdfUrl(status.url),
+      imageUrl:
+        status.sensitive || status.spoiler_text
+          ? null
+          : safePdfUrl(rootImage?.preview_url ?? rootImage?.url ?? null),
       excerpt: status.spoiler_text
         ? plainText(status.spoiler_text)
         : status.sensitive
@@ -67,6 +74,7 @@ export function selectTopPosts(posts: PostReach[], year: number): PdfTopPost[] {
 export function preparePdfSnapshot(input: {
   handle: string;
   displayName: string;
+  avatarUrl?: string | null;
   report: AggregatedReport;
   analyzedAt: string;
   posts?: PostReach[];
@@ -93,14 +101,48 @@ export function preparePdfSnapshot(input: {
   );
   const observations = input.legacy ? [] : (input.observations ?? []);
   const observed = monthEndFollowers(observations, report.year);
-  const growth = followerGrowth(observations, report.year);
   const history =
     !input.legacy && input.history ? reportFollowerHistory(input.history, report.year) : null;
+  const points = months.map((state, i) => {
+    if (state === 'future') return null;
+    const point = observed[i];
+    if (point) return { value: point.count, source: 'observed' as const };
+    const value = history?.followers[i] ?? null;
+    return value === null ? null : { value, source: 'reconstructed' as const };
+  });
+  const previousDecember = input.legacy
+    ? null
+    : monthEndFollowers(observations, report.year - 1)[11];
+  let previous: { value: number; source: 'observed' | 'reconstructed' } | null = previousDecember
+    ? { value: previousDecember.count, source: 'observed' }
+    : null;
+  const community = months.map((state, i) => {
+    const point = points[i];
+    const netChange = point && previous ? point.value - previous.value : null;
+    const netChangeSource =
+      point && previous
+        ? point.source === 'observed' && previous.source === 'observed'
+          ? ('observed' as const)
+          : ('reconstructed' as const)
+        : null;
+    const entry = {
+      followers: point?.value ?? null,
+      source: point?.source ?? ('missing' as const),
+      observedAt: state === 'future' ? null : (observed[i]?.observedAt ?? null),
+      netChange,
+      netChangeSource,
+      follows: state === 'future' ? null : (history?.follows[i] ?? null),
+      partial: Boolean(input.history?.partial) && !input.legacy,
+    };
+    previous = point;
+    return entry;
+  });
   return {
     version: 1,
     model: 'net-reach-v1',
     handle: cleanText(input.handle, 512),
     displayName: plainText(input.displayName, 200),
+    avatarUrl: input.legacy ? null : safePdfUrl(input.avatarUrl ?? null),
     year: report.year,
     analyzedAt,
     followerObservation: input.legacy ? null : (input.followerObservation ?? null),
@@ -108,21 +150,7 @@ export function preparePdfSnapshot(input: {
     origin: input.legacy ? 'legacy' : 'live',
     report: structuredClone(report),
     months,
-    community: months.map((state, i) => ({
-      followers: state === 'future' ? null : (observed[i]?.count ?? history?.followers[i] ?? null),
-      source:
-        state === 'future'
-          ? 'missing'
-          : observed[i]
-            ? 'observed'
-            : history?.followers[i] != null
-              ? 'reconstructed'
-              : 'missing',
-      observedAt: state === 'future' ? null : (observed[i]?.observedAt ?? null),
-      netChange: state === 'future' ? null : growth[i],
-      follows: state === 'future' ? null : (history?.follows[i] ?? null),
-      partial: Boolean(input.history?.partial) && !input.legacy,
-    })),
+    community,
     topPosts: selectTopPosts(input.posts ?? [], report.year),
     topAvailable: !input.legacy && input.posts !== undefined,
     rankingComplete: report.total.counterComplete && report.total.reachComplete,

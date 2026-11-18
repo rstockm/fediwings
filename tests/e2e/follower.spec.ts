@@ -186,6 +186,13 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await page.getByLabel('Jahr', { exact: true }).selectOption('2026');
   await expect(page.getByRole('rowheader', { name: 'Interaktionen' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Der Jahresverlauf' })).toBeVisible();
+  const exportGroup = page.getByRole('group', { name: 'Export' });
+  await expect(exportGroup.getByRole('button')).toHaveCount(3);
+  const exportBox = await exportGroup.boundingBox();
+  const reportTableBox = await page.getByRole('table').boundingBox();
+  expect(exportBox).not.toBeNull();
+  expect(reportTableBox).not.toBeNull();
+  expect(exportBox!.y).toBeLessThan(reportTableBox!.y);
   const reachPlot = page.locator('.chart-card', { hasText: 'Reichweite' }).locator('.chart-plot');
   const reachBox = await reachPlot.boundingBox();
   expect(reachBox).not.toBeNull();
@@ -218,6 +225,9 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await page.getByRole('button', { name: 'Report speichern' }).click();
   await expect(page.getByText('Report lokal gespeichert.')).toBeVisible();
   await expect(page.getByText(/Gespeicherter Stand:/)).toBeVisible();
+  await expect(page.locator('.reports-saved-state button')).toHaveText(
+    'Gespeicherten Stand löschen',
+  );
   await page.reload();
   await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
   await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();

@@ -27,15 +27,19 @@ verwenden dagegen kontrollierte Testdaten.
 | `reports-loading-demo-mobile.png` | Dieselbe UI-Demo bei 390 Pixel Breite |
 | `report-pdf-desktop.png` | PDF-Exportdialog, Desktop-UI-Demo vom 18.11.2026; kontrollierte Antworten und synthetische Sitzung, keine Live-Anmeldung |
 | `report-pdf-mobile.png` | Derselbe Exportdialog mit mobilem Direktdownload |
-| `report-pdf-page-1.png` | Gerasterte erste Seite des synthetischen PDF-Beispielberichts, kein Live-Report |
+| `report-pdf-page-1.png` | Gerasterte erste Seite des synthetischen PDF-Beispielberichts mit Account-Avatar, kein Live-Report |
 | `report-pdf-charts.png` | Aktualisierte Demo-Diagrammseite mit Online-Farblogik Grün/Orange und vollständiger Tabellenzuordnung |
 | `report-pdf-followers.png` | Demo-Seite mit vergrößerter Follower-Achse, rechtsbündigen Tabellenköpfen und vollständiger Community-Tabelle |
+| `report-pdf-top-posts.png` | Demo-Top-5-Seite mit Beitragsbildern, Einzelinteraktionen und Original-Links |
 
 ## Aktualisieren
 
 PDF-Beispiele: `npm run test:pdf -- --update-demo --update-reference`;
 die erste gerasterte Demoseite aus `test-results/pdf/complete-de-1.png`
-als `report-pdf-page-1.png` übernehmen. Den Dialog nach aktuellem Build mit
+als `report-pdf-page-1.png` übernehmen, die Community-Seite aus
+`test-results/pdf/complete-de-3.png` als `report-pdf-followers.png` und die
+Top-5-Seite aus `test-results/pdf/complete-de-4.png` als
+`report-pdf-top-posts.png`. Den Dialog nach aktuellem Build mit
 `PDF_SCREENSHOTS=1 npx playwright test tests/e2e/report-pdf.spec.ts` aufnehmen.
 Die UI-Aufnahmen zeigen Chromium (1280 × 720) und das mobile Pixel-7-Testprofil.
 Alle Inhalte sind kontrollierte Demo-Daten, keine authentifizierten Live-Bereiche.
@@ -43,6 +47,10 @@ Alle Inhalte sind kontrollierte Demo-Daten, keine authentifizierten Live-Bereich
 Nach Ergänzung der Follower-Titelkennzahl und Veränderungs-Badges wurden
 Titel- und Diagrammseite am 18.11.2026 erneut gerastert. Die Diagrammseite ist
 `test-results/pdf/complete-de-2.png` und wird als `report-pdf-charts.png` übernommen.
+Am selben Tag ergänzten Avatar und Beitragsbilder die Titelseite und die
+Top-5-Seite; beide Raster wurden aktualisiert. Die Demo-Medien sind
+deterministische, synthetische Platzhalter, keine echten Account- oder
+Beitragsfotos.
 
 Die gemeinsamen Ladeanzeigen werden mit
 `UPDATE_COMBINED_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'waehrend des Ladens' --project=chromium`
@@ -55,12 +63,12 @@ Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
 `LIVE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'optionale öffentliche' --project=chromium`.
 Die älteren Reports-/Diagrammaufnahmen vom 16.11.2026 verwenden öffentliche
 ZLB-Daten und stammen vor der Verbindungspflicht, vor der aktuellen
-Grün-/Orange-Farblogik, vor der heutigen Aktionsleiste, vor der
-Mittelwertlinie in den Diagrammen, vor der heutigen Wertanzeige rechts oben in der
-Diagrammkarte und vor der Jahresauswahl als Liste. Sie
-bleiben als gekennzeichnete Darstellungsbeispiele erhalten. Authentifizierte Live-Reports
-können ohne Anmeldung des Accountinhabers nicht neu aufgenommen werden; sie
-werden nicht vorgetäuscht.
+Grün-/Orange-Farblogik, vor der heutigen Aktionsleiste am Kopf der
+Reportansicht, vor der Mittelwertlinie in den Diagrammen, vor der heutigen
+Wertanzeige rechts oben in der Diagrammkarte und vor der Jahresauswahl als
+Liste. Sie bleiben als gekennzeichnete Darstellungsbeispiele erhalten.
+Authentifizierte Live-Reports können ohne Anmeldung des Accountinhabers nicht
+neu aufgenommen werden; sie werden nicht vorgetäuscht.
 Die Methodikaufnahme vom 16.11.2026 entsteht mit
 `UPDATE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/app.spec.ts -g 'wechselt ueber die Reiter' --project=chromium`.
 Sie zeigt die aktuelle Reports-Methodik und hat keinen zusätzlichen Außenrand.

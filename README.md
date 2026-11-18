@@ -16,8 +16,8 @@ Reichweite, Interaktionen, Likes und Boosts im Zeitverlauf — jeweils mit dem v
 - **Beiträge verstehen:** Netto-Reichweite, Brutto-Potenzial, Likes, Boosts sowie Antworten/Quotes pro Thread; aufklappbare Texte und Medien.
 - **30 Tage vergleichen:** Reichweitenschätzungen, Interaktionen, Likes und Boosts mit dem vorherigen 30-Tage-Zeitraum vergleichen; unvollständige Zeitfenster werden gekennzeichnet.
 - **Ergebnisse teilen:** Einzelne Threads als Analyse-Link öffnen oder über den optionalen Card Service eine Vorschaukarte erstellen.
-- **Reports:** Erst nach Verbindung der eigenen Instanz erscheinen Statistiken und starten Jahresbericht und Follower-Verlauf gemeinsam. Reports zeigen monatliche Postings, Interaktionen, modellierte Reichweite und Engagement als Tabelle und Balkendiagramme; Tabellen lassen sich für Excel kopieren oder als CSV herunterladen. Ein Jahreswechsel lädt den Live-Report automatisch neu. „Report speichern“ legt den aktuellen Stand lokal ab; pro Account und Jahr gibt es einen Stand, dessen Datum die Ansicht ausweist. Follower-Stichtage bleiben beim Löschen des Stands erhalten. Das Handle-Feld bleibt auch mit Verbindung bedienbar: Ein anderer Account lässt sich wählen und per Login verbinden; die Auswahl gilt stabil auch für die Analyse.
-- **Executive-PDF:** Lokal erstellter A4-Managementbericht mit Executive Summary, Monatsentwicklung, vollständigen Tabellen für jede Datengrafik, Community, Top 5 öffentlichen Threads und kompakter Methodik. Berichtstitel, Organisation und Deutsch/Englisch sind wählbar; Vorschau und Download verwenden denselben Stand. Keine Übertragung an einen PDF-Dienst.
+- **Reports:** Erst nach Verbindung der eigenen Instanz erscheinen Statistiken und starten Jahresbericht und Follower-Verlauf gemeinsam. Reports zeigen monatliche Postings, Interaktionen, modellierte Reichweite und Engagement als Tabelle und Balkendiagramme; oben stehen PDF-Bericht, Excel-Kopie und CSV als kompakte, direkt sichtbare Exportaktionen. Ein Jahreswechsel lädt den Live-Report automatisch neu. „Report speichern“ legt den aktuellen Stand lokal ab; pro Account und Jahr gibt es einen Stand, dessen Datum die Ansicht ausweist und an dem er sich direkt löschen lässt. Follower-Stichtage bleiben beim Löschen des Stands erhalten. Das Handle-Feld bleibt auch mit Verbindung bedienbar: Ein anderer Account lässt sich wählen und per Login verbinden; die Auswahl gilt stabil auch für die Analyse.
+- **Executive-PDF:** Lokal erstellter A4-Managementbericht mit Executive Summary, Monatsentwicklung, vollständigen Tabellen für jede Datengrafik, Community, Top 5 öffentlichen Threads und kompakter Methodik. Account-Avatar und vorhandene Beitragsbilder werden eingebettet, bei fehlenden Medien greifen Initialen beziehungsweise Text. Berichtstitel, Organisation und Deutsch/Englisch sind wählbar; Vorschau und Download verwenden denselben Stand. Keine Übertragung an einen PDF-Dienst.
 - **Eigene Instanz verbinden:** Optionaler Nur-Lese-Zugriff per OAuth für Follower-Verlauf und zeitlichen Boost-Verlauf eigener Beiträge. Die graue Long-Tail-Kurve ohne Verbindung ist ausdrücklich nur eine Vorschau, keine Messung.
 - **Mobil und zweisprachig arbeiten:** Responsive Oberfläche, Deutsch/Englisch und optional lokal gemerkte Handles. Zuerst gilt eine gespeicherte Sprachwahl, sonst die deutsche/englische Browsersprache; andere Sprachen fallen auf Deutsch zurück.
 
@@ -41,14 +41,18 @@ nicht bei jedem Seitenaufruf. Fehlende Vergleichsdaten werden nicht geschätzt.
 Die Balken übernehmen Grün/Orange und die relative Farbintensität der Online-Version.
 Jede Grafik trägt eine beschriftete, gerundete Werteachse; beim Follower-Stand ist
 sie auf den Jahresbereich vergrößert und ausdrücklich als „Achse nicht bei null“
-gekennzeichnet. Die Top-5-Beiträge weisen Antworten, Boosts, Likes und Zitate
-einzeln aus; Tabellenköpfe stehen rechtsbündig über ihren Zahlenspalten.
+gekennzeichnet. Die Top-5-Beiträge zeigen, sofern vorhanden, das Beitragsbild und
+weisen Antworten, Boosts, Likes und Zitate einzeln aus; Tabellenköpfe stehen
+rechtsbündig über ihren Zahlenspalten. Der Account-Avatar erscheint auf der
+Titelseite, ohne verfügbares Bild als Initialenfläche.
 
-![Erste Seite des synthetischen FediWings-Demoberichts mit fünf Kennzahlen, Veränderungsindikatoren und Executive Summary](docs/screenshots/report-pdf-page-1.png)
+![Erste Seite des synthetischen FediWings-Demoberichts mit Account-Avatar, fünf Kennzahlen, Veränderungsindikatoren und Executive Summary](docs/screenshots/report-pdf-page-1.png)
 
 ![Monatsdiagramme des synthetischen PDF-Berichts mit beschrifteten Werteachsen sowie Grün für steigende und Orange für fallende Monatswerte](docs/screenshots/report-pdf-charts.png)
 
 ![Community-Seite des Demo-Berichts mit vergrößerter Follower-Achse, rechtsbündigen Zahlenspalten und vollständiger Datentabelle](docs/screenshots/report-pdf-followers.png)
+
+![Top-5-Seite des Demo-Berichts mit Beitragsbild, Datum, Auszug, Einzelinteraktionen und Original-Link](docs/screenshots/report-pdf-top-posts.png)
 
 ![Desktop-UI-Demo des lokalen PDF-Exportdialogs mit Berichtstitel, Organisation, Sprache und Download](docs/screenshots/report-pdf-desktop.png)
 

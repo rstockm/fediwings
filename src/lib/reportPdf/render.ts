@@ -11,12 +11,17 @@ import { pdfText } from './glyphs';
 import { pdfBarColors } from './colors';
 import { titleChange, titleFollowers, type TitleMetric, type TitleChange } from './comparisons';
 import { axisLabels, chartAxis } from './axis';
+import { emptyPdfImages, loadReportPdfImages, type PdfImages } from './images';
 
 const methodUrl = 'https://rstockm.github.io/fediwings/?view=methodik';
 const escapeXml = (s: string) =>
   s.replace(/[<>&"]/gu, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c]!);
 
-export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumentDefinitions {
+export function pdfDefinition(
+  doc: ReportDocument,
+  colors: PdfPalette,
+  images: PdfImages = emptyPdfImages,
+): TDocumentDefinitions {
   const { snapshot: s, copy: c, options: o } = doc;
   const compact = o.title.length > 65 || o.organization.length > 60 || s.handle.length > 100;
   const shownTitle = cleanText(pdfText(o.title), 120);
@@ -52,6 +57,35 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
     ...(before ? { pageBreak: 'before' as const } : {}),
   });
   const small = (text: string): Content => ({ text, style: 'meta', margin: [0, 3, 0, 6] });
+  const initial =
+    Array.from(s.displayName.trim() || s.handle.replace(/^@/u, ''))[0]?.toUpperCase() ?? '@';
+  const monogram = (): Content => ({
+    table: {
+      widths: [44],
+      heights: [44],
+      body: [
+        [
+          {
+            text: cleanText(pdfText(initial), 12) || '@',
+            fillColor: colors.violet,
+            color: '#ffffff',
+            bold: true,
+            fontSize: 18,
+            alignment: 'center',
+            margin: [0, 13, 0, 0],
+          },
+        ],
+      ],
+    },
+    layout: {
+      hLineWidth: () => 0,
+      vLineWidth: () => 0,
+      paddingTop: () => 0,
+      paddingBottom: () => 0,
+      paddingLeft: () => 0,
+      paddingRight: () => 0,
+    },
+  });
   const reference = (label: string, id: string, title: string): Content => ({
     text: [`${label}: ${title} · ${c.page} `, { pageReference: id }],
     style: 'meta',
@@ -258,11 +292,25 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
   });
   const content: Content[] = [
     {
-      text: 'FEDIWINGS / EXECUTIVE REPORT',
-      color: colors.violet,
-      bold: true,
-      fontSize: 10,
-      characterSpacing: 1.2,
+      columns: [
+        {
+          width: 44,
+          stack: [images.avatar ? { image: images.avatar, width: 44, height: 44 } : monogram()],
+        },
+        {
+          width: '*',
+          stack: [
+            {
+              text: 'FEDIWINGS / EXECUTIVE REPORT',
+              color: colors.violet,
+              bold: true,
+              fontSize: 10,
+              characterSpacing: 1.2,
+            },
+          ],
+          margin: [12, 15, 0, 0],
+        },
+      ],
       margin: [0, 8, 0, compact ? 14 : 22],
     },
     {
@@ -356,7 +404,13 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
         s.community.map((p, i) => [
           { text: monthLabel(i) },
           { text: stateValue(followerSeries, i), alignment: 'right' },
-          { text: s.months[i] === 'future' ? '' : nf(p.netChange), alignment: 'right' },
+          {
+            text:
+              s.months[i] === 'future'
+                ? ''
+                : `${nf(p.netChange)}${p.netChangeSource === 'reconstructed' ? ' ~' : ''}`,
+            alignment: 'right',
+          },
           {
             text: s.months[i] === 'future' ? '' : `${nf(p.follows)}${p.partial ? ' !' : ''}`,
             alignment: 'right',
@@ -381,7 +435,44 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
       heading(s.rankingComplete ? c.top : c.topPartial, 'section-top'),
       small(c.topNote),
     );
-    for (const [i, post] of s.topPosts.entries())
+    for (const [i, post] of s.topPosts.entries()) {
+      const detail: Content[] = [
+        {
+          text: post.contentWarning
+            ? `${c.warning}: ${cleanText(pdfText(post.excerpt), 240)}`
+            : cleanText(pdfText(post.excerpt), 240) || (post.sensitive ? c.sensitive : '—'),
+          fontSize: 11,
+          lineHeight: 1.15,
+        },
+        {
+          text: `${c.reach}: ${nf(post.reach)}${post.complete ? '' : ' !'}    ·    ${c.interactions}: ${nf(post.interactions)}`,
+          bold: true,
+          fontSize: 10,
+          margin: [0, 7, 0, post.interactionDetail ? 2 : 4],
+        },
+        ...(post.interactionDetail
+          ? [
+              {
+                text: `${c.replies}: ${nf(post.interactionDetail.replies)}  ·  ${c.boosts}: ${nf(post.interactionDetail.boosts)}  ·  ${c.likes}: ${nf(post.interactionDetail.likes)}  ·  ${c.quotes}: ${nf(post.interactionDetail.quotes)}`,
+                fontSize: 9,
+                color: colors.muted,
+                margin: [0, 0, 0, 4],
+              } as Content,
+            ]
+          : []),
+        ...(safePdfUrl(post.url)
+          ? [
+              {
+                text: c.original,
+                link: safePdfUrl(post.url)!,
+                color: colors.violet,
+                fontSize: 9,
+                margin: [0, 0, 0, 8],
+              } as Content,
+            ]
+          : []),
+      ];
+      const thumbnail = images.posts[post.id];
       content.push({
         unbreakable: true,
         stack: [
@@ -391,42 +482,23 @@ export function pdfDefinition(doc: ReportDocument, colors: PdfPalette): TDocumen
             bold: true,
             margin: [0, 14, 0, 7],
           },
-          {
-            text: post.contentWarning
-              ? `${c.warning}: ${cleanText(pdfText(post.excerpt), 240)}`
-              : cleanText(pdfText(post.excerpt), 240) || (post.sensitive ? c.sensitive : '—'),
-            fontSize: 11,
-            lineHeight: 1.15,
-          },
-          {
-            text: `${c.reach}: ${nf(post.reach)}${post.complete ? '' : ' !'}    ·    ${c.interactions}: ${nf(post.interactions)}`,
-            bold: true,
-            fontSize: 10,
-            margin: [0, 7, 0, post.interactionDetail ? 2 : 4],
-          },
-          ...(post.interactionDetail
+          ...(thumbnail
             ? [
                 {
-                  text: `${c.replies}: ${nf(post.interactionDetail.replies)}  ·  ${c.boosts}: ${nf(post.interactionDetail.boosts)}  ·  ${c.likes}: ${nf(post.interactionDetail.likes)}  ·  ${c.quotes}: ${nf(post.interactionDetail.quotes)}`,
-                  fontSize: 9,
-                  color: colors.muted,
-                  margin: [0, 0, 0, 4],
+                  columns: [
+                    {
+                      width: 96,
+                      stack: [{ image: thumbnail, width: 84, height: 63 }],
+                    },
+                    { width: '*', stack: detail },
+                  ],
+                  columnGap: 10,
                 } as Content,
               ]
-            : []),
-          ...(safePdfUrl(post.url)
-            ? [
-                {
-                  text: c.original,
-                  link: safePdfUrl(post.url)!,
-                  color: colors.violet,
-                  fontSize: 9,
-                  margin: [0, 0, 0, 8],
-                } as Content,
-              ]
-            : []),
+            : detail),
         ],
       });
+    }
   } else {
     content.push(small(s.topAvailable ? c.noPosts : c.legacy));
   }
@@ -578,6 +650,7 @@ export async function renderReportPdf(
   options: PdfOptions,
 ): Promise<Blob> {
   const palette = readPdfPalette();
-  const engine = await loadEngine();
-  return engine.createPdf(pdfDefinition(buildReportDocument(snapshot, options), palette)).getBlob();
+  const [engine, images] = await Promise.all([loadEngine(), loadReportPdfImages(snapshot)]);
+  const definition = pdfDefinition(buildReportDocument(snapshot, options), palette, images);
+  return engine.createPdf(definition).getBlob();
 }

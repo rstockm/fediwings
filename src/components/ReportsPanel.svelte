@@ -384,6 +384,7 @@
       pdfSnapshot = preparePdfSnapshot({
         handle: canonicalAcct(fresh, origin),
         displayName: fresh.display_name,
+        avatarUrl: fresh.avatar_static,
         report: $state.snapshot(report),
         analyzedAt,
         followerObservation: { count: fresh.followers_count, observedAt },
@@ -524,42 +525,55 @@
 <section class="follower-card reports-panel" aria-labelledby="reports-title">
   <h2 id="reports-title">{$_('reports.title')}</h2>
   <p>{$_('reports.intro')}</p>
-  <form
-    class="reports-actions reports-toolbar"
-    onsubmit={(event) => {
-      event.preventDefault();
-      void refresh();
-    }}
-  >
-    <label for="report-year">{$_('reports.year')}</label>
-    <select id="report-year" bind:value={year}>
-      {#each years as option (option)}
-        <option value={option}>{option}</option>
-      {/each}
-    </select>
-    <button type="submit" disabled={busy}>{$_('reports.load')}</button>
-    {#if busy}<button type="button" onclick={() => controller?.abort()}
-        >{$_('follower.cancel')}</button
-      >{/if}
-    <button type="button" disabled={busy} onclick={() => void restore()}
-      >{$_('reports.restore')}</button
-    >
-    <button
-      type="button"
-      disabled={busy || !report}
-      title={!report ? $_('reports.saveHint') : undefined}
-      onclick={() => void store()}>{$_('reports.save')}</button
-    >
-    <button
-      type="button"
-      disabled={busy || !pdfSnapshot}
-      onclick={() => {
-        void openPdf();
+  <div class="reports-toolbar">
+    <form
+      class="reports-actions"
+      onsubmit={(event) => {
+        event.preventDefault();
+        void refresh();
       }}
     >
-      {$_('reports.pdf.action')}
-    </button>
-  </form>
+      <label for="report-year">{$_('reports.year')}</label>
+      <select id="report-year" bind:value={year}>
+        {#each years as option (option)}
+          <option value={option}>{option}</option>
+        {/each}
+      </select>
+      <button type="submit" disabled={busy}>{$_('reports.load')}</button>
+      {#if busy}<button type="button" onclick={() => controller?.abort()}
+          >{$_('follower.cancel')}</button
+        >{/if}
+      <button type="button" disabled={busy} onclick={() => void restore()}
+        >{$_('reports.restore')}</button
+      >
+      <button
+        type="button"
+        disabled={busy || !report}
+        title={!report ? $_('reports.saveHint') : undefined}
+        onclick={() => void store()}>{$_('reports.save')}</button
+      >
+    </form>
+    {#if report && !busy}
+      <div class="reports-export" role="group" aria-label={$_('reports.exportGroup')}>
+        <button
+          type="button"
+          disabled={!pdfSnapshot}
+          onclick={() => {
+            void openPdf();
+          }}
+        >
+          {$_('reports.pdf.action')}
+        </button>
+        <button type="button" onclick={() => void copy()}>{$_('reports.copy')}</button>
+        <button type="button" onclick={download}>{$_('reports.csv')}</button>
+      </div>
+    {/if}
+  </div>
+  {#if report && !busy && actionMessage}
+    <p class="reports-action-status" class:reports-action-status-error={actionError} role="status">
+      {actionMessage}
+    </p>
+  {/if}
   {#if !report && !busy}<p class="reports-hint">{$_('reports.saveHint')}</p>{/if}
   {#if busy}
     <div class="follower-progress-block reports-progress" role="status" aria-live="polite">
@@ -626,16 +640,23 @@
       <p>{$_('reports.followerHistoryNote')}</p>
       {#if followerHistory?.partial}<p>{$_('reports.followerHistoryPartial')}</p>{/if}
     {/if}
-    <p class="reports-saved-state">
-      {#if savedAt}
-        {$_('reports.savedState')}:
-        {new Date(savedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
-          timeZone: 'Europe/Berlin',
-        })}
-      {:else}
-        {$_('reports.noSavedState')}
+    <div class="reports-saved-state">
+      <span>
+        {#if savedAt}
+          {$_('reports.savedState')}:
+          {new Date(savedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
+            timeZone: 'Europe/Berlin',
+          })}
+        {:else}
+          {$_('reports.noSavedState')}
+        {/if}
+      </span>
+      {#if saved}
+        <button type="button" class="reports-delete" onclick={() => void remove()}
+          >{$_('reports.delete')}</button
+        >
       {/if}
-    </p>
+    </div>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (Scrollable table needs keyboard focus.) -->
     <div class="reports-scroll" role="region" aria-label={$_('reports.title')} tabindex="0">
       <table>
@@ -662,22 +683,6 @@
       </table>
     </div>
     <ReportCharts {labels} {rows} />
-    <div class="reports-actions">
-      <button type="button" disabled={!saved} onclick={() => void remove()}
-        >{$_('reports.delete')}</button
-      >
-      <button type="button" onclick={() => void copy()}>{$_('reports.copy')}</button>
-      <button type="button" onclick={download}>{$_('reports.csv')}</button>
-    </div>
-    {#if actionMessage}
-      <p
-        class="reports-action-status"
-        class:reports-action-status-error={actionError}
-        role="status"
-      >
-        {actionMessage}
-      </p>
-    {/if}
     <p>{$_('reports.storageNote')}</p>
   {/if}
 </section>
@@ -697,21 +702,69 @@
   .reports-panel {
     min-width: 0;
   }
+  .reports-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin: 1rem 0 0.4rem;
+  }
   .reports-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
     align-items: center;
-    margin: 1rem 0;
   }
-  .reports-toolbar {
-    margin-bottom: 0.4rem;
+  .reports-export {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-left: auto;
+  }
+  .reports-export button {
+    min-height: 38px;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    color: var(--paper);
+    background: transparent;
+    font: 700 0.64rem var(--mono);
+    cursor: pointer;
+  }
+  .reports-export button:hover:not(:disabled) {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+  .reports-export button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
   .reports-hint,
   .reports-saved-state {
     margin: 0 0 0.8rem;
     color: var(--text-on-dark);
     font-size: 0.8rem;
+  }
+  .reports-saved-state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+  }
+  .reports-delete {
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: none;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+  .reports-delete:hover {
+    color: var(--chart-decline);
   }
   .reports-action-status {
     margin: -0.2rem 0 0.8rem;
@@ -763,6 +816,8 @@
     cursor: not-allowed;
   }
   .reports-actions :focus-visible,
+  .reports-export :focus-visible,
+  .reports-delete:focus-visible,
   .reports-scroll:focus-visible {
     outline: 2px solid var(--lime);
     outline-offset: 3px;
@@ -785,5 +840,18 @@
   }
   th:first-child {
     text-align: left;
+  }
+  @media (max-width: 720px) {
+    .reports-export {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+      margin-left: 0;
+    }
+    .reports-export button {
+      min-height: 44px;
+      padding: 0.35rem 0.4rem;
+      line-height: 1.2;
+    }
   }
 </style>

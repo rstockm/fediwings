@@ -108,11 +108,11 @@ Das PDF SHALL vorhandene Report-Aggregate ohne Änderung der Reichweitenformel v
 
 #### Scenario: Unterschiedliche Followerquellen
 - **WHEN** Stichtagsdifferenzen, verankerte Followerwerte und Follow-Benachrichtigungen vorliegen
-- **THEN** unterscheidet der Bericht Nettoveränderung, rekonstruierten Stand und erfasste Follow-Ereignisse; eine gemischte Jahressumme wird nicht als Netto-Wachstum bezeichnet.
+- **THEN** unterscheidet der Bericht Nettoveränderungen aus erfassten Monatsendständen, mit `~` gekennzeichnete Veränderungen aus dem rekonstruierten Verlauf, rekonstruierte Stände und erfasste Follow-Ereignisse; eine gemischte Jahressumme wird nicht als Netto-Wachstum bezeichnet.
 
 ### Requirement: Top 5 Beiträge
 
-Das PDF SHALL bis zu fünf öffentliche Threads des Berichtszeitraums nach FediWings-Reichweite absteigend darstellen. Ein Thread SHALL einmal zählen. Bei Gleichstand entscheiden höhere Interaktionssumme, jüngeres Datum und lexikografische Thread-ID. Jeder Eintrag SHALL Rang, Datum, Klartextauszug, Reichweite, Interaktionssumme mit Einzelwerten sowie bei sicherer URL den Original-Link enthalten.
+Das PDF SHALL bis zu fünf öffentliche Threads des Berichtszeitraums nach FediWings-Reichweite absteigend darstellen. Ein Thread SHALL einmal zählen. Bei Gleichstand entscheiden höhere Interaktionssumme, jüngeres Datum und lexikografische Thread-ID. Jeder Eintrag SHALL Rang, Datum, Klartextauszug, Reichweite, Interaktionssumme mit Einzelwerten sowie bei sicherer URL den Original-Link enthalten; ein vorhandenes, unbedenkliches Beitragsbild SHALL zusätzlich erscheinen.
 
 #### Scenario: Rangliste
 - **WHEN** mindestens fünf auswertbare öffentliche Threads vorliegen
@@ -129,6 +129,22 @@ Das PDF SHALL bis zu fünf öffentliche Threads des Berichtszeitraums nach FediW
 #### Scenario: Inhaltswarnung und fehlender Link
 - **WHEN** ein Beitrag eine Inhaltswarnung hat oder keine sichere Original-URL besitzt
 - **THEN** ersetzt die Inhaltswarnung den sensiblen Auszug beziehungsweise entfällt der Link, ohne eine URL zu erfinden.
+
+#### Scenario: Beitragsbild
+- **WHEN** ein gelisteter Beitrag ein sicheres Vorschaubild besitzt und weder sensibel noch mit Inhaltswarnung versehen ist
+- **THEN** zeigt der Eintrag das Bild neben dem Auszug; bei fehlendem Bild bleibt der Text allein stehen.
+
+### Requirement: Account-Avatar und Medienzugriff
+
+Das PDF SHALL auf der Titelseite den Avatar des berichteten Accounts einbetten, sofern eine sichere Bildquelle vorhanden ist. Ohne nutzbares Bild SHALL eine Initialenfläche erscheinen. Avatar und Beitragsbilder SHALL vor dem Satz als Data-URLs geladen werden; die PDF-Engine SHALL keinen Remote-URL-Zugriff erhalten. Nicht abrufbare oder übergroße Medien SHALL den Export nicht verhindern.
+
+#### Scenario: Avatar nicht verfügbar
+- **WHEN** die Bildquelle fehlt, CORS den Abruf verhindert oder der Abruf fehlschlägt
+- **THEN** bricht der Export nicht ab, sondern zeigt die Initialen des Anzeigenamens beziehungsweise Handles.
+
+#### Scenario: Kein Remote-Bildzugriff
+- **WHEN** das PDF gesetzt wird
+- **THEN** enthält es keine aktiven Remote-Bildverweise; Medien sind eingebettet oder entfallen.
 
 ### Requirement: Konsistenter und rückwärtskompatibler Exportstand
 

@@ -9,7 +9,9 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 try {
   const { pdfDefinition } = await server.ssrLoadModule('/src/lib/reportPdf/render.ts');
   const { buildReportDocument } = await server.ssrLoadModule('/src/lib/reportPdf/document.ts');
-  const { pdfFixture } = await server.ssrLoadModule('/src/lib/reportPdf/fixtures.ts');
+  const { pdfFixture, pdfFixtureImages } = await server.ssrLoadModule(
+    '/src/lib/reportPdf/fixtures.ts',
+  );
   const css = readFileSync('src/styles/tokens.css', 'utf8');
   const color = (name) => css.match(new RegExp(`--${name}:\\s*(#[a-f0-9]+)`, 'i'))[1];
   const palette = {
@@ -58,7 +60,7 @@ try {
         createdAt: '2026-01-15T12:00:00.000Z',
       };
       const doc = buildReportDocument(snapshot, options);
-      const definition = pdfDefinition(doc, palette);
+      const definition = pdfDefinition(doc, palette, pdfFixtureImages(snapshot));
       definition.info.creationDate = new Date(options.createdAt);
       definition.info.modDate = new Date(options.createdAt);
       const path = `test-results/pdf/${variant}-${locale}.pdf`;

@@ -42,11 +42,11 @@ Kein neuer interaktiver Chartstack: PDF-spezifische Vektoren mit verpflichtender
 
 Der Snapshot enthält:
 
-- Schema-/Modellversion, Account-Handle und Anzeigename, Berichtsjahr, Datenstand, Erstellungszeit und Zeitzone.
+- Schema-/Modellversion, Account-Handle, Anzeigename und optionale Avatar-URL, Berichtsjahr, Datenstand, Erstellungszeit und Zeitzone.
 - Vorhandene Monats-/Jahresaggregate mit `counterComplete` und `reachComplete`.
 - Monatsstatus: abgeschlossen, laufend, zukünftig; Datenabdeckung getrennt von diesen Kalenderzuständen.
-- Followerzellen mit Wert, Quelle und Beobachtungsdatum; Follow-Ereignisse getrennt von Nettoveränderung.
-- Bis zu fünf vorbereitete öffentliche Thread-Kurzdatensätze: ID, Datum, sicherer Link, Klartextauszug oder Inhaltswarnung, Reichweite, Report-Interaktionssumme und Vollständigkeit.
+- Followerzellen mit Wert, Quelle, Veränderung zum Vormonat samt Berechnungsbasis und Beobachtungsdatum; Follow-Ereignisse getrennt von Nettoveränderung.
+- Bis zu fünf vorbereitete öffentliche Thread-Kurzdatensätze: ID, Datum, sicherer Link, optionales Beitragsbild, Klartextauszug oder Inhaltswarnung, Reichweite, Report-Interaktionssumme und Vollständigkeit.
 - Herkunft des gesamten Stands: live, neuer gespeicherter Exportstand oder Legacy-Report.
 
 Die Top-5-Ableitung läuft unmittelbar aus `loadReport(...).posts`, bevor das Panel diese Daten verwirft. Es werden nicht alle Rohtexte gespeichert. Titel, Organisation und Sprache gehören zur Exportkonfiguration; der Erstellungszeitpunkt wird je Erstellung eingefroren. Ein Wechsel dieser Konfiguration erzeugt einen neuen Blob; bloßer Download verwendet den vorhandenen Vorschau-Blob.
@@ -95,11 +95,13 @@ Verbindliche deutsche Textlinie:
 
 Die englischen Texte werden gleichwertig redigiert, nicht dynamisch übersetzt. Maximal drei regelbasierte Aussagen in fester Priorität: Interaktionsspitze und Anteil, Reichweitenentwicklung zum vorherigen abgeschlossenen Monat, Aktivitätsvergleich zweier abgeschlossener Dreimonatsfenster. Nur bei ausreichender vollständiger Basis; kein prozentualer Vergleich gegen null, keine Prognosen oder Kausalbehauptungen. Bei Gleichständen werden gleichrangige Spitzen sachlich benannt oder die Aussage entfällt. Summen/Anteile nutzen ungerundete Werte.
 
-### 6. Top 5 ohne Medienabhängigkeit
+### 6. Top 5 mit optionalen Medien
 
 Rangfolge nach Reichweite, dann Report-Interaktionen, dann Veröffentlichungszeit absteigend, dann ID lexikografisch aufsteigend. Deduplizierung nach Thread-Root-ID; Kalenderzuordnung entspricht der Aggregation. Öffentliche Threads werden anhand `visibility === 'public'` ausgewählt; nicht öffentliche oder nicht gelistete Inhalte erscheinen nicht als Beitragstexte im PDF. Aggregate behalten ihre bestehende Semantik.
 
-Auszüge aus dem Root-Beitrag: HTML in Klartext umwandeln, Absatzabstände normalisieren, Steuerzeichen entfernen, auf höchstens 240 Unicode-Zeichen und die vorgesehene Zeilenhöhe begrenzen, Kürzung markieren. Bei Inhaltswarnung nur deren Text; bei markiert sensiblen Inhalten ohne Warntext neutraler Hinweis statt Auszug. Keine Vorschaubilder, Avatare oder Remote-Fonts. Dadurch stabiler Satz, kleinere Dateien und kein zusätzlicher Netzwerkzugriff.
+Auszüge aus dem Root-Beitrag: HTML in Klartext umwandeln, Absatzabstände normalisieren, Steuerzeichen entfernen, auf höchstens 240 Unicode-Zeichen und die vorgesehene Zeilenhöhe begrenzen, Kürzung markieren. Bei Inhaltswarnung nur deren Text; bei markiert sensiblen Inhalten ohne Warntext neutraler Hinweis statt Auszug. Remote-Fonts bleiben ausgeschlossen.
+
+Avatar und Beitragsbilder sind optional und werden ausschließlich als vorab geladene Data-URLs in das PDF eingebettet; pdfmake behält die Sperre für Remote-URLs. Der Avatar stammt aus `avatar_static`, das Beitragsbild bevorzugt aus `preview_url` des Thread-Roots. Sensible Beiträge und Beiträge mit Inhaltswarnung erhalten kein Bild. CORS-Fehler, Netzwerkfehler, übergroße Dateien und Zeitüberschreitungen führen still zum Rückfall auf Initialen beziehungsweise Text, damit der Export nie an Medien scheitert. Vor der Einbettung werden die Bilder verkleinert (Avatar 96 px rund, Beitragsbild 240 × 180 px).
 
 Links nur aus vorhandenen validierten HTTP-/HTTPS-URLs ohne Zugangsdaten; fehlen sie, entfällt die Aktion. Keine abgeleiteten Fantasie-URLs. Für Teilstände wird der Ranglistentitel auf den vorhandenen Datenstand begrenzt.
 
@@ -110,6 +112,8 @@ Neue Datensätze als `StoredReport` Version 2 mit versioniertem PDF-Snapshot zus
 Version-1-Reports erhalten keinen heimlichen Live-Nachabruf und keine aus aktuellen Beobachtungen behauptete historische Community. PDF nutzt alte Aggregate; fehlende Top-Beiträge/Herkünfte werden als „In diesem gespeicherten Stand nicht enthalten“ benannt. Live-Aktualisierung ersetzt den gesamten Stand erst auf Nutzeraktion.
 
 Damit löst der PDF-Pfad den Widerspruch zwischen der ursprünglichen Netto-Wachstums-Spec und aktuellen Follower-Fallbacks durch getrennte Quellendarstellung, ohne die bestehende Bildschirm-/CSV-Semantik in diesem Change umzuschreiben.
+
+Veränderungen zum Vormonat werden aus demselben effektiven Followerstand berechnet, der in der Community-Tabelle steht: erfasste Monatsendstände haben Vorrang, sonst der rekonstruierte Verlauf. Die Berechnungsbasis bleibt je Zelle erhalten. Differenzen zwischen zwei erfassten Monatsendständen gelten als Nettoveränderung; sobald ein rekonstruierter Wert beteiligt ist, kennzeichnet `~` die Veränderung als Näherung ohne Unfollows. Der Snapshot speichert die Basis optional, ältere Stände ohne dieses Feld werden als beobachtet gelesen.
 
 ### 8. Qualität als funktionale und visuelle Prüfung
 

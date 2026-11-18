@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ReportsPanel from './ReportsPanel.svelte';
@@ -305,13 +305,40 @@ describe('ReportsPanel', () => {
     expect(screen.getByRole('heading', { name: 'Engagement Rate (%)' })).toBeInTheDocument();
   });
 
+  it('zeigt die Exportformate oben vor der Tabelle und ohne Aufklappmenü', async () => {
+    render(ReportsPanel, {
+      account: fixture,
+      origin: 'https://test.social',
+      platform: null,
+    });
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+
+    const group = screen.getByRole('group', { name: 'Export' });
+    expect(
+      within(group)
+        .getAllByRole('button')
+        .map((button) => button.textContent?.trim()),
+    ).toEqual(['PDF-Bericht erstellen', 'Für Excel kopieren', 'CSV herunterladen']);
+    expect(
+      group.compareDocumentPosition(screen.getByRole('table')) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(within(group).queryByRole('combobox')).toBeNull();
+  });
+
   it('zeigt einen vorhandenen gespeicherten Stand mit Datum an', async () => {
     vi.mocked(readReport).mockResolvedValue({
       savedAt: '2026-03-01T10:00:00.000Z',
     } as Awaited<ReturnType<typeof readReport>>);
-    render(ReportsPanel, { account: fixture, origin: 'https://test.social', platform: null });
+    const { container } = render(ReportsPanel, {
+      account: fixture,
+      origin: 'https://test.social',
+      platform: null,
+    });
     await waitFor(() => expect(screen.getByText(/Gespeicherter Stand:/)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: 'Gespeicherten Stand löschen' })).toBeEnabled();
+    expect(container.querySelector('.reports-saved-state button')).toHaveTextContent(
+      'Gespeicherten Stand löschen',
+    );
   });
 
   it('bietet die gültigen Jahre als Auswahlliste statt als Zahlen-Spinner an', () => {

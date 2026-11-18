@@ -3,7 +3,7 @@ import { aggregateReport } from '../reports';
 import { initialReach } from '../reach';
 import type { MastodonStatus, PostReach } from '../types';
 import { buildReportDocument, seriesTableRows } from './document';
-import { pdfFixture } from './fixtures';
+import { pdfFixture, pdfFixtureImages } from './fixtures';
 import { reportInsights } from './insights';
 import { cleanText, pdfSnapshotSchema, safePdfUrl } from './model';
 import { plainText, preparePdfSnapshot, selectTopPosts } from './prepare';
@@ -42,6 +42,16 @@ const options = {
   organization: 'Demo',
   locale: 'de' as const,
   createdAt: '2026-01-15T12:00:00Z',
+};
+const palette = {
+  ink: '#17181b',
+  paper: '#faf9f5',
+  muted: '#5c5a62',
+  violet: '#5d4cf0',
+  lime: '#c7f36b',
+  riseSoft: '#93b873',
+  decline: '#ff9d55',
+  declineSoft: '#d99a63',
 };
 
 describe('PDF-Daten und Top 5', () => {
@@ -103,13 +113,59 @@ describe('PDF-Daten und Top 5', () => {
         .excerpt,
     ).toBe('Warnung');
     expect(selectTopPosts([post('s', { sensitive: true })], 2025)[0].excerpt).toBe('');
+    const media = [
+      {
+        type: 'image',
+        url: 'https://example.social/media/full.jpg',
+        preview_url: 'https://example.social/media/preview.jpg',
+      },
+    ];
+    expect(selectTopPosts([post('media', { media_attachments: media })], 2025)[0].imageUrl).toBe(
+      'https://example.social/media/preview.jpg',
+    );
+    expect(
+      selectTopPosts([post('cw', { spoiler_text: 'Warnung', media_attachments: media })], 2025)[0]
+        .imageUrl,
+    ).toBeNull();
+    expect(
+      selectTopPosts([post('sensitive', { sensitive: true, media_attachments: media })], 2025)[0]
+        .imageUrl,
+    ).toBeNull();
+    expect(
+      preparePdfSnapshot({
+        handle: 'demo',
+        displayName: 'Demo',
+        avatarUrl: 'javascript:alert(1)',
+        report: pdfFixture().report,
+        analyzedAt: '2026-01-15T12:00:00Z',
+      }).avatarUrl,
+    ).toBeNull();
+    expect(
+      preparePdfSnapshot({
+        handle: 'demo',
+        displayName: 'Demo',
+        avatarUrl: 'https://example.social/avatar.png',
+        report: pdfFixture().report,
+        analyzedAt: '2026-01-15T12:00:00Z',
+      }).avatarUrl,
+    ).toBe('https://example.social/avatar.png');
+    expect(
+      preparePdfSnapshot({
+        handle: 'demo',
+        displayName: 'Demo',
+        avatarUrl: 'https://example.social/avatar.png',
+        report: pdfFixture().report,
+        analyzedAt: '2026-01-15T12:00:00Z',
+        legacy: true,
+      }).avatarUrl,
+    ).toBeNull();
     expect(safePdfUrl('javascript:alert(1)')).toBeNull();
     expect(safePdfUrl('https://user:pass@example.social')).toBeNull();
     expect(safePdfUrl(null)).toBeNull();
     expect(cleanText('A\u0000B')).toBe('A B');
     expect(Array.from(plainText('😀'.repeat(300)))).toHaveLength(240);
   });
-  it('übernimmt Aggregate und Quellen ohne falsches Nettowachstum', () => {
+  it('kennzeichnet rekonstruierte Veränderungen statt sie als Nettowachstum auszugeben', () => {
     const posts = [post()];
     const report = aggregateReport(2025, posts, new Date('2025-03-15T12:00:00Z'));
     const s = preparePdfSnapshot({
@@ -137,8 +193,18 @@ describe('PDF-Daten und Top 5', () => {
     });
     expect(s.report).toEqual(report);
     expect(s.months.slice(0, 4)).toEqual(['closed', 'closed', 'current', 'future']);
-    expect(s.community[0]).toMatchObject({ followers: 90, source: 'observed', netChange: -10 });
-    expect(s.community[1]).toMatchObject({ source: 'reconstructed', follows: 6, netChange: null });
+    expect(s.community[0]).toMatchObject({
+      followers: 90,
+      source: 'observed',
+      netChange: -10,
+      netChangeSource: 'observed',
+    });
+    expect(s.community[1]).toMatchObject({
+      source: 'reconstructed',
+      follows: 6,
+      netChange: 6,
+      netChangeSource: 'reconstructed',
+    });
     expect(s.community[3].followers).toBeNull();
     expect(s.report.total.engagement).toBe(28);
   });
@@ -207,16 +273,7 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     expect(axisLabels(chartAxis([0, 80_000_000_000_000], false), 'de').at(-1)).toContain('Bio.');
     expect(chartAxis([0, 0]).ticks).toEqual([0, 1]);
     const doc = buildReportDocument(pdfFixture(), options);
-    const definition = pdfDefinition(doc, {
-      ink: '#17181b',
-      paper: '#faf9f5',
-      muted: '#5c5a62',
-      violet: '#5d4cf0',
-      lime: '#c7f36b',
-      riseSoft: '#93b873',
-      decline: '#ff9d55',
-      declineSoft: '#d99a63',
-    });
+    const definition = pdfDefinition(doc, palette);
     const nodes = (Array.isArray(definition.content) ? definition.content : []) as unknown as Array<
       Record<string, unknown>
     >;
@@ -235,6 +292,21 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
     const rendered = JSON.stringify(definition.content);
     expect(rendered).toContain('Achse nicht bei null');
     expect(rendered).toContain('Antworten: 50');
+    expect(rendered).toContain('Veränderung');
+    expect(rendered).toContain('44 ~');
+    expect(rendered).toContain('rekonstruiertem Verlauf');
+  });
+  it('bettet Avatar und Beitragsbilder ein und fällt ohne Bild auf Initialen zurück', () => {
+    const snapshot = pdfFixture();
+    const doc = buildReportDocument(snapshot, options);
+    const withImages = JSON.stringify(
+      pdfDefinition(doc, palette, pdfFixtureImages(snapshot)).content,
+    );
+    expect(withImages).toContain('"image":"data:image/png;base64,');
+    expect(withImages.match(/"image":"data:image\/jpeg;base64,/g)).toHaveLength(5);
+    const withoutImages = JSON.stringify(pdfDefinition(doc, palette).content);
+    expect(withoutImages).not.toContain('"image"');
+    expect(withoutImages).toContain('"text":"D"');
   });
   it('lokalisiert und begrenzt Titel ohne HTML-Ausführung', () => {
     const de = buildReportDocument(pdfFixture(), options);
@@ -251,16 +323,7 @@ describe('PDF-Redaktion und Tabellenvertrag', () => {
   it('gibt fehlende Schriftzeichen sichtbar aus und rendert jede Tabellenzelle aus der zugehörigen Reihe', () => {
     expect(pdfText('Ää ß 😀 中')).toBe('Ää ß [U+1F600] [U+4E2D]');
     const doc = buildReportDocument(pdfFixture('partial'), options);
-    const definition = pdfDefinition(doc, {
-      ink: '#17181b',
-      paper: '#faf9f5',
-      muted: '#5c5a62',
-      violet: '#5d4cf0',
-      lime: '#c7f36b',
-      riseSoft: '#93b873',
-      decline: '#ff9d55',
-      declineSoft: '#d99a63',
-    });
+    const definition = pdfDefinition(doc, palette);
     const nodes = (Array.isArray(definition.content) ? definition.content : []) as unknown as Array<
       Record<string, unknown>
     >;
