@@ -116,6 +116,10 @@ Die folgenden **UI-Demos vom 19.11.2026** verwenden kontrollierte Beispieldaten.
 
 <img src="docs/screenshots/reports-mobile.png" alt="Mobilansicht der horizontal scrollbareren Demo-Tabelle mit unbekanntem Januar und Februar-Teilstand" width="390" />
 
+![Demo: Abruf pausiert am FediWings-Seitenlimit, mit ältestem Datum und Schaltfläche zum Nachladen](docs/screenshots/reports-interaction-history-desktop.png)
+
+<img src="docs/screenshots/reports-interaction-history-mobile.png" alt="Mobiler Hinweis zum Teilstand mit Schaltfläche zum Nachladen älterer Interaktionen" width="390" />
+
 Die Balkendiagramme zeigen dieselben Monatswerte mit gerundeten Achsenskalen.
 Die Balkenfarbe vergleicht jeden Monat mit seinem direkten Vormonat: Grün bedeutet
 einen höheren Wert, Orange einen niedrigeren. Kleine Sprünge erscheinen in schwachem
@@ -341,7 +345,9 @@ Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regress
 
 Die Ergebnisübersicht vergleicht Beiträge aus den letzten 30 Kalendertagen mit den 30 Tagen davor und gruppiert die Werte nach Veröffentlichungsdatum. An erster Stelle steht die Summe der bereits pro Thread berechneten Netto-Reichweiten; wegen möglicher Zielgruppenüberschneidungen ist sie keine Schätzung eindeutig erreichter Personen. Die weiteren Karten verwenden direkt gemeldete Postingzähler: Likes und Boosts sowie Likes, Boosts und Antworten zusammen als Interaktionen. Die Zähler zeigen den Stand zum Analysezeitpunkt, nicht den Zeitpunkt einzelner Reaktionen. Reicht die geladene Historie oder die Auswahl der 80 analysierten Threads nicht bis zum Beginn eines Zeitfensters, zeigt FediWings dafür weder eine Teilsumme noch eine irreführende Kurve. Eine Prozentabweichung entfällt außerdem, wenn die Vorperiodensumme null ist.
 
-Reports zählen eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate aus verfügbaren Benachrichtigungen der verbundenen Instanz nach Ereignismonat in `Europe/Berlin` – auch zu älteren Beiträgen. Nur innerhalb der erreichten Historie kann ein Monat ohne gemeldete Ereignisse als Null erscheinen. Fehlende Monate bleiben unbekannt (`—`); unvollständige Monats- und Jahressummen sind Teilstände (`!`). Die Instanz kann Ereignisse vorenthalten oder löschen, und der Abruf ist auf 40 Benachrichtigungsseiten begrenzt. Tabelle, PDF, CSV und Excel-Kopie verwenden dieselben Interaktionswerte; ältere gespeicherte Stände sind als nach Thread-Start gruppiert gekennzeichnet.
+Reports zählen eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate aus verfügbaren Benachrichtigungen der verbundenen Instanz nach Ereignismonat in `Europe/Berlin` – auch zu älteren Beiträgen. Fehlende Monate bleiben unbekannt (`—`); unvollständige Monats- und Jahressummen sind Teilstände (`!`). Der Report zeigt das älteste erreichte Datum und den Abbruchgrund. Nach jeweils 40 Seiten lässt sich der Abruf über „Ältere Interaktionen nachladen“ an derselben Stelle fortsetzen, sofern die Instanz weitere Seiten anbietet. Die Instanz kann Ereignisse vorenthalten oder löschen.
+
+„Report speichern“ hält die ermittelten Werte lokal fest. Spätere kurze Live-Abrufe bevorzugen vollständig erfasste Live-Monate und ergänzen fehlende oder teilweise erfasste ältere Monate mit bereits vollständig gespeicherten, abgeschlossenen Monaten desselben Accounts und Jahres. Monatswerte werden dabei nicht addiert. Tabelle, PDF, CSV und Excel-Kopie verwenden dieselben Interaktionswerte; ältere gespeicherte Stände nach Thread-Start werden für diese Ergänzung nicht verwendet.
 
 Postings und Reichweite zählen weiter zum Startmonat der Threads. Deren beim Abruf sichtbare Beitragszähler, nicht die Monatsereignisse, bilden den Zähler der Engagement-Rate zur modellierten Reichweitensumme. Auch die Top‑5‑Karten im PDF zeigen Beitragszähler zum Abrufzeitpunkt. Follower-Wachstum benötigt gespeicherte Stände vom letzten Tag zweier aufeinanderfolgender Monate; bei geschlossener App werden keine Stände automatisch erhoben.
 

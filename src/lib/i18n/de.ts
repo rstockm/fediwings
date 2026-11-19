@@ -89,6 +89,8 @@ export const de = {
       notificationDefinition:
         'Eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate zählen anhand verfügbarer Instanz-Benachrichtigungen zum Ereignismonat (Europe/Berlin), unabhängig vom Alter der Beiträge. Die Jahressumme enthält nur verfügbare Monatswerte. Die Karten der Top 5 zeigen dagegen Beitragszähler zum Abrufstand.',
       postInteractions: 'Interaktionen am Beitrag',
+      reusedInteractionNote:
+        'Vollständig erfasste ältere Interaktionsmonate können aus einem lokal gespeicherten Datenstand stammen.',
       threadEngagement: 'Engagement-Rate der Threads',
       threadRate: 'Beitragszähler / Reichweite · %',
       engagementDefinition:
@@ -141,6 +143,17 @@ export const de = {
     interactionPartial:
       'Interaktionen: — = unbekannt bei fehlender Historie; ! = Teilstand. Die Jahressumme enthält nur verfügbare Monatswerte.',
     interactionCoverage: 'Datenabdeckung: Interaktionen',
+    reusedInteractions: 'Vollständig erfasste ältere Monate aus dem gespeicherten Stand: {count}.',
+    oldestInteraction: 'Älteste abgerufene Interaktions-Benachrichtigung',
+    interactionBudget:
+      'FediWings hat nach 40 Seiten pausiert. Die Instanz bietet weitere Seiten an.',
+    loadOlderInteractions: 'Ältere Interaktionen nachladen',
+    interactionEnd: 'Die Instanz hat keine weitere Seite geliefert.',
+    interactionYear: 'Der Abruf hat den Beginn des Berichtsjahres erreicht.',
+    interactionRateLimit: 'Die Instanz hat den Abruf vorübergehend begrenzt (HTTP 429).',
+    interactionHttp: 'Die Instanz hat den Abruf mit HTTP {status} beendet.',
+    interactionError:
+      'Der Abruf konnte wegen eines Verbindungs- oder Antwortfehlers nicht fortgesetzt werden.',
     unknown: 'Unbekannt',
     partialValue: 'Teilstand',
     threads: 'Postings',

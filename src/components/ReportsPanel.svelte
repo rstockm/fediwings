@@ -14,9 +14,14 @@
   import { getAccount, getStatus } from '../lib/api';
   import { canonicalAcct } from '../lib/oauth';
   import { loadReport, REPORT_CACHE_MS, type ReportLoadProgress } from '../lib/reportLoader';
-  import { loadReportInteractions } from '../lib/reportInteractions';
+  import { loadReportInteractions, type ReportInteractionHistory } from '../lib/reportInteractions';
   import type { FollowerProgress } from '../lib/followers';
-  import { aggregateReport, type AggregatedReport } from '../lib/reports';
+  import {
+    aggregateReport,
+    applyInteractionHistory,
+    reuseStoredInteractions,
+    type AggregatedReport,
+  } from '../lib/reports';
   import {
     listFollowerObservations,
     followerGrowth,
@@ -27,6 +32,7 @@
     reportKey,
     saveReport,
     type FollowerObservation,
+    type StoredReport,
   } from '../lib/reportStorage';
   import { reportAsCsv, reportAsTsv, type ReportExport } from '../lib/reportExport';
   import { reportFollowerHistory, type ReportFollowerHistory } from '../lib/reportFollowers';
@@ -77,6 +83,8 @@
   let progress = $state<ReportLoadProgress | null>(null);
   let followerProgress = $state<FollowerProgress | null>(null);
   let interactionRequests = $state(0);
+  let interactionHistory = $state.raw<ReportInteractionHistory | null>(null);
+  let storedInteractions: StoredReport | undefined;
   let followersDone = $state(false);
   let reachDone = $state(false);
   let interactionsDone = $state(false);
@@ -181,6 +189,7 @@
   const interactionNote = $derived(
     $_(report?.interactionBasis ? 'reports.interactionNote' : 'reports.legacyInteractionNote'),
   );
+  const reusedCount = $derived(report?.reusedInteractionMonths?.length ?? 0);
   const rows = $derived.by(() => {
     const currentReport = report;
     if (!currentReport) return [];
@@ -228,6 +237,9 @@
           analyzedAt,
           modelNote:
             `${$_('reports.modelNote')} ${interactionNote}` +
+            (reusedCount
+              ? ` ${$_('reports.reusedInteractions', { values: { count: reusedCount } })}`
+              : '') +
             (year === currentYear ? ` ${$_('reports.currentMonth')}.` : '') +
             (latestObserved
               ? ` ${$_('reports.followerAsOf')}: ${latestObserved.observedAt}.`
@@ -416,6 +428,8 @@
     comparisonLoading = false;
     followerProgress = null;
     interactionRequests = 0;
+    interactionHistory = null;
+    storedInteractions = undefined;
     followersDone = !loadFollowerHistory;
     reachDone = false;
     interactionsDone = false;
@@ -482,6 +496,7 @@
       if (active.signal.aborted) return;
       if (loaded.status === 'rejected') throw loaded.reason;
       const result = loaded.value;
+      interactionHistory = interactions.status === 'fulfilled' ? interactions.value : null;
       currentAccount = fresh;
       accountObservedAt = observedAt;
       analyzedAt = new Date(
@@ -508,6 +523,8 @@
         if (active.signal.aborted) return;
         observations = storedObservations;
         savedAt = storedReport?.savedAt ?? '';
+        storedInteractions = storedReport;
+        report = withStoredInteractions(report);
       } catch {
         if (active.signal.aborted) return;
         message = $_('reports.storageError');
@@ -536,6 +553,57 @@
       }
     } finally {
       if (controller === active) {
+        busy = false;
+        onbusy?.(false);
+        controller = null;
+      }
+    }
+  }
+
+  function withStoredInteractions(live: AggregatedReport): AggregatedReport {
+    const stored = storedInteractions;
+    return stored ? reuseStoredInteractions(live, stored.report, stored.analyzedAt) : live;
+  }
+
+  async function loadOlderInteractions(): Promise<void> {
+    const resume = interactionHistory;
+    const base = report;
+    const snapshot = pdfSnapshot;
+    if (!resume?.cursor || !base || !snapshot || busy || !notificationToken) return;
+    closePdf();
+    const active = new AbortController();
+    controller = active;
+    busy = true;
+    onbusy?.(true);
+    interactionsDone = false;
+    elapsed = 0;
+    message = '';
+    const previousRequests = interactionRequests;
+    try {
+      const history = await loadReportInteractions(
+        origin,
+        notificationToken,
+        base.year,
+        active.signal,
+        (count) => {
+          if (!active.signal.aborted) interactionRequests = previousRequests + count;
+        },
+        { cacheKey: sessionKey || undefined, resume },
+      );
+      if (active.signal.aborted || controller !== active) return;
+      interactionHistory = history;
+      report = withStoredInteractions(applyInteractionHistory(base, history, new Date(analyzedAt)));
+      pdfSnapshot = {
+        ...$state.snapshot(snapshot),
+        report: $state.snapshot(report),
+        annualComparison: undefined,
+      };
+    } catch (error) {
+      if (!active.signal.aborted)
+        message = error instanceof Error ? error.message : $_('reports.error');
+    } finally {
+      if (controller === active) {
+        interactionsDone = true;
         busy = false;
         onbusy?.(false);
         controller = null;
@@ -598,6 +666,7 @@
         return;
       }
       currentAccount = fresh;
+      interactionHistory = null;
       accountObservedAt = new Date().toISOString();
       report = stored.version === 2 ? stored.pdfSnapshot.report : stored.report;
       pdfOpen = false;
@@ -782,8 +851,45 @@
         'reports.modelNote',
       )}
     </p>
-    <p>{interactionNote}</p>
-    {#if interactionPartial?.some(Boolean)}<p>{$_('reports.interactionPartial')}</p>{/if}
+    <div class="reports-interaction-info">
+      <p>{interactionNote}</p>
+      {#if reusedCount}<p>
+          {$_('reports.reusedInteractions', { values: { count: reusedCount } })}
+        </p>{/if}
+      {#if interactionHistory?.oldest != null}
+        <p>
+          {$_('reports.oldestInteraction')}:
+          {new Intl.DateTimeFormat($locale === 'en' ? 'en' : 'de', {
+            dateStyle: 'medium',
+            timeZone: 'Europe/Berlin',
+          }).format(interactionHistory.oldest)}
+        </p>
+      {/if}
+      {#if interactionHistory?.stop === 'budget'}
+        <p>{$_('reports.interactionBudget')}</p>
+      {:else if interactionHistory?.stop === 'end'}
+        <p>{$_('reports.interactionEnd')}</p>
+      {:else if interactionHistory?.stop === 'year'}
+        <p>{$_('reports.interactionYear')}</p>
+      {:else if interactionHistory?.stop === 'http'}
+        <p>
+          {$_(
+            interactionHistory.status === 429
+              ? 'reports.interactionRateLimit'
+              : 'reports.interactionHttp',
+            { values: { status: interactionHistory.status } },
+          )}
+        </p>
+      {:else if interactionHistory?.stop === 'error'}
+        <p>{$_('reports.interactionError')}</p>
+      {/if}
+      {#if interactionHistory?.cursor}
+        <button type="button" onclick={() => void loadOlderInteractions()}
+          >{$_('reports.loadOlderInteractions')}</button
+        >
+      {/if}
+      {#if interactionPartial?.some(Boolean)}<p>{$_('reports.interactionPartial')}</p>{/if}
+    </div>
     {#if !report.total.counterComplete || !report.total.reachComplete}<p>
         {$_('reports.partial')}
       </p>{/if}

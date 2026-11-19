@@ -89,6 +89,8 @@ export const en: Messages = {
       notificationDefinition:
         'Incoming likes, boosts, replies/mentions and quotes are assigned to the month of the available instance notification (Europe/Berlin), regardless of the age of the post. The annual total includes only available monthly values. The top 5 cards show post counters at retrieval instead.',
       postInteractions: 'Post interactions',
+      reusedInteractionNote:
+        'Fully covered older interaction months may come from a locally saved snapshot.',
       threadEngagement: 'Thread engagement rate',
       threadRate: 'Post counters / reach · %',
       engagementDefinition:
@@ -141,6 +143,15 @@ export const en: Messages = {
     interactionPartial:
       'Interactions: — = unknown when history is missing; ! = partial. The annual total only includes available monthly values.',
     interactionCoverage: 'Data coverage: interactions',
+    reusedInteractions: 'Fully covered older months reused from the saved snapshot: {count}.',
+    oldestInteraction: 'Oldest interaction notification fetched',
+    interactionBudget: 'FediWings paused after 40 pages. The server offers more pages.',
+    loadOlderInteractions: 'Load older interactions',
+    interactionEnd: 'The server did not return another page.',
+    interactionYear: 'The request reached the start of the report year.',
+    interactionRateLimit: 'The server temporarily rate limited the request (HTTP 429).',
+    interactionHttp: 'The server stopped the request with HTTP {status}.',
+    interactionError: 'The request could not continue because of a connection or response error.',
     unknown: 'Unknown',
     partialValue: 'Partial',
     threads: 'Posts',

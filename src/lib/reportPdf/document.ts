@@ -32,7 +32,9 @@ export function buildReportDocument(
         ...base,
         engagement: base.threadEngagement,
         rate: base.threadRate,
-        interactionDefinition: base.notificationDefinition,
+        interactionDefinition: snapshot.report.reusedInteractionMonths?.length
+          ? `${base.notificationDefinition} ${base.reusedInteractionNote}`
+          : base.notificationDefinition,
       }
     : base;
   const number = (value: number) =>

@@ -307,6 +307,68 @@ test('Report bleibt bei gesperrtem lokalem Speicher nutzbar', async ({ page }) =
   await expect(page.getByRole('button', { name: 'CSV herunterladen' })).toBeEnabled();
 });
 
+test('lädt ältere Interaktionen nach und nutzt gespeicherte Altmonate im kurzen Live-Report', async ({
+  page,
+}, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-11-19T12:00:00Z'));
+  await mockInstance(page);
+  await mockOAuthFlow(page);
+  const cursors: Array<string | null> = [];
+  await page.route('https://test.social/api/v1/notifications?*', async (route) => {
+    const url = new URL(route.request().url());
+    if (!url.searchParams.getAll('types[]').includes('favourite')) return route.fallback();
+    const cursor = url.searchParams.get('max_id');
+    cursors.push(cursor);
+    const value = Number(cursor);
+    const interaction = (id: number, created_at: string) => ({
+      id: String(id),
+      type: 'favourite',
+      created_at,
+    });
+    if (value === 40) {
+      await route.fulfill({
+        json: [interaction(41, '2026-01-15T12:00:00Z'), interaction(42, '2025-12-15T12:00:00Z')],
+      });
+    } else {
+      await route.fulfill({
+        json: [interaction(value + 1, '2026-10-01T12:00:00Z')],
+        headers: {
+          'Access-Control-Expose-Headers': 'Link',
+          Link: `<https://test.social/api/v1/notifications?max_id=${value + 1}>; rel="next"`,
+        },
+      });
+    }
+  });
+  await page.goto('/?view=reports');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Eigene Instanz verbinden', exact: true }).click();
+  await connectOwnInstance(page);
+  const older = page.getByRole('button', { name: 'Ältere Interaktionen nachladen' });
+  await expect(older).toBeVisible();
+  await expect(page.getByText(/FediWings hat nach 40 Seiten pausiert/)).toBeVisible();
+  const january = page.getByRole('row', { name: 'Interaktionen' }).getByRole('cell').first();
+  await expect(january).toHaveText('—');
+  if (process.env.UPDATE_INTERACTION_HISTORY_SCREENSHOTS && testInfo.project.name !== 'narrow') {
+    const variant = testInfo.project.name === 'mobile' ? 'mobile' : 'desktop';
+    await page.locator('.reports-interaction-info').screenshot({
+      path: `docs/screenshots/reports-interaction-history-${variant}.png`,
+    });
+  }
+  await older.click();
+  await expect(january).toHaveText('1');
+  expect(cursors).toHaveLength(41);
+  expect(cursors.at(-1)).toBe('40');
+  await page.getByRole('button', { name: 'Report speichern' }).click();
+  await expect(page.getByText('Report lokal gespeichert.')).toBeVisible();
+  await page.getByRole('button', { name: 'Live-Report laden' }).click();
+  await expect(older).toBeVisible();
+  await expect(january).toHaveText('1');
+  await expect(
+    page.getByText(/Vollständig erfasste ältere Monate aus dem gespeicherten Stand/),
+  ).toBeVisible();
+  expect(cursors).toHaveLength(81);
+});
+
 test('zeigt ohne Verbindung keine Statistiken und lädt keine Reportdaten', async ({ page }) => {
   await mockInstance(page);
   const statusRequests: string[] = [];

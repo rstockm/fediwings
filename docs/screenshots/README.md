@@ -21,6 +21,8 @@ verwenden dagegen kontrollierte Testdaten.
 | `reports-mobile.png`    | Dieselbe Demo-Reporttabelle; Mobilansicht |
 | `reports-charts-desktop.png` | Monatsdiagramme desselben Demo-Reports; Desktop |
 | `reports-charts-mobile.png` | Monatsdiagramme desselben Demo-Reports; Mobilansicht |
+| `reports-interaction-history-desktop.png` | UI-Demo vom 19.11.2026: Seitenlimit mit Abbruchgrund, ältestem Datum und Nachlade-Aktion |
+| `reports-interaction-history-mobile.png` | Derselbe Hinweis im mobilen Pixel-7-Testprofil |
 | `reports-connect-desktop.png` | Aktueller Reports-Einstieg ohne Verbindung und ohne Statistiken |
 | `reports-connect-mobile.png` | Derselbe Einstieg mobil |
 | `reports-loading-demo-desktop.png` | UI-Demo vom 19.11.2026: gemeinsamer Ladezustand mit ausstehender Interaktionshistorie; kontrollierte Antworten, keine echte Anmeldung |
@@ -75,6 +77,10 @@ Die Tabellen- und Diagrammaufnahmen vom 19.11.2026 werden nach dem Build mit
 erstellt (1440 und 390 Pixel Viewport). Sie zeigen zwei April-Reaktionen auf
 ältere Beiträge sowie fehlende und teilweise abgedeckte Monate. Die
 Beispieldaten sind kontrolliert, nicht von einem echten Account abgerufen.
+
+Die Aufnahmen zum Nachladen entstehen nach dem Build mit
+`UPDATE_INTERACTION_HISTORY_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'ältere Interaktionen'`.
+Der Test simuliert weitere Benachrichtigungsseiten, keine Live-Anmeldung.
 Authentifizierte Live-Reports können ohne Anmeldung des Accountinhabers nicht
 neu aufgenommen werden; sie werden nicht vorgetäuscht.
 Die Methodikaufnahme vom 19.11.2026 entsteht mit

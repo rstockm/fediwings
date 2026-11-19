@@ -38,6 +38,7 @@ export const pdfSnapshotSchema = z.object({
     months: z.array(period).length(12),
     total: period,
     interactionBasis: z.literal('notification-time').optional(),
+    reusedInteractionMonths: z.array(z.number().int().min(0).max(11)).max(12).optional(),
   }),
   months: z.array(z.enum(['closed', 'current', 'future'])).length(12),
   community: z

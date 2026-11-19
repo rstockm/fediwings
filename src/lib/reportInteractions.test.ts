@@ -97,6 +97,32 @@ describe('Report-Interaktionen', () => {
     ).rejects.toMatchObject({ name: 'AbortError' });
   });
 
+  it('setzt nach 40 Seiten mit dem nächsten Cursor fort und zählt Überschneidungen nicht doppelt', async () => {
+    const fetch = vi.fn(async (request: string) => {
+      const cursor = Number(new URL(request).searchParams.get('max_id'));
+      if (cursor === 40)
+        return Response.json([
+          event('40', 'reblog', '2026-06-01T08:00:00Z'),
+          event('41', 'favourite', '2025-12-01T08:00:00Z'),
+        ]);
+      const id = cursor + 1;
+      return Response.json([event(String(id), 'reblog', '2026-06-01T08:00:00Z')], {
+        headers: { Link: `<${origin}/api/v1/notifications?max_id=${id}>; rel="next"` },
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const first = await loadReportInteractions(origin, 'test-token', 2026, signal);
+    expect(first).toMatchObject({ stop: 'budget', cursor: '40' });
+    expect(first.timestamps).toHaveLength(40);
+    const second = await loadReportInteractions(origin, 'test-token', 2026, signal, undefined, {
+      resume: first,
+    });
+    expect(second).toMatchObject({ stop: 'end', oldest: Date.parse('2025-12-01T08:00:00Z') });
+    expect(second.timestamps).toHaveLength(41);
+    expect(fetch).toHaveBeenCalledTimes(41);
+    expect(new URL(fetch.mock.calls[40][0]).searchParams.get('max_id')).toBe('40');
+  });
+
   it('nutzt die Historie beim Jahreswechsel nur in derselben Sitzung und bis zur Aktualisierung', async () => {
     const fetch = vi.fn(async () => Response.json([event('1', 'reblog', '2025-01-01T08:00:00Z')]));
     vi.stubGlobal('fetch', fetch);

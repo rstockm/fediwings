@@ -17,6 +17,7 @@ export interface AggregatedReport {
   months: ReportPeriod[];
   total: ReportPeriod;
   interactionBasis?: 'notification-time';
+  reusedInteractionMonths?: number[];
 }
 
 const berlinMonth = new Intl.DateTimeFormat('en-CA', {
@@ -114,8 +115,20 @@ export function aggregateReport(
   if (total.reach && total.interactions !== null) {
     total.engagement = (100 * total.interactions) / total.reach;
   }
-  if (!interactionHistory) return { year, months, total };
+  const report = { year, months, total };
+  return interactionHistory
+    ? applyInteractionHistory(report, interactionHistory, referenceDate)
+    : report;
+}
 
+export function applyInteractionHistory(
+  base: AggregatedReport,
+  interactionHistory: ReportInteractionHistory,
+  referenceDate: Date,
+): AggregatedReport {
+  const { year } = base;
+  const months = base.months.map((period) => ({ ...period }));
+  const total = { ...base.total };
   // Engagement was calculated using only counters of the threads in each period.
   // Overwrite the separate interaction metric with dated account-wide events.
   const { timestamps, oldest, observedAt } = interactionHistory;
@@ -130,6 +143,7 @@ export function aggregateReport(
 
   for (const [i, period] of months.entries()) {
     period.interactions = null;
+    delete period.interactionsComplete;
     if (period.threads === null) continue;
     const month = i + 1;
     period.interactionsComplete =
@@ -138,6 +152,11 @@ export function aggregateReport(
       (year < endYear || (year === endYear && month <= endMonth));
     if (period.interactionsComplete || counts[i] > 0) period.interactions = counts[i];
   }
+  updateInteractionTotal(months, total);
+  return { year, months, total, interactionBasis: 'notification-time' };
+}
+
+function updateInteractionTotal(months: ReportPeriod[], total: ReportPeriod): void {
   const available = months.filter((period) => period.interactions !== null);
   total.interactions = available.length
     ? available.reduce((sum, period) => sum + (period.interactions ?? 0), 0)
@@ -145,5 +164,34 @@ export function aggregateReport(
   total.interactionsComplete = months.every(
     (period) => period.threads === null || period.interactionsComplete,
   );
-  return { year, months, total, interactionBasis: 'notification-time' };
+}
+
+/** Reuse whole closed months only. Never add a snapshot count to a live count. */
+export function reuseStoredInteractions(
+  live: AggregatedReport,
+  stored: AggregatedReport,
+  storedAt: string,
+): AggregatedReport {
+  if (!live.interactionBasis || !stored.interactionBasis || live.year !== stored.year) return live;
+  const date = new Date(storedAt);
+  if (!Number.isFinite(date.getTime())) return live;
+  const [year, month] = yearMonth(date);
+  const reused: number[] = [];
+  const months = live.months.map((period, i) => {
+    const saved = stored.months[i];
+    if (
+      period.interactionsComplete !== false ||
+      !saved?.interactionsComplete ||
+      saved.interactions === null ||
+      year < live.year ||
+      (year === live.year && i + 1 >= month)
+    )
+      return period;
+    reused.push(i);
+    return { ...period, interactions: saved.interactions, interactionsComplete: true };
+  });
+  if (!reused.length) return live;
+  const total = { ...live.total };
+  updateInteractionTotal(months, total);
+  return { ...live, months, total, reusedInteractionMonths: reused };
 }

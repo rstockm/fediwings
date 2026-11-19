@@ -7,7 +7,7 @@ const PATH = '/api/v1/notifications';
 const CACHE_MS = 5 * 60_000;
 let cache: {
   key: string;
-  value?: { history: ReportInteractionHistory; exhausted: boolean };
+  value?: { history: ReportInteractionHistory; exhausted: boolean; year: number };
 } | null = null;
 const pageSchema = z.array(
   z.object({
@@ -22,7 +22,14 @@ export interface ReportInteractionHistory {
   timestamps: number[];
   oldest: number | null;
   observedAt: number;
+  stop?: 'year' | 'budget' | 'end' | 'http' | 'error';
+  status?: number;
+  cursor?: string;
+  ids?: Set<string>;
+  postIds?: Set<string>;
 }
+
+const PAGE_BUDGET = 40;
 
 /**
  * The API's end of pagination is not evidence that older notifications never
@@ -34,36 +41,40 @@ export async function loadReportInteractions(
   year: number,
   signal: AbortSignal,
   onRequest?: (count: number) => void,
-  options?: { cacheKey: string; refresh?: boolean },
+  options?: { cacheKey?: string; refresh?: boolean; resume?: ReportInteractionHistory },
 ): Promise<ReportInteractionHistory> {
   signal.throwIfAborted();
   const history: ReportInteractionHistory = {
-    timestamps: [],
-    oldest: null,
-    observedAt: Date.now(),
+    timestamps: [...(options?.resume?.timestamps ?? [])],
+    oldest: options?.resume?.oldest ?? null,
+    observedAt: options?.resume?.observedAt ?? Date.now(),
+    stop: 'error',
   };
   if (!token || new URL(origin).protocol !== 'https:') return history;
   const yearStart = Date.UTC(year - 1, 11, 31, 23); // January 1, 00:00 in Berlin
-  const key = options ? `${origin}|${options.cacheKey}` : '';
-  if (options && (options.refresh || cache?.key !== key)) cache = { key };
-  const activeCache = options ? cache : null;
+  const key = options?.cacheKey ? `${origin}|${options.cacheKey}` : '';
+  if (key && (options?.refresh || cache?.key !== key)) cache = { key };
+  const activeCache = key ? cache : null;
   const cached = activeCache?.value;
   if (
-    options &&
+    !options?.resume &&
     cached &&
     history.observedAt - cached.history.observedAt < CACHE_MS &&
-    (cached.exhausted || (cached.history.oldest !== null && cached.history.oldest < yearStart))
+    (cached.exhausted ||
+      (cached.history.oldest !== null && cached.history.oldest < yearStart) ||
+      (cached.history.stop === 'budget' && cached.year === year))
   )
     return cached.history;
 
   let exhausted = false;
   const params = new URLSearchParams({ limit: '80', include_filtered: 'true' });
   for (const type of TYPES) params.append('types[]', type);
-  let url: string | null = `${origin}${PATH}?${params}`;
+  if (options?.resume?.cursor) params.set('max_id', options.resume.cursor);
+  let url = `${origin}${PATH}?${params}`;
   const pages = new Set<string>();
-  const seen = new Set<string>();
-  const seenPosts = new Set<string>();
-  for (let i = 0; url && i < 40 && !pages.has(url); i += 1) {
+  const seen = new Set(options?.resume?.ids);
+  const seenPosts = new Set(options?.resume?.postIds);
+  for (let i = 0; i < PAGE_BUDGET && !pages.has(url); i += 1) {
     signal.throwIfAborted();
     pages.add(url);
     try {
@@ -77,7 +88,11 @@ export async function loadReportInteractions(
         signal,
         12_000,
       );
-      if (!response.ok) break;
+      if (!response.ok) {
+        history.stop = 'http';
+        history.status = response.status;
+        break;
+      }
       const items = pageSchema.safeParse(await response.json());
       if (!items.success) break;
       for (const item of items.data) {
@@ -98,20 +113,36 @@ export async function loadReportInteractions(
       const cursor = next?.pathname === PATH ? next.searchParams.get('max_id') : null;
       if (!cursor) {
         exhausted = !response.headers.has('Link') || items.data.length === 0;
+        history.stop = exhausted ? 'end' : 'error';
         break;
       }
-      if (history.oldest !== null && history.oldest < yearStart) break;
+      if (history.oldest !== null && history.oldest < yearStart) {
+        history.stop = 'year';
+        break;
+      }
       // Retain the same filters even if a compatible server omits them in links.
       params.set('max_id', cursor);
       url = `${origin}${PATH}?${params}`;
+      if (i === PAGE_BUDGET - 1 && !pages.has(url)) {
+        history.stop = 'budget';
+      }
     } catch {
       signal.throwIfAborted();
       break;
     }
   }
   signal.throwIfAborted();
-  if (activeCache && (exhausted || (history.oldest !== null && history.oldest < yearStart))) {
-    activeCache.value = { history, exhausted };
+  const cursor = params.get('max_id');
+  if (
+    cursor &&
+    (history.stop === 'budget' || history.stop === 'http' || history.stop === 'error')
+  ) {
+    history.cursor = cursor;
+    history.ids = seen;
+    history.postIds = seenPosts;
+  }
+  if (activeCache && (history.stop === 'budget' || history.stop === 'year' || exhausted)) {
+    activeCache.value = { history, exhausted, year };
   }
   return history;
 }

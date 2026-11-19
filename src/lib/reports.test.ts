@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aggregateReport } from './reports';
+import { aggregateReport, reuseStoredInteractions } from './reports';
 import { preparePosts } from './analysis';
 import type { MastodonStatus } from './types';
 
@@ -26,6 +26,33 @@ function status(
 }
 
 describe('aggregateReport', () => {
+  it('übernimmt nur vollständige abgeschlossene Altmonate und addiert keine Teilzählung dazu', () => {
+    const observedAt = Date.parse('2026-11-20T00:00:00Z');
+    const events = (yearMonth: string) => Date.parse(`2026-${yearMonth}T00:00:00Z`);
+    const saved = aggregateReport(2026, [], new Date(observedAt), true, {
+      observedAt,
+      oldest: events('01-01') - 3600_000,
+      timestamps: [
+        events('02-01'),
+        events('07-01'),
+        events('07-02'),
+        events('10-01'),
+        events('11-01'),
+      ],
+    });
+    const live = aggregateReport(2026, [], new Date(observedAt), true, {
+      observedAt,
+      oldest: events('07-02'),
+      timestamps: [events('07-02'), events('10-01'), events('10-02')],
+    });
+    const merged = reuseStoredInteractions(live, saved, new Date(observedAt).toISOString());
+    expect(merged.months[1].interactions).toBe(1);
+    expect(merged.months[6].interactions).toBe(2);
+    expect(merged.months[9].interactions).toBe(2);
+    expect(merged.months[10].interactions).toBe(0);
+    expect(merged.total).toMatchObject({ interactions: 5, interactionsComplete: true });
+    expect(merged.reusedInteractionMonths).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  });
   it('ordnet Threads dem Berliner Startmonat zu und addiert alle Interaktionen einschließlich Quotes', () => {
     const posts = preparePosts(
       [
