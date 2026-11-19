@@ -12,6 +12,7 @@ export interface PdfSeries {
   values: Array<number | null>;
   status: Array<'closed' | 'current' | 'future'>;
   partial: boolean[];
+  strictCoverage?: boolean;
 }
 export interface ReportDocument {
   snapshot: ReportPdfSnapshot;
@@ -25,7 +26,15 @@ export function buildReportDocument(
   snapshot: ReportPdfSnapshot,
   options: PdfOptions,
 ): ReportDocument {
-  const copy = (options.locale === 'en' ? en.reports.pdf : de.reports.pdf) as PdfCopy;
+  const base = (options.locale === 'en' ? en.reports.pdf : de.reports.pdf) as PdfCopy;
+  const copy: PdfCopy = snapshot.report.interactionBasis
+    ? {
+        ...base,
+        engagement: base.threadEngagement,
+        rate: base.threadRate,
+        interactionDefinition: base.notificationDefinition,
+      }
+    : base;
   const number = (value: number) =>
     new Intl.NumberFormat(options.locale, { maximumFractionDigits: 1 }).format(value);
   const month = (i: number) =>
@@ -39,8 +48,13 @@ export function buildReportDocument(
     unit: copy.count,
     values: snapshot.report.months.map((p) => p[key]),
     status: [...snapshot.months],
+    strictCoverage: key === 'interactions' && Boolean(snapshot.report.interactionBasis),
     partial: snapshot.report.months.map((p) =>
-      key === 'reach' ? !p.reachComplete : !p.counterComplete,
+      key === 'reach'
+        ? !p.reachComplete
+        : key === 'interactions'
+          ? !(p.interactionsComplete ?? p.counterComplete)
+          : !p.counterComplete,
     ),
   }));
   if (snapshot.community.some((p) => p.followers !== null))

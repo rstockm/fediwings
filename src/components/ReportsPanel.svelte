@@ -14,6 +14,7 @@
   import { getAccount, getStatus } from '../lib/api';
   import { canonicalAcct } from '../lib/oauth';
   import { loadReport, REPORT_CACHE_MS, type ReportLoadProgress } from '../lib/reportLoader';
+  import { loadReportInteractions } from '../lib/reportInteractions';
   import type { FollowerProgress } from '../lib/followers';
   import { aggregateReport, type AggregatedReport } from '../lib/reports';
   import {
@@ -37,6 +38,7 @@
     platform,
     followerHistory = null,
     sessionKey = '',
+    notificationToken,
     loadFollowerHistory,
     onbusy,
   }: {
@@ -45,6 +47,7 @@
     platform: ServerPlatform | null;
     followerHistory?: ReportFollowerHistory | null;
     sessionKey?: string;
+    notificationToken?: string;
     loadFollowerHistory?: (
       account: MastodonAccount,
       signal: AbortSignal,
@@ -73,6 +76,7 @@
   let actionError = $state(false);
   let progress = $state<ReportLoadProgress | null>(null);
   let followerProgress = $state<FollowerProgress | null>(null);
+  let interactionRequests = $state(0);
   let followersDone = $state(false);
   let reportDone = $state(false);
   const measurable = $derived(
@@ -86,7 +90,8 @@
   const requests = $derived(
     (progress?.requests ?? 0) +
       (progress?.analysis?.requests ?? 0) +
-      (followerProgress?.requests ?? 0),
+      (followerProgress?.requests ?? 0) +
+      interactionRequests,
   );
   let controller: AbortController | null = null;
   let previousIdentity = '';
@@ -138,6 +143,14 @@
         (labelYear === currentYear && index + 1 === currentMonth ? '*' : ''),
     ),
   );
+  const interactionPartial = $derived(
+    report?.interactionBasis
+      ? [...report.months, report.total].map((period) => period.interactionsComplete === false)
+      : undefined,
+  );
+  const interactionNote = $derived(
+    $_(report?.interactionBasis ? 'reports.interactionNote' : 'reports.legacyInteractionNote'),
+  );
   const rows = $derived.by(() => {
     const currentReport = report;
     if (!currentReport) return [];
@@ -167,7 +180,12 @@
       },
       { key: 'growth', label: $_('reports.growth'), values: [...growthValues, annualGrowth] },
       { key: 'reach', label: $_('reports.reach'), values: period('reach') },
-      { key: 'interactions', label: $_('reports.interactions'), values: period('interactions') },
+      {
+        key: 'interactions',
+        label: $_('reports.interactions'),
+        values: period('interactions'),
+        partial: interactionPartial,
+      },
       { key: 'engagement', label: $_('reports.engagement'), values: period('engagement') },
       { key: 'threads', label: $_('reports.threads'), values: period('threads') },
     ];
@@ -179,7 +197,7 @@
           year,
           analyzedAt,
           modelNote:
-            $_('reports.modelNote') +
+            `${$_('reports.modelNote')} ${interactionNote}` +
             (year === currentYear ? ` ${$_('reports.currentMonth')}.` : '') +
             (latestObserved
               ? ` ${$_('reports.followerAsOf')}: ${latestObserved.observedAt}.`
@@ -193,7 +211,27 @@
               : ''),
           locale: $locale === 'en' ? 'en' : 'de',
           headers: [...labels, $_('reports.yearTotal')],
-          rows,
+          rows: interactionPartial?.some(Boolean)
+            ? rows.flatMap((row) =>
+                row.key === 'interactions'
+                  ? [
+                      row,
+                      {
+                        label: $_('reports.interactionCoverage'),
+                        values: interactionPartial.map((partial, index) =>
+                          !partial
+                            ? null
+                            : $_(
+                                row.values[index] === null
+                                  ? 'reports.unknown'
+                                  : 'reports.partialValue',
+                              ),
+                        ),
+                      },
+                    ]
+                  : [row],
+              )
+            : rows,
         }
       : null,
   );
@@ -282,20 +320,37 @@
     comparisonController = active;
     comparisonLoading = true;
     try {
-      const previous = await loadReport(
-        origin,
-        currentAccount.id,
-        currentAccount.followers_count,
-        base.year - 1,
-        active.signal,
-        () => {},
-        platform?.id !== 'pixelfed',
-        sessionKey ? { cacheKey: sessionKey } : undefined,
-      );
+      const [previous, interactions] = await Promise.all([
+        loadReport(
+          origin,
+          currentAccount.id,
+          currentAccount.followers_count,
+          base.year - 1,
+          active.signal,
+          () => {},
+          platform?.id !== 'pixelfed',
+          sessionKey ? { cacheKey: sessionKey } : undefined,
+        ),
+        base.report.interactionBasis
+          ? loadReportInteractions(
+              origin,
+              notificationToken,
+              base.year - 1,
+              active.signal,
+              undefined,
+              sessionKey ? { cacheKey: sessionKey } : undefined,
+            )
+          : undefined,
+      ]);
       if (active.signal.aborted || pdfSnapshot !== base) return;
       pdfSnapshot = {
         ...$state.snapshot(base),
-        annualComparison: prepareAnnualComparison(base.year, base.analyzedAt, previous),
+        annualComparison: prepareAnnualComparison(
+          base.year,
+          base.analyzedAt,
+          previous,
+          interactions,
+        ),
       };
     } catch {
       if (!active.signal.aborted) comparisonUnavailable = true;
@@ -330,6 +385,7 @@
     progress = null;
     comparisonLoading = false;
     followerProgress = null;
+    interactionRequests = 0;
     followersDone = !loadFollowerHistory;
     reportDone = false;
     message = '';
@@ -369,17 +425,45 @@
         },
         platform?.id !== 'pixelfed',
         sessionKey ? { cacheKey: sessionKey, refresh } : undefined,
-      ).finally(() => {
+      );
+      const interactionTask = loadReportInteractions(
+        origin,
+        fresh.id === account.id ? notificationToken : undefined,
+        year,
+        active.signal,
+        (count) => {
+          if (!active.signal.aborted) interactionRequests = count;
+        },
+        sessionKey ? { cacheKey: sessionKey, refresh } : undefined,
+      );
+      const reportResults = Promise.allSettled([reportTask, interactionTask]).then((results) => {
         if (!active.signal.aborted) reportDone = true;
+        return results;
       });
-      const [loaded, history] = await Promise.allSettled([reportTask, followerTask]);
+      const [[loaded, interactions], history] = await Promise.all([
+        reportResults,
+        Promise.allSettled([followerTask]).then(([result]) => result),
+      ]);
       if (active.signal.aborted) return;
       if (loaded.status === 'rejected') throw loaded.reason;
       const result = loaded.value;
       currentAccount = fresh;
       accountObservedAt = observedAt;
-      analyzedAt = result.analyzedAt ?? new Date().toISOString();
-      report = aggregateReport(year, result.posts, new Date(analyzedAt), result.historyComplete);
+      analyzedAt = new Date(
+        Math.max(
+          Date.parse(result.analyzedAt ?? new Date().toISOString()),
+          interactions.status === 'fulfilled' ? interactions.value.observedAt : 0,
+        ),
+      ).toISOString();
+      report = aggregateReport(
+        year,
+        result.posts,
+        new Date(analyzedAt),
+        result.historyComplete,
+        interactions.status === 'fulfilled'
+          ? interactions.value
+          : { oldest: null, timestamps: [], observedAt: Date.parse(analyzedAt) },
+      );
       const key = reportAccountKey(origin, fresh.id);
       try {
         const [storedObservations, storedReport] = await Promise.all([
@@ -480,7 +564,7 @@
       }
       currentAccount = fresh;
       accountObservedAt = new Date().toISOString();
-      report = stored.report;
+      report = stored.version === 2 ? stored.pdfSnapshot.report : stored.report;
       pdfOpen = false;
       pdfSnapshot =
         stored.version === 2
@@ -673,6 +757,8 @@
         'reports.modelNote',
       )}
     </p>
+    <p>{interactionNote}</p>
+    {#if interactionPartial?.some(Boolean)}<p>{$_('reports.interactionPartial')}</p>{/if}
     {#if !report.total.counterComplete || !report.total.reachComplete}<p>
         {$_('reports.partial')}
       </p>{/if}
@@ -719,13 +805,18 @@
         <tbody>
           {#each rows as row (row.label)}
             <tr
-              ><th scope="row">{row.label}</th>{#each row.values as cell, index (index)}<td
-                  >{cell === null
-                    ? '—'
-                    : new Intl.NumberFormat($locale === 'en' ? 'en' : 'de', {
-                        maximumFractionDigits: 1,
-                      }).format(cell)}</td
-                >{/each}</tr
+              ><th scope="row">{row.label}</th>{#each row.values as cell, index (index)}<td>
+                  {#if cell === null}
+                    <span aria-label={row.partial?.[index] ? $_('reports.unknown') : undefined}
+                      >—</span
+                    >
+                  {:else}
+                    {new Intl.NumberFormat($locale === 'en' ? 'en' : 'de', {
+                      maximumFractionDigits: 1,
+                    }).format(cell)}{#if row.partial?.[index]}&nbsp;
+                      <abbr title={$_('reports.partialValue')}>!</abbr>{/if}
+                  {/if}
+                </td>{/each}</tr
             >
           {/each}
         </tbody>
@@ -889,6 +980,10 @@
   }
   th:first-child {
     text-align: left;
+  }
+  th[scope='row'] {
+    white-space: normal;
+    max-width: 12rem;
   }
   @media (max-width: 720px) {
     .reports-export {

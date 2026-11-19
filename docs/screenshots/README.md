@@ -17,10 +17,10 @@ verwenden dagegen kontrollierte Testdaten.
 | `instanzverbindung.png` | Erklärung der optionalen OAuth-Verbindung, vor der Anmeldung                      |
 | `methodik.png`          | Einstieg in die Methodikseite                                                     |
 | `share-card.png`        | Echte, über den Card Service erzeugte Karte für einen öffentlichen FediPol-Thread |
-| `reports-desktop.png`   | Reporttabelle mit öffentlichen ZLB-Daten; Desktop |
-| `reports-mobile.png`    | Reporttabelle mit denselben öffentlichen ZLB-Daten; Mobilansicht |
-| `reports-charts-desktop.png` | Balkendiagramme des ZLB-Jahresreports; Desktop |
-| `reports-charts-mobile.png` | Balkendiagramme desselben Reports; Mobilansicht |
+| `reports-desktop.png`   | UI-Demo vom 19.11.2026: zwei April-Interaktionen ohne neue Postings; Desktop |
+| `reports-mobile.png`    | Dieselbe Demo-Reporttabelle; Mobilansicht |
+| `reports-charts-desktop.png` | Monatsdiagramme desselben Demo-Reports; Desktop |
+| `reports-charts-mobile.png` | Monatsdiagramme desselben Demo-Reports; Mobilansicht |
 | `reports-connect-desktop.png` | Aktueller Reports-Einstieg ohne Verbindung und ohne Statistiken |
 | `reports-connect-mobile.png` | Derselbe Einstieg mobil |
 | `reports-loading-demo-desktop.png` | UI-Demo vom 18.11.2026: gemeinsamer Ladezustand, kontrollierte Antworten für alice@test.social; keine echte Anmeldung |
@@ -43,6 +43,8 @@ Top-5-Seite aus `test-results/pdf/complete-de-4.png` als
 `PDF_SCREENSHOTS=1 npx playwright test tests/e2e/report-pdf.spec.ts` aufnehmen.
 Die UI-Aufnahmen zeigen Chromium (1280 × 720) und das mobile Pixel-7-Testprofil.
 Alle Inhalte sind kontrollierte Demo-Daten, keine authentifizierten Live-Bereiche.
+PDF-Beispiele und Dialogaufnahmen wurden am 19.11.2026 mit Interaktionen nach
+Ereignismonat und separat beschrifteter Thread-Engagement-Rate aktualisiert.
 
 Nach dem Zusammenführen von Community- und Kennzahlentabelle wurde die
 Community-Seite am 18.11.2026 erneut gerastert. Zuvor, nach Ergänzung der
@@ -67,15 +69,14 @@ verborgen bleiben. Die Aufnahmen sind UI-Demos, kein Nachweis eines Live-Logins.
 
 Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
 `LIVE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'optionale öffentliche' --project=chromium`.
-Die älteren Reports-/Diagrammaufnahmen vom 16.11.2026 verwenden öffentliche
-ZLB-Daten und stammen vor der Verbindungspflicht, vor der aktuellen
-Grün-/Orange-Farblogik, vor der heutigen Aktionsleiste am Kopf der
-Reportansicht, vor der Mittelwertlinie in den Diagrammen, vor der heutigen
-Wertanzeige rechts oben in der Diagrammkarte und vor der Jahresauswahl als
-Liste. Sie bleiben als gekennzeichnete Darstellungsbeispiele erhalten.
+Die Tabellen- und Diagrammaufnahmen vom 19.11.2026 werden nach dem Build mit
+`UPDATE_REPORT_INTERACTION_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'speichert und öffnet' --project=chromium`
+erstellt (1440 und 390 Pixel Viewport). Sie zeigen zwei April-Reaktionen auf
+ältere Beiträge sowie fehlende und teilweise abgedeckte Monate. Die
+Beispieldaten sind kontrolliert, nicht von einem echten Account abgerufen.
 Authentifizierte Live-Reports können ohne Anmeldung des Accountinhabers nicht
 neu aufgenommen werden; sie werden nicht vorgetäuscht.
-Die Methodikaufnahme vom 16.11.2026 entsteht mit
+Die Methodikaufnahme vom 19.11.2026 entsteht mit
 `UPDATE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/app.spec.ts -g 'wechselt ueber die Reiter' --project=chromium`.
 Sie zeigt die aktuelle Reports-Methodik und hat keinen zusätzlichen Außenrand.
 Ältere Übersichtsaufnahmen zeigen teilweise noch die frühere Reiterbezeichnung

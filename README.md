@@ -106,18 +106,20 @@ und Mobilgerät; authentifizierte Live-Aufnahmen sind damit nicht abgedeckt.
 
 <img src="docs/screenshots/reports-connect-mobile.png" alt="Mobiler Reports-Einstieg zum Verbinden der eigenen Instanz" width="390" />
 
-Die folgenden **älteren Aufnahmen vor der Verbindungspflicht** zeigen öffentliche Daten von **[@zlb_berlin@openbiblio.social](https://openbiblio.social/@zlb_berlin)**, abgerufen am **16.11.2026**. Sie dokumentieren die Reportdarstellung, nicht den aktuellen Anmeldeablauf oder die heutige Aktionsleiste mit Jahreswahl, Live-Laden, Öffnen und Speichern. Die Diagrammaufnahmen zeigen noch keine Mittelwertlinie; die Reports-Aufnahmen zeigen zudem die frühere Jahreseingabe statt der heutigen Auswahlliste. Aktuelle authentifizierte Live-Aufnahmen fehlen mangels Anmeldung des Accountinhabers. Die Werte sind eine Momentaufnahme; die Reichweite ist modelliert. Der mobile Tabellenbereich ist horizontal scrollbar.
+Die folgenden **UI-Demos vom 19.11.2026** verwenden kontrollierte Beispieldaten. Im April zeigt der Report zwei Reaktionen auf ältere Beiträge bei null neuen Postings. Januar ist unbekannt, Februar ein Teilstand. Der mobile Tabellenbereich ist horizontal scrollbar. Authentifizierte Live-Aufnahmen sind nicht enthalten.
 
-![Reports-Tabelle mit öffentlichen ZLB-Daten für 2026 und Aktionen zum Speichern, Kopieren und CSV-Export](docs/screenshots/reports-desktop.png)
+![Demo-Reporttabelle mit zwei Interaktionen und null Postings im April](docs/screenshots/reports-desktop.png)
 
-<img src="docs/screenshots/reports-mobile.png" alt="Mobiler Reports-Bereich mit öffentlichen ZLB-Daten und horizontal scrollbarerer Tabelle" width="390" />
+<img src="docs/screenshots/reports-mobile.png" alt="Mobilansicht der horizontal scrollbareren Demo-Tabelle mit unbekanntem Januar und Februar-Teilstand" width="390" />
 
 Die Balkendiagramme zeigen dieselben Monatswerte mit gerundeten Achsenskalen.
 Die Balkenfarbe vergleicht jeden Monat mit seinem direkten Vormonat: Grün bedeutet
 einen höheren Wert, Orange einen niedrigeren. Kleine Sprünge erscheinen in schwachem
 Grün beziehungsweise Orange, große Sprünge in kräftiger Farbe. Die Intensität
 orientiert sich am größten absoluten Monatsunterschied des jeweiligen Diagramms.
-Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer.
+Fehlende Interaktionswerte bleiben im Diagramm und in der Tabelle offen. Der
+Mittelwert der Interaktionen berücksichtigt nur abgedeckte Monate. Für andere
+Kennzahlen zählen fehlende Monatswerte weiterhin als 0 im Diagramm.
 Eine gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate; sein
 Wert steht rechts oben in der Diagrammkarte und überdeckt so keine Balken. Die
 Mittelwerte von Follower-Wachstum, Reichweite und Interaktionen erscheinen als ganze
@@ -130,9 +132,9 @@ Monatsendstände haben Vorrang. Der Verlauf berücksichtigt keine Unfollows;
 Benachrichtigungen können auch Follow-Anfragen enthalten. Außerhalb der
 vorhandenen Historie bleiben Werte leer.
 
-![Balkendiagramme des ZLB-Jahresreports für Reichweite, Interaktionen, Engagement und Postings](docs/screenshots/reports-charts-desktop.png)
+![Demo-Balkendiagramme für Reichweite, Interaktionen, Thread-Engagement und Postings](docs/screenshots/reports-charts-desktop.png)
 
-<img src="docs/screenshots/reports-charts-mobile.png" alt="Balkendiagramme des ZLB-Jahresreports in der Mobilansicht" width="390" />
+<img src="docs/screenshots/reports-charts-mobile.png" alt="Demo-Balkendiagramme des Jahresreports in der Mobilansicht" width="390" />
 
 ### Ergebnisse als Share-Card
 
@@ -335,7 +337,9 @@ Die Netto-Reichweite ist der zentrale Wert der App. Sie überträgt eine Regress
 
 Die Ergebnisübersicht vergleicht Beiträge aus den letzten 30 Kalendertagen mit den 30 Tagen davor und gruppiert die Werte nach Veröffentlichungsdatum. An erster Stelle steht die Summe der bereits pro Thread berechneten Netto-Reichweiten; wegen möglicher Zielgruppenüberschneidungen ist sie keine Schätzung eindeutig erreichter Personen. Die weiteren Karten verwenden direkt gemeldete Postingzähler: Likes und Boosts sowie Likes, Boosts und Antworten zusammen als Interaktionen. Die Zähler zeigen den Stand zum Analysezeitpunkt, nicht den Zeitpunkt einzelner Reaktionen. Reicht die geladene Historie oder die Auswahl der 80 analysierten Threads nicht bis zum Beginn eines Zeitfensters, zeigt FediWings dafür weder eine Teilsumme noch eine irreführende Kurve. Eine Prozentabweichung entfällt außerdem, wenn die Vorperiodensumme null ist.
 
-Reports gruppieren Postings nach ihrem Startmonat in der Zeitzone Europe/Berlin. Interaktionen zählen Likes, Boosts, Antworten und, soweit gemeldet, Quotes; die Engagement Rate teilt sie durch die modellierte Reichweitensumme. Die Zahlen sind Abrufstände und keine nach Reaktionszeitpunkt erfasste Monatsstatistik. Bei begrenzter Historie oder unvollständiger Boosterliste wird ein Teilstand angezeigt. Follower-Wachstum benötigt gespeicherte Stände vom letzten Tag zweier aufeinanderfolgender Monate; bei geschlossener App werden keine Stände automatisch erhoben.
+Reports zählen eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate aus verfügbaren Benachrichtigungen der verbundenen Instanz nach Ereignismonat in `Europe/Berlin` – auch zu älteren Beiträgen. Nur innerhalb der erreichten Historie kann ein Monat ohne gemeldete Ereignisse als Null erscheinen. Fehlende Monate bleiben unbekannt (`—`); unvollständige Monats- und Jahressummen sind Teilstände (`!`). Die Instanz kann Ereignisse vorenthalten oder löschen, und der Abruf ist auf 40 Benachrichtigungsseiten begrenzt. Tabelle, PDF, CSV und Excel-Kopie verwenden dieselben Interaktionswerte; ältere gespeicherte Stände sind als nach Thread-Start gruppiert gekennzeichnet.
+
+Postings und Reichweite zählen weiter zum Startmonat der Threads. Deren beim Abruf sichtbare Beitragszähler, nicht die Monatsereignisse, bilden den Zähler der Engagement-Rate zur modellierten Reichweitensumme. Auch die Top‑5‑Karten im PDF zeigen Beitragszähler zum Abrufzeitpunkt. Follower-Wachstum benötigt gespeicherte Stände vom letzten Tag zweier aufeinanderfolgender Monate; bei geschlossener App werden keine Stände automatisch erhoben.
 
 Für den eigenen, verbundenen Account können aufgeklappte Beiträge zusätzlich Zeitpunkte aus `reblog`-Benachrichtigungen zeigen. Diese Historie ist von den öffentlichen Boost-Zählern getrennt und kann durch gelöschte, gefilterte oder noch nicht geladene Notifications unvollständig sein. Zunächst wird eine Seite geladen; ältere Seiten nur auf ausdrückliche Aktion, maximal zehn pro Tab-Sitzung.
 

@@ -578,6 +578,7 @@
       {account}
       {origin}
       {platform}
+      notificationToken={authSession?.token}
       sessionKey={authSession ? historySessionKey(authSession) : ''}
       loadFollowerHistory={loadHistory}
       onbusy={(value) => (reportBusy = value)}

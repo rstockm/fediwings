@@ -85,11 +85,16 @@ export const en: Messages = {
       reachDefinition:
         'FediWings reach is calculated using the FediWings model from the distribution potential and interaction signals of threads. This report sums the reach of threads started during the period. Repeat contacts across threads are possible; this metric does not represent measured views or unique people.',
       interactionDefinition:
-        'Interactions include likes, boosts, replies and available quotes of the included threads as of the stated data snapshot.',
+        'This older snapshot assigns likes, boosts, replies and available quotes visible at retrieval to the month their thread started, not the month of the reaction.',
+      notificationDefinition:
+        'Incoming likes, boosts, replies/mentions and quotes are assigned to the month of the available instance notification (Europe/Berlin), regardless of the age of the post. The annual total includes only available monthly values. The top 5 cards show post counters at retrieval instead.',
+      postInteractions: 'Post interactions',
+      threadEngagement: 'Thread engagement rate',
+      threadRate: 'Post counters / reach · %',
       engagementDefinition:
-        'The engagement rate relates interactions to FediWings reach. Overall rates are calculated from the totals, not as an average of monthly rates.',
+        'The engagement rate divides the likes, boosts, replies and available quotes visible at retrieval for threads started in the period by those threads’ FediWings reach. Overall rates are calculated from the totals.',
       timeDefinition:
-        'Threads are assigned to the month they started in Europe/Berlin. Interaction counters reflect the time of data retrieval. Months in progress are excluded from comparisons of completed months.',
+        'Threads are assigned to the month they started in Europe/Berlin. Months in progress are excluded from comparisons of completed months.',
       dataDefinition:
         'Sources are the loaded instance data and the identified local follower observations. Previous-year data is added only when the PDF export is started, if needed; rendering then uses this fixed snapshot.',
       model: 'Model version',
@@ -110,9 +115,9 @@ export const en: Messages = {
     rateLimitWait: 'API limit reached · resuming after waiting',
     connectFirst: 'Connect your own instance to load all statistics together.',
     title: 'Monthly and annual report',
-    intro: 'Analyse public posts by publication month.',
+    intro: 'Analyse posts and incoming reactions throughout the year.',
     methodology:
-      'Reports group posts by their starting month in Berlin time. Interactions include likes, boosts, replies and available quotes; engagement is the ratio to the modelled reach total. Counters reflect the time of retrieval, not the time of each interaction.',
+      'Reports count incoming likes, boosts, replies/mentions and quotes by the date of the available instance notification (Europe/Berlin), including reactions to older posts. Reach and engagement apply to threads started in each month and their counters at retrieval.',
     year: 'Year',
     yearTotal: 'Year',
     metric: 'Metric',
@@ -124,7 +129,16 @@ export const en: Messages = {
     growth: 'Follower growth',
     reach: 'Reach',
     interactions: 'Interactions',
-    engagement: 'Engagement rate (%)',
+    engagement: 'Engagement rate of threads started (%)',
+    interactionNote:
+      'Interactions follow notification dates (Berlin time): incoming likes, boosts, replies/mentions and quotes, including on older posts. Only notifications returned by the instance are counted.',
+    legacyInteractionNote:
+      'Older saved snapshot: Interactions are assigned to the month their thread started, not to the month of the reaction.',
+    interactionPartial:
+      'Interactions: — = unknown when history is missing; ! = partial. The annual total only includes available monthly values.',
+    interactionCoverage: 'Data coverage: interactions',
+    unknown: 'Unknown',
+    partialValue: 'Partial',
     threads: 'Posts',
     asOf: 'As of',
     currentMonth: '* Current month',
@@ -133,7 +147,7 @@ export const en: Messages = {
     chartsKicker: 'Month by month',
     chartsTitle: 'The year at a glance',
     chartsNote:
-      'Monthly values at a glance. Missing months count as 0 in the chart; the table leaves them empty. The dashed violet line marks the mean of the displayed months, with its value shown at the top right of the chart. The absolute follower chart omits the mean.',
+      'Missing interaction values are left blank, and their mean uses only covered months. For other metrics, missing months count as 0 in the chart. The violet line marks the mean; it is omitted for the follower count.',
     chartColorLegend:
       'Green: at least as high as the previous month · Orange: lower. A faint colour marks a small jump, a strong colour a large jump within this chart.',
     chartEmpty: 'No monthly values yet.',

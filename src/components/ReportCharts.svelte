@@ -7,7 +7,7 @@
     rows,
   }: {
     labels: string[];
-    rows: Array<{ key: string; label: string; values: Array<number | null> }>;
+    rows: Array<{ key: string; label: string; values: Array<number | null>; partial?: boolean[] }>;
   } = $props();
 
   /** Charts whose scale makes a mean line misleading or unreadable. */
@@ -29,9 +29,10 @@
         return {
           key: row.key,
           label: row.label,
+          partial: row.partial,
           hasValues,
           values: values.map((value, index) =>
-            index < periodLength ? (hasValues ? (value ?? 0) : null) : null,
+            index < periodLength ? (hasValues && !row.partial ? (value ?? 0) : value) : null,
           ),
         };
       })
@@ -39,9 +40,9 @@
         ...row,
         maximum: Math.max(...row.values.filter((value): value is number => value !== null)),
         ticks: reportScaleTicks(row.values),
-        changes: reportChanges(row.values.slice(0, periodLength)),
+        changes: reportChanges(row.values.slice(0, periodLength), row.partial),
         ...reportBars(row.values),
-        mean: MEANLESS_KEYS.has(row.key) ? null : reportMean(row.values),
+        mean: MEANLESS_KEYS.has(row.key) ? null : reportMean(row.values, row.partial),
         meanFractionDigits: WHOLE_MEAN_KEYS.has(row.key) ? 0 : 1,
       }))
       .sort(
@@ -174,7 +175,10 @@
                     style:left={`${((hoveredIndex + 0.5) * 100) / plotColumns}%`}
                   ></div>
                   <div class="chart-hover-tip" style:left={tooltipOffset(hoveredIndex)}>
-                    {labels[hoveredIndex]} · {formatValue(hoveredBar.value)}
+                    {labels[hoveredIndex]} · {formatValue(
+                      hoveredBar.value,
+                    )}{#if chart.partial?.[hoveredIndex]}
+                      · {$_('reports.partialValue')}{/if}
                   </div>
                 {/if}
               {/if}

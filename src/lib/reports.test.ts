@@ -49,6 +49,20 @@ describe('aggregateReport', () => {
     });
     expect(report.total.interactions).toBe(10);
     expect(report.months[3].threads).toBeNull();
+
+    const cutoff = new Date('2026-04-30T10:00:00Z');
+    const eventReport = aggregateReport(2026, posts, cutoff, true, {
+      oldest: Date.parse('2025-12-31T23:00:00Z'),
+      observedAt: cutoff.getTime(),
+      timestamps: [Date.parse('2026-04-15T10:00:00Z')],
+    });
+    expect(eventReport.months[1]).toMatchObject({ threads: 1, interactions: 0, engagement: 20 });
+    expect(eventReport.months[3]).toMatchObject({ threads: 0, interactions: 1, engagement: null });
+    expect(eventReport.total).toMatchObject({
+      interactions: 1,
+      interactionsComplete: true,
+      engagement: 20,
+    });
   });
 
   it('zeigt bei null Reichweite keine Engagement Rate und kennzeichnet Teilstände', () => {

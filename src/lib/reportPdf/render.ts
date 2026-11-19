@@ -49,7 +49,9 @@ export function pdfDefinition(
   const monthLabel = (i: number) =>
     `${month(i)}${s.months[i] === 'current' ? '*' : s.months[i] === 'future' ? ` (${c.future})` : ''}`;
   const stateValue = (series: PdfSeries, i: number) =>
-    series.status[i] === 'future' ? '' : `${nf(series.values[i])}${series.partial[i] ? ' !' : ''}`;
+    series.status[i] === 'future'
+      ? ''
+      : `${nf(series.values[i])}${series.partial[i] && series.values[i] !== null ? ' !' : ''}`;
   const heading = (title: string, id: string, before = true): Content => ({
     text: title,
     id,
@@ -244,7 +246,12 @@ export function pdfDefinition(
         false,
       ],
       [c.threads, total.threads, c.sum, !total.counterComplete],
-      [c.interactions, total.interactions, c.sum, !total.counterComplete],
+      [
+        c.interactions,
+        total.interactions,
+        c.sum,
+        !(total.interactionsComplete ?? total.counterComplete),
+      ],
       [c.reach, total.reach, c.sum, !total.reachComplete],
       [c.engagement, total.engagement, c.rate, !total.reachComplete || !total.counterComplete],
     ] as const
@@ -339,9 +346,11 @@ export function pdfDefinition(
       margin: [0, 0, 0, compact ? 5 : 10],
       lineHeight: 1.2,
     })),
-    ...(!total.counterComplete || !total.reachComplete ? [small(c.partialNote)] : []),
+    ...(!total.counterComplete || !total.reachComplete || total.interactionsComplete === false
+      ? [small(c.partialNote)]
+      : []),
   ];
-  const hasPosts = (total.threads ?? 0) > 0;
+  const hasPosts = (total.threads ?? 0) > 0 || (total.interactions ?? 0) > 0;
   const metricSeries = doc.series.filter((item) => item.id !== 'chart-followers');
   if (hasPosts) {
     content.push(heading(c.development, 'section-development'));
@@ -453,7 +462,7 @@ export function pdfDefinition(
           lineHeight: 1.15,
         },
         {
-          text: `${c.reach}: ${nf(post.reach)}${post.complete ? '' : ' !'}    ·    ${c.interactions}: ${nf(post.interactions)}`,
+          text: `${c.reach}: ${nf(post.reach)}${post.complete ? '' : ' !'}    ·    ${s.report.interactionBasis ? c.postInteractions : c.interactions}: ${nf(post.interactions)}`,
           bold: true,
           fontSize: 10,
           margin: [0, 7, 0, post.interactionDetail ? 2 : 4],

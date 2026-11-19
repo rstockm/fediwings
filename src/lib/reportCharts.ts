@@ -10,10 +10,18 @@ export interface ReportChange {
 }
 
 /** Missing values count as zero; January compares against a zero baseline. */
-export function reportChanges(values: Array<number | null>): ReportChange[] {
+export function reportChanges(values: Array<number | null>, partial?: boolean[]): ReportChange[] {
   const number = (value: number | null | undefined) =>
     typeof value === 'number' && Number.isFinite(value) ? value : 0;
   const differences = values.map((value, index) => {
+    if (
+      partial &&
+      (partial[index] ||
+        partial[index - 1] ||
+        value === null ||
+        (index > 0 && values[index - 1] === null))
+    )
+      return null;
     return number(value) - number(values[index - 1]);
   });
   const maximum = Math.max(0, ...differences.map((value) => Math.abs(value ?? 0)));
@@ -65,9 +73,10 @@ export interface ReportMean {
 }
 
 /** Arithmetic mean of all finite values; missing values are ignored. */
-export function reportMean(values: Array<number | null>): ReportMean | null {
+export function reportMean(values: Array<number | null>, partial?: boolean[]): ReportMean | null {
   const numbers = values.filter(
-    (value): value is number => value !== null && Number.isFinite(value),
+    (value, index): value is number =>
+      value !== null && Number.isFinite(value) && !partial?.[index],
   );
   if (numbers.length === 0) return null;
   const { min, max } = chartScale(values);

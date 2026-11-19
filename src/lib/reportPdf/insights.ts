@@ -13,14 +13,16 @@ export function reportInsights(snapshot: ReportPdfSnapshot): PdfInsight[] {
     )
     .filter((i) => i >= 0);
   const results: PdfInsight[] = [];
-  if (
-    closed.length &&
-    snapshot.report.total.counterComplete &&
-    snapshot.report.total.reachComplete
-  ) {
-    const max = Math.max(...closed.map((i) => periods[i].interactions ?? 0));
-    const peaks = closed.filter((i) => periods[i].interactions === max);
-    const sum = closed.reduce((total, i) => total + (periods[i].interactions ?? 0), 0);
+  const interactionMonths = snapshot.report.interactionBasis
+    ? snapshot.months.flatMap((status, i) => (status === 'closed' ? [i] : []))
+    : closed;
+  const interactionComplete = snapshot.report.interactionBasis
+    ? interactionMonths.every((i) => periods[i].interactionsComplete)
+    : snapshot.report.total.counterComplete && snapshot.report.total.reachComplete;
+  if (interactionMonths.length && interactionComplete) {
+    const max = Math.max(...interactionMonths.map((i) => periods[i].interactions ?? 0));
+    const peaks = interactionMonths.filter((i) => periods[i].interactions === max);
+    const sum = interactionMonths.reduce((total, i) => total + (periods[i].interactions ?? 0), 0);
     if (max > 0 && sum > 0 && peaks.length === 1)
       results.push({ key: 'peak', month: peaks[0], value: max, percent: (100 * max) / sum });
   }

@@ -21,7 +21,10 @@ function mix(accent: string, base: string, percent: number): string {
 
 export function pdfBarColors(series: PdfSeries, palette: PdfPalette) {
   const future = series.status.indexOf('future');
-  const changes = reportChanges(series.values.slice(0, future < 0 ? series.values.length : future));
+  const changes = reportChanges(
+    series.values.slice(0, future < 0 ? series.values.length : future),
+    series.strictCoverage ? series.partial : undefined,
+  );
   return series.values.map((value, index) => {
     if (value === null || series.status[index] === 'future') return null;
     const change = changes[index];

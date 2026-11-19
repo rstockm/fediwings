@@ -89,6 +89,13 @@ echte Nettoveränderungen. Mit `~` markierte Werte stammen aus dem rekonstruiert
 Follower-Verlauf, enthalten keine Unfollows und sind deshalb keine belastbare
 Nettoveränderung.
 
+Die Monats- und Jahressummen der Interaktionen stammen unverändert aus
+demselben Report-Datenstand wie die Online-Tabelle. Sie zählen verfügbare
+eingehende Benachrichtigungen nach Berliner Ereignismonat, auch für ältere
+Beiträge. Fehlende Werte bleiben offen, Teilsummen sind markiert. Die
+Engagement-Rate bleibt auf gestartete Threads und die Top‑5-Kennzahl auf
+Beitragszähler bezogen. Alte gespeicherte Stände tragen ihre alte Definition.
+
 Spaltenbreiten und Schriftgrad skalieren gemeinsam mit dem längsten Wert einer
 Spalte. Dadurch bleiben auch sehr große Zahlen und lange Spaltenköpfe innerhalb
 der Seitenränder, ohne dass schmale Spalten unnötig Platz verlieren; lange

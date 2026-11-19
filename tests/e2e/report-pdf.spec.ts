@@ -71,8 +71,32 @@ async function demoReport(page: Page, media = false) {
       await route.fulfill({
         json: Array.from({ length: 6 }, (_, i) => demoStatus(i, media)),
       });
-    } else if (url.pathname.includes('notifications')) await route.fulfill({ json: [] });
-    else if (
+    } else if (url.pathname.includes('notifications')) {
+      await route.fulfill({
+        json: url.searchParams.getAll('types[]').includes('favourite')
+          ? [
+              {
+                id: '3',
+                type: 'reblog',
+                created_at: '2025-10-01T10:00:00Z',
+                status: { id: 'demo-post-0' },
+              },
+              {
+                id: '2',
+                type: 'favourite',
+                created_at: '2025-10-02T10:00:00Z',
+                status: { id: 'demo-post-0' },
+              },
+              {
+                id: '1',
+                type: 'favourite',
+                created_at: '2024-12-01T10:00:00Z',
+                status: { id: 'old-post' },
+              },
+            ]
+          : [],
+      });
+    } else if (
       url.pathname.includes('accounts/lookup') ||
       url.pathname.includes('verify_credentials')
     )
@@ -94,6 +118,12 @@ test('PDF lokal mit Top 5, Tabellen, Vorschau und Speicherung exportieren', asyn
 }, testInfo) => {
   test.setTimeout(60000);
   await demoReport(page);
+  const interactions = page.getByRole('row', { name: 'Interaktionen' }).getByRole('cell');
+  await expect(interactions.nth(9)).toHaveText('2');
+  await expect(interactions.last()).toHaveText('2');
+  await expect(page.getByRole('row', { name: 'Postings' }).getByRole('cell').nth(9)).toHaveText(
+    '0',
+  );
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const requests: string[] = [];
@@ -151,7 +181,9 @@ test('PDF lokal mit Top 5, Tabellen, Vorschau und Speicherung exportieren', asyn
   const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' });
   expect(text).toContain('Top 5 Beiträge');
   expect(text).toContain('Datentabelle');
-  expect(text).toContain('Interaktionen: 862');
+  expect(text).toMatch(/Okt\s+0\s+2\s+0\s+—/u);
+  expect(text.split('\f')[0]).toMatch(/Interaktionen\s*\n\s*\n\s*\n—\s+6\s+2\b/u);
+  expect(text).toContain('Interaktionen am Beitrag: 862');
   expect(text).not.toContain('demo-token');
   await page.evaluate(async (expected) => {
     const db = await new Promise<IDBDatabase>((resolve) => {
@@ -212,10 +244,12 @@ test('PDF lokal mit Top 5, Tabellen, Vorschau und Speicherung exportieren', asyn
   const restoredText = execFileSync('pdftotext', ['-layout', restoredPath, '-'], {
     encoding: 'utf8',
   });
-  expect(restoredText).toContain('Interaktionen: 862');
+  expect(restoredText).toContain('Interaktionen am Beitrag: 862');
+  expect(restoredText).toMatch(/Okt\s+0\s+2\s+0\s+—/u);
+  expect(restoredText.split('\f')[0]).toMatch(/Interaktionen\s*\n\s*\n\s*\n—\s+6\s+2\b/u);
   expect(restoredText).toContain('Originalbeitrag öffnen');
   expect(restoredText).not.toContain('New live content');
-  expect(restoredText).not.toContain('Interaktionen: 10.012');
+  expect(restoredText).not.toContain('Interaktionen am Beitrag: 10.012');
   expect(errors).toEqual([]);
 });
 
@@ -286,6 +320,6 @@ for (const missing of ['live', 'absent', 'null'] as const) {
     expect(raw.match(/\/Width 96\b/g)).toHaveLength(2);
     expect(raw).toContain('/SMask');
     const text = execFileSync('pdftotext', ['-layout', path, '-'], { encoding: 'utf8' });
-    expect(text).toContain('Interaktionen: 862');
+    expect(text).toContain('Interaktionen am Beitrag: 862');
   });
 }

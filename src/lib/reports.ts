@@ -1,4 +1,5 @@
 import type { PostReach } from './types';
+import type { ReportInteractionHistory } from './reportInteractions';
 
 export interface ReportPeriod {
   threads: number | null;
@@ -7,12 +8,15 @@ export interface ReportPeriod {
   engagement: number | null;
   counterComplete: boolean;
   reachComplete: boolean;
+  /** Separate from the completeness of thread counters used for engagement. */
+  interactionsComplete?: boolean;
 }
 
 export interface AggregatedReport {
   year: number;
   months: ReportPeriod[];
   total: ReportPeriod;
+  interactionBasis?: 'notification-time';
 }
 
 const berlinMonth = new Intl.DateTimeFormat('en-CA', {
@@ -20,6 +24,17 @@ const berlinMonth = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
   month: '2-digit',
 });
+const berlinHour = new Intl.DateTimeFormat('en', {
+  timeZone: 'Europe/Berlin',
+  hour: 'numeric',
+  hourCycle: 'h23',
+});
+
+function berlinMonthStart(year: number, month: number): number {
+  const utcMidnight = Date.UTC(year, month - 1, 1);
+  // Berlin's UTC offset at midnight on the first day of a month is 1h or 2h.
+  return utcMidnight - Number(berlinHour.format(utcMidnight)) * 3_600_000;
+}
 
 function yearMonth(date: Date): [number, number] {
   const parts = berlinMonth.formatToParts(date);
@@ -45,6 +60,7 @@ export function aggregateReport(
   posts: PostReach[],
   referenceDate: Date,
   historyComplete = true,
+  interactionHistory?: ReportInteractionHistory,
 ): AggregatedReport {
   const [currentYear, currentMonth] = yearMonth(referenceDate);
   const months = Array.from({ length: 12 }, (_, index) =>
@@ -98,5 +114,36 @@ export function aggregateReport(
   if (total.reach && total.interactions !== null) {
     total.engagement = (100 * total.interactions) / total.reach;
   }
-  return { year, months, total };
+  if (!interactionHistory) return { year, months, total };
+
+  // Engagement was calculated using only counters of the threads in each period.
+  // Overwrite the separate interaction metric with dated account-wide events.
+  const { timestamps, oldest, observedAt } = interactionHistory;
+  const cutoff = Math.min(referenceDate.getTime(), observedAt);
+  const [endYear, endMonth] = yearMonth(new Date(cutoff));
+  const counts: number[] = Array(12).fill(0);
+  for (const timestamp of timestamps) {
+    if (timestamp > cutoff) continue;
+    const [eventYear, eventMonth] = yearMonth(new Date(timestamp));
+    if (eventYear === year) counts[eventMonth - 1]++;
+  }
+
+  for (const [i, period] of months.entries()) {
+    period.interactions = null;
+    if (period.threads === null) continue;
+    const month = i + 1;
+    period.interactionsComplete =
+      oldest !== null &&
+      oldest <= berlinMonthStart(year, month) &&
+      (year < endYear || (year === endYear && month <= endMonth));
+    if (period.interactionsComplete || counts[i] > 0) period.interactions = counts[i];
+  }
+  const available = months.filter((period) => period.interactions !== null);
+  total.interactions = available.length
+    ? available.reduce((sum, period) => sum + (period.interactions ?? 0), 0)
+    : null;
+  total.interactionsComplete = months.every(
+    (period) => period.threads === null || period.interactionsComplete,
+  );
+  return { year, months, total, interactionBasis: 'notification-time' };
 }

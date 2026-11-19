@@ -1,5 +1,6 @@
 import { aggregateReport } from '../reports';
 import type { ReportLoadResult } from '../reportLoader';
+import type { ReportInteractionHistory } from '../reportInteractions';
 import type { ReportPdfSnapshot } from './model';
 
 export type TitleMetric = 'followers' | 'threads' | 'interactions' | 'reach' | 'engagement';
@@ -60,6 +61,7 @@ export function prepareAnnualComparison(
   year: number,
   analyzedAt: string,
   previous: ReportLoadResult,
+  interactions?: ReportInteractionHistory,
 ): NonNullable<ReportPdfSnapshot['annualComparison']> {
   const currentEnd = comparisonEnd(year, analyzedAt);
   const previousEnd = previousYearEnd(currentEnd);
@@ -71,7 +73,13 @@ export function prepareAnnualComparison(
     analyzedAt: previous.analyzedAt ?? analyzedAt,
     currentEnd,
     previousEnd,
-    total: aggregateReport(year - 1, posts, new Date(previousEnd), previous.historyComplete).total,
+    total: aggregateReport(
+      year - 1,
+      posts,
+      new Date(previousEnd),
+      previous.historyComplete,
+      interactions,
+    ).total,
   };
 }
 export function titleFollowers(s: ReportPdfSnapshot): {
@@ -104,7 +112,11 @@ export function titleChange(s: ReportPdfSnapshot, key: TitleMetric): TitleChange
     const previous = s.annualComparison;
     if (!previous || previous.year !== s.year - 1) return null;
     const complete = (p: typeof s.report.total) =>
-      key === 'reach' ? p.reachComplete : p.counterComplete;
+      key === 'reach'
+        ? p.reachComplete
+        : key === 'interactions'
+          ? (p.interactionsComplete ?? (!s.report.interactionBasis && p.counterComplete))
+          : p.counterComplete;
     const start = previous.total[key],
       end = s.report.total[key];
     if (

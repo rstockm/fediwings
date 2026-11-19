@@ -38,6 +38,20 @@ try {
   for (const variant of ['complete', 'current', 'partial', 'empty', 'legacy', 'long', 'large']) {
     for (const locale of variant === 'complete' ? ['de', 'en'] : ['de']) {
       const snapshot = pdfFixture(variant);
+      if (variant !== 'legacy') {
+        snapshot.report.interactionBasis = 'notification-time';
+        snapshot.report.total.interactionsComplete = variant !== 'partial';
+        for (const [i, period] of snapshot.report.months.entries()) {
+          if (snapshot.months[i] !== 'future')
+            period.interactionsComplete = variant !== 'partial' || i > 1;
+        }
+        if (snapshot.annualComparison) snapshot.annualComparison.total.interactionsComplete = true;
+        if (variant === 'partial') {
+          const january = snapshot.report.months[0];
+          snapshot.report.total.interactions -= january.interactions;
+          january.interactions = null;
+        }
+      }
       if (variant === 'long') {
         snapshot.handle = '@' + 'langes-handle-'.repeat(15) + '@example.social';
         snapshot.topPosts[0].excerpt =

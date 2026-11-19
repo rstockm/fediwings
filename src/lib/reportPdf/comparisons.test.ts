@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { pdfFixture } from './fixtures';
-import { comparisonEnd, previousYearEnd, titleChange, titleFollowers } from './comparisons';
+import {
+  comparisonEnd,
+  prepareAnnualComparison,
+  previousYearEnd,
+  titleChange,
+  titleFollowers,
+} from './comparisons';
 import { pdfBarColors } from './colors';
 import { buildReportDocument } from './document';
 import { reportChanges } from '../reportCharts';
@@ -94,5 +100,25 @@ describe('PDF-Farben und Titelvergleiche', () => {
     expect(previousYearEnd('2024-02-29T11:30:00Z')).toBe('2023-02-28T11:30:00.000Z');
     const s = pdfFixture('current');
     expect(s.annualComparison?.previousEnd).toBe('2024-07-15T11:00:00.000Z');
+  });
+  it('vergleicht nur abgedeckte Reaktionswerte bis zum Vorjahresstichtag', () => {
+    const s = pdfFixture('current');
+    s.report.interactionBasis = 'notification-time';
+    s.report.total.interactions = 2;
+    s.report.total.interactionsComplete = true;
+    s.annualComparison = prepareAnnualComparison(
+      s.year,
+      s.analyzedAt,
+      { posts: [], historyComplete: false, oldestFetchedAt: null, error: null },
+      {
+        timestamps: [Date.parse('2024-07-15T10:00:00Z'), Date.parse('2024-07-15T12:00:00Z')],
+        oldest: Date.parse('2023-12-31T23:00:00Z'),
+        observedAt: Date.parse(s.analyzedAt),
+      },
+    );
+    expect(s.annualComparison.total.interactions).toBe(1);
+    expect(titleChange(s, 'interactions')?.percent).toBe(100);
+    s.annualComparison.total.interactionsComplete = false;
+    expect(titleChange(s, 'interactions')).toBeNull();
   });
 });

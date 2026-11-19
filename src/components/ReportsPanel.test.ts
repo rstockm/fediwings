@@ -303,9 +303,13 @@ describe('ReportsPanel', () => {
     expect(screen.getByRole('button', { name: 'Report speichern' })).toBeEnabled();
     expect(screen.getByText('Noch kein gespeicherter Stand für dieses Jahr.')).toBeInTheDocument();
     expect(screen.getAllByText(/Teilstand:/).length).toBeGreaterThan(0);
-    expect(screen.getByRole('rowheader', { name: 'Engagement Rate (%)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('rowheader', { name: 'Engagement-Rate der gestarteten Threads (%)' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Der Jahresverlauf' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Engagement Rate (%)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Engagement-Rate der gestarteten Threads (%)' }),
+    ).toBeInTheDocument();
   });
 
   it('zeigt die Exportformate oben vor der Tabelle und ohne Aufklappmenü', async () => {

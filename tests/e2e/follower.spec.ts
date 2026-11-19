@@ -92,6 +92,31 @@ async function mockOAuthFlow(page: Page) {
   });
   await page.route('https://test.social/api/v1/notifications?*', async (route) => {
     const url = new URL(route.request().url());
+    if (url.searchParams.getAll('types[]').includes('favourite')) {
+      await route.fulfill({
+        json: [
+          {
+            id: '204',
+            type: 'reblog',
+            created_at: '2026-04-02T10:00:00Z',
+            status: { id: 'post-1' },
+          },
+          {
+            id: '203',
+            type: 'favourite',
+            created_at: '2026-03-31T22:00:00Z',
+            status: { id: 'older-post' },
+          },
+          {
+            id: '202',
+            type: 'mention',
+            created_at: '2026-02-02T10:00:00Z',
+            status: { id: 'reply' },
+          },
+        ],
+      });
+      return;
+    }
     const maxId = url.searchParams.get('max_id');
     if (!maxId) {
       await route.fulfill({ json: bulk(200, 80, '2026-03-05T10:00:00Z') });
@@ -201,7 +226,32 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await expect(page.locator('.chart-hover-line')).toHaveCount(1);
   await page.mouse.move(0, 0);
   await expect(page.locator('.chart-hover-tip')).toHaveCount(0);
-  await expect(page.getByRole('row', { name: /Interaktionen/ })).toContainText('6');
+  const interactions = page.getByRole('row', { name: 'Interaktionen' }).getByRole('cell');
+  await expect(interactions.nth(0)).toHaveText('—');
+  await expect(interactions.nth(1)).toHaveText('1 !');
+  await expect(interactions.nth(2)).toHaveText('0');
+  await expect(interactions.nth(3)).toHaveText('2');
+  await expect(interactions.last()).toHaveText('3 !');
+  await expect(page.getByRole('row', { name: 'Postings' }).getByRole('cell').nth(3)).toHaveText(
+    '0',
+  );
+  if (process.env.UPDATE_REPORT_INTERACTION_SCREENSHOTS) {
+    const panel = page.locator('.reports-panel');
+    await page.mouse.move(0, 0);
+    for (const [name, width, height] of [
+      ['desktop', 1440, 1000],
+      ['mobile', 390, 1100],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await panel
+        .locator('.reports-scroll')
+        .screenshot({ path: `docs/screenshots/reports-${name}.png` });
+      await panel
+        .locator('.report-charts')
+        .screenshot({ path: `docs/screenshots/reports-charts-${name}.png` });
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  }
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(
     accessibility.violations.filter(
@@ -218,7 +268,7 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await expect(page.locator('.reports-action-status')).toHaveText('Tabelle kopiert.');
   expect(
     await page.evaluate(() => (window as unknown as { copiedReport: string }).copiedReport),
-  ).toContain('Interaktionen\t');
+  ).toContain('Interaktionen\t\t1\t0\t2\t');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'CSV herunterladen' }).click();
   expect((await download).suggestedFilename()).toBe('fediwings-report-2026.csv');
@@ -231,7 +281,8 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await page.reload();
   await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
   await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();
-  await expect(page.getByRole('row', { name: /Interaktionen/ })).toContainText('6');
+  await expect(interactions.nth(3)).toHaveText('2');
+  await expect(interactions.last()).toHaveText('3 !');
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Gespeicherten Stand löschen' }).click();
   await expect(page.getByText(/Gespeicherter Stand gelöscht/)).toBeVisible();

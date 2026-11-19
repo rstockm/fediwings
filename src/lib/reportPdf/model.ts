@@ -8,6 +8,7 @@ const period = z.object({
   engagement: value,
   counterComplete: z.boolean(),
   reachComplete: z.boolean(),
+  interactionsComplete: z.boolean().optional(),
 });
 export const pdfSnapshotSchema = z.object({
   version: z.literal(1),
@@ -32,7 +33,12 @@ export const pdfSnapshotSchema = z.object({
     .nullable()
     .optional(),
   origin: z.enum(['live', 'stored', 'legacy']),
-  report: z.object({ year: z.number().int(), months: z.array(period).length(12), total: period }),
+  report: z.object({
+    year: z.number().int(),
+    months: z.array(period).length(12),
+    total: period,
+    interactionBasis: z.literal('notification-time').optional(),
+  }),
   months: z.array(z.enum(['closed', 'current', 'future'])).length(12),
   community: z
     .array(

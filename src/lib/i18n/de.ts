@@ -85,11 +85,16 @@ export const de = {
       reachDefinition:
         'Die FediWings-Reichweite wird nach dem FediWings-Modell aus dem Verbreitungspotenzial und den Interaktionssignalen der Threads berechnet. Der Bericht summiert die Reichweiten der im Zeitraum gestarteten Threads. Mehrfachkontakte über verschiedene Threads sind möglich; die Kennzahl beschreibt keine gemessenen Aufrufe oder eindeutigen Personen.',
       interactionDefinition:
-        'Interaktionen umfassen Likes, Boosts, Antworten und verfügbare Quotes der berücksichtigten Threads zum angegebenen Datenstand.',
+        'Dieser ältere Stand ordnet die beim Abruf sichtbaren Likes, Boosts, Antworten und verfügbaren Zitate dem Startmonat ihrer Threads zu, nicht dem Reaktionsmonat.',
+      notificationDefinition:
+        'Eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate zählen anhand verfügbarer Instanz-Benachrichtigungen zum Ereignismonat (Europe/Berlin), unabhängig vom Alter der Beiträge. Die Jahressumme enthält nur verfügbare Monatswerte. Die Karten der Top 5 zeigen dagegen Beitragszähler zum Abrufstand.',
+      postInteractions: 'Interaktionen am Beitrag',
+      threadEngagement: 'Engagement-Rate der Threads',
+      threadRate: 'Beitragszähler / Reichweite · %',
       engagementDefinition:
-        'Die Engagement-Rate setzt die Interaktionen ins Verhältnis zur FediWings-Reichweite. Gesamtwerte werden aus den Gesamtsummen berechnet, nicht als Durchschnitt der Monatsraten.',
+        'Die Engagement-Rate teilt die beim Abruf sichtbaren Likes, Boosts, Antworten und verfügbaren Zitate der im Zeitraum gestarteten Threads durch deren FediWings-Reichweite. Gesamtwerte werden aus den Gesamtsummen berechnet.',
       timeDefinition:
-        'Threads zählen zum Monat ihres Starts in Europe/Berlin. Die Interaktionszähler bilden den Stand des Datenabrufs ab. Laufende Monate fließen nicht in Vergleiche abgeschlossener Monate ein.',
+        'Threads zählen zum Monat ihres Starts in Europe/Berlin. Laufende Monate fließen nicht in Vergleiche abgeschlossener Monate ein.',
       dataDefinition:
         'Datenquelle sind die geladenen Instanzdaten und die ausgewiesenen lokalen Follower-Stichtage. Vorjahresdaten werden bei Bedarf erst beim Start des PDF-Exports ergänzt; das anschließende Rendern nutzt diesen festen Datenstand.',
       model: 'Modellversion',
@@ -110,9 +115,9 @@ export const de = {
     rateLimitWait: 'API-Limit erreicht · Fortsetzung nach Wartezeit',
     connectFirst: 'Verbinde deine eigene Instanz, um alle Statistiken gemeinsam zu laden.',
     title: 'Monats- und Jahresreport',
-    intro: 'Öffentliche Beiträge nach Veröffentlichungsmonat auswerten.',
+    intro: 'Beiträge und eingehende Reaktionen im Jahresverlauf auswerten.',
     methodology:
-      'Reports ordnen Postings ihrem Startmonat in Berliner Zeit zu. Interaktionen umfassen Likes, Boosts, Antworten und verfügbare Quotes; Engagement ist das Verhältnis zur modellierten Reichweitensumme. Zähler gelten zum Abrufzeitpunkt, nicht zum Zeitpunkt der Reaktion.',
+      'Reports zählen eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate nach dem Datum der verfügbaren Instanz-Benachrichtigung (Europe/Berlin), auch bei älteren Beiträgen. Reichweite und Engagement beziehen sich auf die im jeweiligen Monat gestarteten Threads und ihre Beitragszähler zum Abrufzeitpunkt.',
     year: 'Jahr',
     yearTotal: 'Jahr',
     metric: 'Kennzahl',
@@ -124,7 +129,16 @@ export const de = {
     growth: 'Follower-Wachstum',
     reach: 'Reichweite',
     interactions: 'Interaktionen',
-    engagement: 'Engagement Rate (%)',
+    engagement: 'Engagement-Rate der gestarteten Threads (%)',
+    interactionNote:
+      'Interaktionen zählen nach Benachrichtigungsdatum (Berliner Zeit): eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate, auch zu älteren Beiträgen. Gezählt wird nur, was die Instanz als Benachrichtigung liefert.',
+    legacyInteractionNote:
+      'Älterer gespeicherter Stand: Die Interaktionen sind dem Startmonat der Threads zugeordnet, nicht dem Reaktionsmonat.',
+    interactionPartial:
+      'Interaktionen: — = unbekannt bei fehlender Historie; ! = Teilstand. Die Jahressumme enthält nur verfügbare Monatswerte.',
+    interactionCoverage: 'Datenabdeckung: Interaktionen',
+    unknown: 'Unbekannt',
+    partialValue: 'Teilstand',
     threads: 'Postings',
     asOf: 'Datenstand',
     currentMonth: '* Laufender Monat',
@@ -133,7 +147,7 @@ export const de = {
     chartsKicker: 'Monat für Monat',
     chartsTitle: 'Der Jahresverlauf',
     chartsNote:
-      'Monatliche Werte im Überblick. Fehlende Monatswerte zählen im Diagramm als 0; die Tabelle lässt sie leer. Die gestrichelte violette Linie markiert den Mittelwert der gezeigten Monate; sein Wert steht rechts oben im Diagramm. Beim absoluten Follower-Stand entfällt der Mittelwert.',
+      'Fehlende Interaktionswerte bleiben im Diagramm leer; ihr Mittelwert berücksichtigt nur abgedeckte Monate. Bei anderen Kennzahlen zählen fehlende Monatswerte im Diagramm als 0. Die violette Linie markiert den Mittelwert; beim Follower-Stand entfällt er.',
     chartColorLegend:
       'Grün: mindestens so hoch wie im Vormonat · Orange: niedriger. Schwache Farbe bedeutet einen kleinen Sprung, kräftige Farbe einen großen Sprung innerhalb des Diagramms.',
     chartEmpty: 'Noch keine Monatswerte vorhanden.',
