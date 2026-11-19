@@ -23,7 +23,7 @@ verwenden dagegen kontrollierte Testdaten.
 | `reports-charts-mobile.png` | Monatsdiagramme desselben Demo-Reports; Mobilansicht |
 | `reports-connect-desktop.png` | Aktueller Reports-Einstieg ohne Verbindung und ohne Statistiken |
 | `reports-connect-mobile.png` | Derselbe Einstieg mobil |
-| `reports-loading-demo-desktop.png` | UI-Demo vom 18.11.2026: gemeinsamer Ladezustand, kontrollierte Antworten für alice@test.social; keine echte Anmeldung |
+| `reports-loading-demo-desktop.png` | UI-Demo vom 19.11.2026: gemeinsamer Ladezustand mit ausstehender Interaktionshistorie; kontrollierte Antworten, keine echte Anmeldung |
 | `reports-loading-demo-mobile.png` | Dieselbe UI-Demo bei 390 Pixel Breite |
 | `report-pdf-desktop.png` | PDF-Exportdialog, Desktop-UI-Demo vom 18.11.2026; kontrollierte Antworten und synthetische Sitzung, keine Live-Anmeldung |
 | `report-pdf-mobile.png` | Derselbe Exportdialog mit mobilem Direktdownload |
@@ -63,9 +63,10 @@ gleich breite Tabellenziffern.
 Die gemeinsamen Ladeanzeigen werden mit
 `UPDATE_COMBINED_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'waehrend des Ladens' --project=chromium`
 nach einem aktuellen Build aufgenommen (1440 × 1000 und 390 × 1100).
-Der Test hält die Benachrichtigungsantwort gezielt zurück und prüft, dass genau
-ein Fortschritt und ein Abbruch erscheinen und Ergebnisse bis zum Abschluss
-verborgen bleiben. Die Aufnahmen sind UI-Demos, kein Nachweis eines Live-Logins.
+Der Test hält die Interaktionshistorie gezielt zurück. Er prüft, dass die
+Anzeige nach der Reichweitenanalyse unter 100 % weiterläuft, nur eine
+Abbrechen-Aktion erscheint und Ergebnisse bis zum Abschluss verborgen bleiben.
+Die Aufnahmen sind UI-Demos, kein Nachweis eines Live-Logins.
 
 Die aktuellen Einstieg-Aufnahmen entstehen nach einem Build mit
 `LIVE_REPORT_SCREENSHOTS=1 npx playwright test tests/e2e/follower.spec.ts -g 'optionale öffentliche' --project=chromium`.

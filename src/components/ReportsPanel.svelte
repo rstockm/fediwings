@@ -78,14 +78,44 @@
   let followerProgress = $state<FollowerProgress | null>(null);
   let interactionRequests = $state(0);
   let followersDone = $state(false);
-  let reportDone = $state(false);
-  const measurable = $derived(
-    !reportDone && progress?.phase === 'reach' && (progress.analysis?.totalPosts ?? 0) > 0,
-  );
-  const percent = $derived(
-    measurable && progress?.analysis
-      ? Math.round((progress.analysis.completedPosts / progress.analysis.totalPosts) * 100)
-      : null,
+  let reachDone = $state(false);
+  let interactionsDone = $state(false);
+  let elapsed = $state(0);
+  let workStarted = $state(false);
+  $effect(() => {
+    if (!busy) return;
+    const start = Date.now();
+    const timer = window.setInterval(() => (elapsed = (Date.now() - start) / 1000), 250);
+    return () => window.clearInterval(timer);
+  });
+  const estimate = (seconds: number) => Math.min(0.96, 1 - Math.exp(-elapsed / seconds));
+  const percent = $derived.by(() => {
+    const analysis = progress?.analysis;
+    const measured = analysis?.totalPosts ? analysis.completedPosts / analysis.totalPosts : 0;
+    if (!workStarted) return Math.floor(5 * estimate(2));
+    // The workflows run in parallel. Their durations vary with instance latency
+    // and history size; only settled tasks receive their full share.
+    const reach = reachDone ? 1 : Math.min(0.98, Math.max(measured, estimate(12)));
+    const interactions = interactionsDone ? 1 : estimate(18);
+    const followers = followersDone ? 1 : estimate(10);
+    return Math.min(98, Math.floor(5 + 45 * reach + 33 * interactions + 15 * followers));
+  });
+  const progressLabel = $derived(
+    !reachDone
+      ? progress?.phase === 'reach'
+        ? (progress.analysis?.completedPosts ?? 0) >= (progress.analysis?.totalPosts ?? 0)
+          ? 'reports.finishingReach'
+          : 'reports.analyzing'
+        : progress?.phase === 'statuses'
+          ? 'reports.fetching'
+          : 'reports.preparing'
+      : !interactionsDone
+        ? followersDone
+          ? 'reports.waitingInteractions'
+          : 'reports.waitingHistories'
+        : !followersDone
+          ? 'reports.waitingFollowers'
+          : 'reports.finalizing',
   );
   const requests = $derived(
     (progress?.requests ?? 0) +
@@ -387,7 +417,10 @@
     followerProgress = null;
     interactionRequests = 0;
     followersDone = !loadFollowerHistory;
-    reportDone = false;
+    reachDone = false;
+    interactionsDone = false;
+    elapsed = 0;
+    workStarted = false;
     message = '';
     try {
       const identity = `${sessionKey}|${origin}|${account.id}`;
@@ -400,6 +433,7 @@
           ? accountCache.account
           : await getAccount(origin, canonicalAcct(account, origin), active.signal, platform?.id);
       if (active.signal.aborted) return;
+      workStarted = true;
       if (!reuseAccount) accountCache = { key: identity, at: Date.now(), account: fresh };
       const observedAt = new Date(accountCache!.at).toISOString();
       const followerTask = loadFollowerHistory
@@ -425,7 +459,9 @@
         },
         platform?.id !== 'pixelfed',
         sessionKey ? { cacheKey: sessionKey, refresh } : undefined,
-      );
+      ).finally(() => {
+        if (!active.signal.aborted) reachDone = true;
+      });
       const interactionTask = loadReportInteractions(
         origin,
         fresh.id === account.id ? notificationToken : undefined,
@@ -435,14 +471,13 @@
           if (!active.signal.aborted) interactionRequests = count;
         },
         sessionKey ? { cacheKey: sessionKey, refresh } : undefined,
-      );
-      const reportResults = Promise.allSettled([reportTask, interactionTask]).then((results) => {
-        if (!active.signal.aborted) reportDone = true;
-        return results;
+      ).finally(() => {
+        if (!active.signal.aborted) interactionsDone = true;
       });
-      const [[loaded, interactions], history] = await Promise.all([
-        reportResults,
-        Promise.allSettled([followerTask]).then(([result]) => result),
+      const [loaded, interactions, history] = await Promise.allSettled([
+        reportTask,
+        interactionTask,
+        followerTask,
       ]);
       if (active.signal.aborted) return;
       if (loaded.status === 'rejected') throw loaded.reason;
@@ -712,39 +747,29 @@
     <div class="follower-progress-block reports-progress" role="status" aria-live="polite">
       <div class="follower-progress-head">
         <strong>{$_('reports.combinedLoading')}</strong>
-        <span
-          >{percent === null
-            ? $_('reports.preparing')
-            : `${$_('reports.analyzing')} · ${percent}%`}</span
-        >
+        <span>{$_('reports.estimatedProgress', { values: { percent } })}</span>
       </div>
       <div
         class="follower-progress-track"
-        class:track-pending={percent === null}
         role="progressbar"
         aria-label={$_('reports.combinedLoading')}
         aria-valuemin="0"
         aria-valuemax="100"
-        aria-valuenow={percent ?? undefined}
+        aria-valuenow={percent}
+        aria-valuetext={$_('reports.estimatedProgress', { values: { percent } })}
       >
-        <span style:width={`${percent ?? 30}%`}></span>
+        <span style:width={`${percent}%`}></span>
       </div>
       <p class="follower-progress">
-        {reportDone
-          ? followersDone
-            ? $_('reports.finalizing')
-            : $_('reports.waitingFollowers')
-          : progress?.phase === 'reach'
-            ? $_('reports.analyzing')
-            : $_('reports.fetching')}
-        {#if progress?.analysis && progress.analysis.totalPosts > 0}
+        {$_(progressLabel)}
+        {#if !reachDone && progress?.analysis && progress.analysis.completedPosts < progress.analysis.totalPosts}
           · {progress.analysis.completedPosts}/{progress.analysis.totalPosts}
         {/if}
         · {$_('reports.requestCount', { values: { count: requests } })}
         {#if followerProgress}
           · {$_('follower.progressEvents', { values: { events: followerProgress.events } })}
         {/if}
-        {#if progress?.analysis?.waitingUntil}
+        {#if !reachDone && progress?.analysis?.waitingUntil}
           · {$_('reports.rateLimitWait')}
         {/if}
       </p>

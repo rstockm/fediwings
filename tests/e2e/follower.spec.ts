@@ -393,16 +393,13 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
 test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }, testInfo) => {
   await mockInstance(page);
   await mockOAuthFlow(page);
-  let firstNotifications = true;
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
   await page.route('https://test.social/api/v1/notifications?*', async (route) => {
-    if (firstNotifications) {
-      firstNotifications = false;
-      await gate;
-    }
+    const types = new URL(route.request().url()).searchParams.getAll('types[]');
+    if (types.includes('favourite')) await gate;
     await route.fallback();
   });
   await page.goto('/?view=follower');
@@ -415,6 +412,8 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }, testInfo
     name: 'Report und Follower-Verlauf werden geladen',
   });
   await expect(progress).toBeVisible();
+  await expect(page.locator('.reports-progress')).toContainText('Interaktionen laden');
+  await expect(progress).toHaveAttribute('aria-valuenow', /^[1-9]\d?$/);
   await expect(page.getByRole('progressbar')).toHaveCount(1);
   await expect(page.getByRole('table')).toHaveCount(0);
   await expect(page.locator('.follower-charts')).toHaveCount(0);

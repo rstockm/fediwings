@@ -102,6 +102,10 @@ und Mobilgerät; authentifizierte Live-Aufnahmen sind damit nicht abgedeckt.
 
 <img src="docs/screenshots/reports-loading-demo-mobile.png" alt="Mobile UI-Demo mit kontrollierten Testdaten: gemeinsamer Ladezustand und eine Abbrechen-Aktion" width="390" />
 
+Der Prozentwert schätzt den Gesamtfortschritt von Reichweitenanalyse,
+Interaktionen und Follower-Verlauf. Er bleibt unter 100 %, solange Daten
+laden. Der Statustext nennt die noch ausstehende Datenquelle.
+
 ![Reports-Einstieg ohne Statistiken mit einer Aktion zum Verbinden der eigenen Instanz](docs/screenshots/reports-connect-desktop.png)
 
 <img src="docs/screenshots/reports-connect-mobile.png" alt="Mobiler Reports-Einstieg zum Verbinden der eigenen Instanz" width="390" />

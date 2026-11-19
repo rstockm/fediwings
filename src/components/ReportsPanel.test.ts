@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ReportsPanel from './ReportsPanel.svelte';
 import { loadReport } from '../lib/reportLoader';
+import { loadReportInteractions } from '../lib/reportInteractions';
 import { readReport } from '../lib/reportStorage';
 import { pdfFixture } from '../lib/reportPdf/fixtures';
 
@@ -29,6 +30,10 @@ vi.mock('../lib/reportLoader', () => ({
     error: null,
   })),
 }));
+vi.mock('../lib/reportInteractions', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/reportInteractions')>();
+  return { ...actual, loadReportInteractions: vi.fn(actual.loadReportInteractions) };
+});
 vi.mock('../lib/reportStorage', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../lib/reportStorage')>();
   return {
@@ -200,7 +205,9 @@ describe('ReportsPanel', () => {
     await waitFor(() => expect(loadFollowerHistory).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
+    expect(Number(screen.getByRole('progressbar').getAttribute('aria-valuenow'))).toBeGreaterThan(
+      0,
+    );
     finishReport({ posts: [], historyComplete: true, oldestFetchedAt: null, error: null });
     await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
   });
@@ -221,7 +228,7 @@ describe('ReportsPanel', () => {
     await waitFor(() => expect(loadFollowerHistory).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.getByText(/Report bereit/)).toBeInTheDocument());
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
-    expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    expect(Number(screen.getByRole('progressbar').getAttribute('aria-valuenow'))).toBeLessThan(100);
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Report speichern' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'CSV herunterladen' })).not.toBeInTheDocument();
@@ -230,6 +237,56 @@ describe('ReportsPanel', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(onbusy).toHaveBeenLastCalledWith(false);
     expect(loadFollowerHistory.mock.calls[0][0]).toEqual(fixture);
+  });
+
+  it('zeigt bei fertiger Reichweite keinen vollen Balken, solange Historien weiterladen', async () => {
+    let finishInteractions!: () => void;
+    let finishFollowers!: () => void;
+    let countRequest!: (count: number) => void;
+    vi.mocked(loadReportInteractions).mockImplementationOnce(
+      (_origin, _token, _year, _signal, onRequest) =>
+        new Promise((resolve) => {
+          countRequest = onRequest!;
+          finishInteractions = () =>
+            resolve({ timestamps: [], oldest: null, observedAt: Date.now() });
+        }),
+    );
+    vi.mocked(loadReport).mockImplementationOnce(
+      async (_origin, _account, _followers, _year, _signal, onProgress) => {
+        onProgress({
+          phase: 'reach',
+          requests: 2,
+          oldestFetchedAt: null,
+          analysis: { completedPosts: 61, totalPosts: 61, requests: 3 },
+        });
+        return { posts: [], historyComplete: true, oldestFetchedAt: null, error: null };
+      },
+    );
+    const followerHistory = new Promise<void>((resolve) => {
+      finishFollowers = resolve;
+    });
+    render(ReportsPanel, {
+      account: fixture,
+      origin: 'https://test.social',
+      platform: null,
+      loadFollowerHistory: () => followerHistory,
+    });
+    await waitFor(() =>
+      expect(screen.getByText(/Interaktionen und Follower-Verlauf laden/)).toBeInTheDocument(),
+    );
+    const bar = screen.getByRole('progressbar');
+    const firstEstimate = Number(bar.getAttribute('aria-valuenow'));
+    expect(firstEstimate).toBeGreaterThan(0);
+    expect(firstEstimate).toBeLessThan(100);
+    expect(screen.queryByText(/61\/61|100%/)).not.toBeInTheDocument();
+    countRequest(8);
+    await waitFor(() => expect(screen.getByText(/API-Abfragen: 13/)).toBeInTheDocument());
+    finishFollowers();
+    await waitFor(() => expect(screen.getByText(/Interaktionen laden/)).toBeInTheDocument());
+    expect(Number(bar.getAttribute('aria-valuenow'))).toBeGreaterThan(firstEstimate);
+    expect(Number(bar.getAttribute('aria-valuenow'))).toBeLessThan(100);
+    finishInteractions();
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
   });
 
   it('bricht beide Abfragen mit demselben Signal ab und bleibt erneut ladbar', async () => {
