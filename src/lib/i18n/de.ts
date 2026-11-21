@@ -121,6 +121,9 @@ export const de = {
     rateLimitWait: 'API-Limit erreicht · Fortsetzung nach Wartezeit',
     connectFirst: 'Verbinde deine eigene Instanz, um alle Statistiken gemeinsam zu laden.',
     title: 'Monats- und Jahresreport',
+    details: 'Methodik & Datenquellen',
+    detailsMethod: 'So werden die Kennzahlen berechnet',
+    detailsSources: 'Datenstand & lokale Speicherung',
     intro: 'Beiträge und eingehende Reaktionen im Jahresverlauf auswerten.',
     methodology:
       'Reports zählen eingehende Likes, Boosts, Antworten/Erwähnungen und Zitate nach dem Datum der verfügbaren Instanz-Benachrichtigung (Europe/Berlin), auch bei älteren Beiträgen. Reichweite und Engagement beziehen sich auf die im jeweiligen Monat gestarteten Threads und ihre Beitragszähler zum Abrufzeitpunkt.',

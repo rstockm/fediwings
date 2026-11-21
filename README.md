@@ -74,9 +74,14 @@ nachgewiesen. Details und Prüfkommandos: [PDF-Modul](docs/pdf-export.md).
 Der Einstieg hat nur eine Aktion: **Eigene Instanz verbinden**. Nach Auswahl des
 Handles öffnet sich die Freigabe; erst nach erfolgreicher Verbindung erscheinen
 Statistiken. Beim Trennen der Verbindung werden sie wieder ausgeblendet.
-Die Accountübersicht nennt die erkannte Server-Software, etwa Mastodon oder
-Pixelfed, auch nach Login und Neuladen. Schlägt die Erkennung fehl, steht dort
+Nach der Verbindung steht das Profil mit Avatar, Handle und aktueller
+Followerzahl auf breiten Displays neben der Accountauswahl, mobil darunter.
+Die Übersicht nennt die erkannte Server-Software, etwa Mastodon oder Pixelfed,
+auch nach Login und Neuladen. Schlägt die Erkennung fehl, steht dort
 ausdrücklich „Nicht erkannt“ statt der unspezifischen Protokollangabe „ActivityPub“.
+Über der Reporttabelle stehen Aktionen, Datenstand und bei Bedarf Warnungen.
+Erklärungen zu Kennzahlen, Quellen und lokaler Speicherung lassen sich unter
+der Tabelle über **Methodik & Datenquellen** aufklappen.
 
 Report und Follower-Verlauf teilen sich **eine Fortschrittsanzeige und eine
 Abbrechen-Aktion**. Tabelle und Diagramme erscheinen gemeinsam nach Abschluss
@@ -93,7 +98,7 @@ fehlende ältere Beitragsseiten nach. **Live-Report laden** beziehungsweise
 Browser-Reload leert diese flüchtigen Caches; lokale gespeicherte Reports bleiben
 erhalten.
 
-**UI-Demo, aufgenommen am 18.11.2026:** Die folgenden aktuellen Aufnahmen verwenden
+**UI-Demo, aktualisiert am 21.11.2026:** Die folgenden Aufnahmen verwenden
 kontrollierte Testantworten für `alice@test.social`, keine echte Anmeldung und
 keine privaten Accountdaten. Sie zeigen den gemeinsamen Ladezustand auf Desktop
 und Mobilgerät; authentifizierte Live-Aufnahmen sind damit nicht abgedeckt.
@@ -110,17 +115,19 @@ laden. Der Statustext nennt die noch ausstehende Datenquelle.
 
 <img src="docs/screenshots/reports-connect-mobile.png" alt="Mobiler Reports-Einstieg zum Verbinden der eigenen Instanz" width="390" />
 
-Die folgenden **UI-Demos vom 19.11.2026** verwenden kontrollierte Beispieldaten. Im April zeigt der Report zwei Reaktionen auf ältere Beiträge bei null neuen Postings. Januar ist unbekannt, Februar ein Teilstand. Der mobile Tabellenbereich ist horizontal scrollbar. Authentifizierte Live-Aufnahmen sind nicht enthalten.
+Die folgenden **UI-Demos, aktualisiert am 21.11.2026**, verwenden kontrollierte Beispieldaten. Im April zeigt der Report zwei Reaktionen auf ältere Beiträge bei null neuen Postings. Januar ist unbekannt, Februar ein Teilstand. Der mobile Tabellenbereich ist horizontal scrollbar. Authentifizierte Live-Aufnahmen sind nicht enthalten.
 
-![Demo-Reporttabelle mit zwei Interaktionen und null Postings im April](docs/screenshots/reports-desktop.png)
+![Demo-Report mit zweispaltiger Accountauswahl und Profilkarte mit Avatar, Reportaktionen und Monatstabelle](docs/screenshots/reports-desktop.png)
 
-<img src="docs/screenshots/reports-mobile.png" alt="Mobilansicht der horizontal scrollbareren Demo-Tabelle mit unbekanntem Januar und Februar-Teilstand" width="390" />
+<img src="docs/screenshots/reports-mobile.png" alt="Mobiler Demo-Report mit Profilkarte unter der Accountauswahl und horizontal scrollbarer Monatstabelle" width="390" />
 
-![Demo: Abruf pausiert am FediWings-Seitenlimit, mit ältestem Datum und Schaltfläche zum Nachladen](docs/screenshots/reports-interaction-history-desktop.png)
+![Demo: kompakter Hinweis zum FediWings-Seitenlimit mit Schaltfläche zum Nachladen](docs/screenshots/reports-interaction-history-desktop.png)
 
 <img src="docs/screenshots/reports-interaction-history-mobile.png" alt="Mobiler Hinweis zum Teilstand mit Schaltfläche zum Nachladen älterer Interaktionen" width="390" />
 
 Die Balkendiagramme zeigen dieselben Monatswerte mit gerundeten Achsenskalen.
+Mobil entfällt der äußere Rahmen um den fertigen Report und den Follower-Verlauf.
+So nutzen die einzelnen Diagrammkarten die verfügbare Breite bis zum Seitenrand.
 Die Balkenfarbe vergleicht jeden Monat mit seinem direkten Vormonat: Grün bedeutet
 einen höheren Wert, Orange einen niedrigeren. Kleine Sprünge erscheinen in schwachem
 Grün beziehungsweise Orange, große Sprünge in kräftiger Farbe. Die Intensität
@@ -143,6 +150,8 @@ vorhandenen Historie bleiben Werte leer.
 ![Demo-Balkendiagramme für Reichweite, Interaktionen, Thread-Engagement und Postings](docs/screenshots/reports-charts-desktop.png)
 
 <img src="docs/screenshots/reports-charts-mobile.png" alt="Demo-Balkendiagramme des Jahresreports in der Mobilansicht" width="390" />
+
+<img src="docs/screenshots/reports-follower-charts-mobile.png" alt="Mobiler Demo-Follower-Verlauf mit breiten Diagrammkarten ohne äußeren Rahmen" width="390" />
 
 ### Ergebnisse als Share-Card
 

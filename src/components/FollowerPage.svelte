@@ -129,6 +129,8 @@
   let historyRun = 0;
   let reportBusy = $state(true);
   let reportsPanel = $state<ReportsPanel>();
+  let failedAvatar = $state('');
+  const avatar = $derived(account?.avatar_static || authSession?.account.avatar_static || '');
 
   const hasHistory = $derived(historyPhase === 'ready' || historyPhase === 'partial');
   const connectedAccount = $derived(
@@ -511,7 +513,11 @@
     <p>{$_('follower.intro')}</p>
   </section>
 
-  <section class="search-shell follower-shell" aria-labelledby="anon-title">
+  <section
+    class="search-shell follower-shell"
+    class:follower-shell-connected={connectedAccount && anonPhase === 'ready'}
+    aria-labelledby="anon-title"
+  >
     <form
       class="search-form"
       onsubmit={(event) => {
@@ -547,23 +553,47 @@
     {/if}
 
     {#if connectedAccount && anonPhase === 'ready' && account}
+      {@const displayName = account.display_name.trim() || account.username}
       <div class="follower-snapshot">
-        <div>
-          <span>@{account.acct}</span>
-          <strong>{$_number(account.followers_count, { format: 'int' })}</strong>
-          <small>{$_('follower.followersNote')}</small>
+        <div class="follower-profile">
+          <div class="follower-avatar" aria-hidden="true">
+            {#if avatar && failedAvatar !== avatar}
+              {#key avatar}
+                {@const src = avatar}
+                <img
+                  {src}
+                  alt=""
+                  width="56"
+                  height="56"
+                  referrerpolicy="no-referrer"
+                  onerror={() => (failedAvatar = src)}
+                />
+              {/key}
+            {:else}
+              {Array.from(displayName)[0]?.toLocaleUpperCase()}
+            {/if}
+          </div>
+          <div class="follower-profile-name">
+            <strong>{displayName}</strong>
+            <span>@{canonicalAcct(account, origin)}</span>
+          </div>
         </div>
-        <div>
-          <span aria-hidden="true">&nbsp;</span>
-          <strong
-            >{!platform
-              ? $_('follower.detectingSoftware')
-              : platform.id === 'unknown'
-                ? $_('follower.unknownSoftware')
-                : platform.name}</strong
-          >
-          <small>{$_('follower.serverSoftware')}</small>
-        </div>
+        <dl class="follower-profile-stats">
+          <div>
+            <dt>{$_('follower.followersNote')}</dt>
+            <dd>{$_number(account.followers_count, { format: 'int' })}</dd>
+          </div>
+          <div>
+            <dt>{$_('follower.serverSoftware')}</dt>
+            <dd>
+              {!platform
+                ? $_('follower.detectingSoftware')
+                : platform.id === 'unknown'
+                  ? $_('follower.unknownSoftware')
+                  : platform.name}
+            </dd>
+          </div>
+        </dl>
       </div>
     {:else if authSession && account && anonPhase === 'ready' && !connectedAccount}
       <p class="follower-note" role="status">
@@ -597,7 +627,7 @@
   {/if}
 
   {#if connectedAccount && authSession && account && !reportBusy}
-    <section class="follower-card" aria-labelledby="history-title">
+    <section class="follower-card follower-history" aria-labelledby="history-title">
       <p class="eyebrow">{$_('follower.stepHistory')}</p>
       <h2 id="history-title">@{account.acct}</h2>
 

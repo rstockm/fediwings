@@ -143,6 +143,9 @@ export const en: Messages = {
     interactionPartial:
       'Interactions: — = unknown when history is missing; ! = partial. The annual total only includes available monthly values.',
     interactionCoverage: 'Data coverage: interactions',
+    details: 'Methodology & data sources',
+    detailsMethod: 'How metrics are calculated',
+    detailsSources: 'Data coverage & local storage',
     reusedInteractions: 'Fully covered older months reused from the saved snapshot: {count}.',
     oldestInteraction: 'Oldest interaction notification fetched',
     interactionBudget: 'FediWings paused after 40 pages. The server offers more pages.',

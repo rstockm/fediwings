@@ -375,6 +375,11 @@
   .chart-labels span {
     white-space: nowrap;
   }
+  @media (max-width: 720px) {
+    .chart-card {
+      padding: 0.8rem;
+    }
+  }
   @media (max-width: 480px) {
     .chart-labels span:nth-child(even) {
       visibility: hidden;

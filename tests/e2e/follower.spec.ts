@@ -8,7 +8,7 @@ const account = {
   display_name: 'Alice Example',
   url: 'https://test.social/@alice',
   avatar_static:
-    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="88" height="88"%3E%3Crect width="88" height="88" fill="%238b7cff"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="88" height="88"%3E%3Crect width="88" height="88" fill="%238b7cff"/%3E%3Cpath d="M22 63 44 23 66 63M31 48h26" fill="none" stroke="%23121316" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E',
   followers_count: 1000,
 };
 
@@ -167,7 +167,10 @@ test('erstellt optionale öffentliche ZLB-Reportscreenshots', async ({ page }) =
   await page.locator('main').screenshot({ path: 'docs/screenshots/reports-connect-mobile.png' });
 });
 
-test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async ({ page }) => {
+test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async ({
+  page,
+}, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-11-21T12:00:00Z'));
   await mockInstance(page);
   await mockOAuthFlow(page);
   await page.addInitScript(() => {
@@ -211,13 +214,47 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await page.getByLabel('Jahr', { exact: true }).selectOption('2026');
   await expect(page.getByRole('rowheader', { name: 'Interaktionen' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Der Jahresverlauf' })).toBeVisible();
+  const mobile = testInfo.project.name !== 'chromium';
+  const panel = page.locator('.reports-panel');
+  await expect(panel).toHaveCSS('border-left-width', mobile ? '0px' : '1px');
+  await expect(panel).toHaveCSS('padding-left', mobile ? '0px' : '28px');
+  await expect(panel.locator('.chart-card').first()).toHaveCSS('border-left-width', '1px');
+  const history = page.locator('.follower-history');
+  await expect(history).toHaveCSS('border-left-width', mobile ? '0px' : '1px');
+  await expect(history).toHaveCSS('padding-left', mobile ? '0px' : '28px');
+  await expect(history.locator('.follower-chart').first()).toHaveCSS('border-left-width', '1px');
+  const profile = page.locator('.follower-snapshot');
+  await expect(profile.getByText('Alice Example')).toBeVisible();
+  await expect(profile.getByText('@alice@test.social')).toBeVisible();
+  const avatar = profile.locator('img');
+  await expect(avatar).toBeVisible();
+  await expect.poll(() => avatar.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(88);
+  const formBox = (await page.locator('.follower-shell form').boundingBox())!;
+  const profileBox = (await profile.boundingBox())!;
+  if (testInfo.project.name === 'chromium') {
+    expect(profileBox.x).toBeGreaterThanOrEqual(formBox.x + formBox.width);
+  } else {
+    expect(profileBox.y).toBeGreaterThanOrEqual(formBox.y + formBox.height);
+  }
+  const details = page.locator('.reports-details');
+  const summary = details.locator('summary');
+  const method = details.getByRole('heading', { name: 'So werden die Kennzahlen berechnet' });
+  await expect(method).toBeHidden();
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  await expect(method).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(method).toBeHidden();
+  await summary.evaluate((element) => element.blur());
   const exportGroup = page.getByRole('group', { name: 'Export' });
   await expect(exportGroup.getByRole('button')).toHaveCount(3);
-  const exportBox = await exportGroup.boundingBox();
-  const reportTableBox = await page.getByRole('table').boundingBox();
-  expect(exportBox).not.toBeNull();
-  expect(reportTableBox).not.toBeNull();
-  expect(exportBox!.y).toBeLessThan(reportTableBox!.y);
+  expect(
+    await exportGroup.evaluate(
+      (group) =>
+        group.getBoundingClientRect().bottom <=
+        document.querySelector('.reports-scroll')!.getBoundingClientRect().top,
+    ),
+  ).toBe(true);
   const reachPlot = page.locator('.chart-card', { hasText: 'Reichweite' }).locator('.chart-plot');
   const reachBox = await reachPlot.boundingBox();
   expect(reachBox).not.toBeNull();
@@ -235,20 +272,25 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
   await expect(page.getByRole('row', { name: 'Postings' }).getByRole('cell').nth(3)).toHaveText(
     '0',
   );
-  if (process.env.UPDATE_REPORT_INTERACTION_SCREENSHOTS) {
-    const panel = page.locator('.reports-panel');
-    await page.mouse.move(0, 0);
+  if (process.env.UPDATE_REPORT_INTERACTION_SCREENSHOTS && testInfo.project.name === 'chromium') {
     for (const [name, width, height] of [
       ['desktop', 1440, 1000],
-      ['mobile', 390, 1100],
+      ['mobile', 390, 1600],
     ] as const) {
       await page.setViewportSize({ width, height });
-      await panel
-        .locator('.reports-scroll')
-        .screenshot({ path: `docs/screenshots/reports-${name}.png` });
-      await panel
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+      const top = (await page.locator('.follower-shell').boundingBox())!;
+      const bottom = (await details.boundingBox())!;
+      await page.screenshot({
+        path: `docs/screenshots/reports-${name}.png`,
+        clip: { x: 0, y: top.y - 10, width, height: bottom.y + bottom.height - top.y + 20 },
+      });
+      await page
         .locator('.report-charts')
         .screenshot({ path: `docs/screenshots/reports-charts-${name}.png` });
+      if (name === 'mobile') {
+        await history.screenshot({ path: 'docs/screenshots/reports-follower-charts-mobile.png' });
+      }
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
   }
@@ -279,6 +321,7 @@ test('lädt, speichert und öffnet einen Jahresreport und exportiert CSV', async
     'Gespeicherten Stand löschen',
   );
   await page.reload();
+  await expect(avatar).toBeVisible();
   await page.getByRole('button', { name: 'Gespeicherten Stand öffnen' }).click();
   await expect(page.getByText('Gespeicherter Stand geöffnet.')).toBeVisible();
   await expect(interactions.nth(3)).toHaveText('2');
@@ -295,6 +338,14 @@ test('Report bleibt bei gesperrtem lokalem Speicher nutzbar', async ({ page }) =
   });
   await mockInstance(page);
   await mockOAuthFlow(page);
+  const brokenAvatar = 'https://test.social/missing-avatar.png';
+  await page.route(brokenAvatar, (route) => route.fulfill({ status: 404 }));
+  await page.route('https://test.social/api/v1/accounts/lookup?*', (route) =>
+    route.fulfill({ json: { ...account, avatar_static: brokenAvatar } }),
+  );
+  await page.route('https://test.social/api/v1/accounts/verify_credentials', (route) =>
+    route.fulfill({ json: { ...account, avatar_static: brokenAvatar } }),
+  );
   await page.route('https://test.social/api/v1/accounts/account-1/statuses?*', async (route) => {
     await route.fulfill({ json: [] });
   });
@@ -304,6 +355,7 @@ test('Report bleibt bei gesperrtem lokalem Speicher nutzbar', async ({ page }) =
   await connectOwnInstance(page);
   await expect(page.getByText('Lokaler Speicher ist nicht verfügbar.')).toBeVisible();
   await expect(page.getByRole('rowheader', { name: 'Interaktionen' })).toBeVisible();
+  await expect(page.locator('.follower-avatar')).toHaveText('A');
   await expect(page.getByRole('button', { name: 'CSV herunterladen' })).toBeEnabled();
 });
 
@@ -437,6 +489,7 @@ test('laedt nach Login beide Verlaufscharts', async ({ page }) => {
     0,
   );
   await expect(page.getByRole('rowheader', { name: 'Follow-Benachrichtigungen' })).toHaveCount(0);
+  await page.locator('.reports-details summary').click();
   await expect(page.getByText(/Unfollows fehlen/)).toBeVisible();
 
   await expect(page.getByText('Kumuliert aus 162 Follow-Ereignissen')).toBeVisible();

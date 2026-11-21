@@ -759,9 +759,13 @@
   }
 </script>
 
-<section class="follower-card reports-panel" aria-labelledby="reports-title">
+<section
+  class="follower-card reports-panel"
+  class:reports-panel-ready={report && !busy}
+  aria-labelledby="reports-title"
+>
   <h2 id="reports-title">{$_('reports.title')}</h2>
-  <p>{$_('reports.intro')}</p>
+  {#if !report && !busy}<p>{$_('reports.intro')}</p>{/if}
   <div class="reports-toolbar">
     <form
       class="reports-actions"
@@ -846,83 +850,62 @@
   {/if}
   {#if message}<p role="status">{message}</p>{/if}
   {#if report && !busy}
-    <p>
-      {$_('reports.asOf')}: {new Date(analyzedAt).toLocaleString($locale === 'en' ? 'en' : 'de')} · {$_(
-        'reports.modelNote',
-      )}
-    </p>
-    <div class="reports-interaction-info">
-      <p>{interactionNote}</p>
-      {#if reusedCount}<p>
-          {$_('reports.reusedInteractions', { values: { count: reusedCount } })}
-        </p>{/if}
-      {#if interactionHistory?.oldest != null}
-        <p>
-          {$_('reports.oldestInteraction')}:
-          {new Intl.DateTimeFormat($locale === 'en' ? 'en' : 'de', {
-            dateStyle: 'medium',
-            timeZone: 'Europe/Berlin',
-          }).format(interactionHistory.oldest)}
-        </p>
-      {/if}
-      {#if interactionHistory?.stop === 'budget'}
-        <p>{$_('reports.interactionBudget')}</p>
-      {:else if interactionHistory?.stop === 'end'}
-        <p>{$_('reports.interactionEnd')}</p>
-      {:else if interactionHistory?.stop === 'year'}
-        <p>{$_('reports.interactionYear')}</p>
-      {:else if interactionHistory?.stop === 'http'}
-        <p>
-          {$_(
-            interactionHistory.status === 429
-              ? 'reports.interactionRateLimit'
-              : 'reports.interactionHttp',
-            { values: { status: interactionHistory.status } },
-          )}
-        </p>
-      {:else if interactionHistory?.stop === 'error'}
-        <p>{$_('reports.interactionError')}</p>
-      {/if}
-      {#if interactionHistory?.cursor}
-        <button type="button" onclick={() => void loadOlderInteractions()}
-          >{$_('reports.loadOlderInteractions')}</button
-        >
-      {/if}
-      {#if interactionPartial?.some(Boolean)}<p>{$_('reports.interactionPartial')}</p>{/if}
+    {@const stop = interactionHistory?.stop}
+    <div class="reports-meta">
+      <span>
+        <strong>{$_('reports.asOf')}:</strong>
+        {new Date(analyzedAt).toLocaleString($locale === 'en' ? 'en' : 'de')}
+      </span>
+      <div class="reports-saved-state">
+        <span>
+          {#if savedAt}
+            {$_('reports.savedState')}:
+            {new Date(savedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
+              timeZone: 'Europe/Berlin',
+            })}
+          {:else}
+            {$_('reports.noSavedState')}
+          {/if}
+        </span>
+        {#if saved}
+          <button type="button" class="reports-delete" onclick={() => void remove()}
+            >{$_('reports.delete')}</button
+          >
+        {/if}
+      </div>
     </div>
-    {#if !report.total.counterComplete || !report.total.reachComplete}<p>
+    {#if stop === 'budget' || stop === 'http' || stop === 'error' || interactionHistory?.cursor || reusedCount}
+      <div class="reports-notice reports-interaction-info">
+        {#if reusedCount}<p>
+            {$_('reports.reusedInteractions', { values: { count: reusedCount } })}
+          </p>{/if}
+        {#if interactionHistory?.stop === 'budget'}
+          <p>{$_('reports.interactionBudget')}</p>
+        {:else if interactionHistory?.stop === 'http'}
+          <p>
+            {$_(
+              interactionHistory.status === 429
+                ? 'reports.interactionRateLimit'
+                : 'reports.interactionHttp',
+              { values: { status: interactionHistory.status } },
+            )}
+          </p>
+        {:else if interactionHistory?.stop === 'error'}
+          <p>{$_('reports.interactionError')}</p>
+        {/if}
+        {#if interactionHistory?.cursor}
+          <button type="button" onclick={() => void loadOlderInteractions()}
+            >{$_('reports.loadOlderInteractions')}</button
+          >
+        {/if}
+      </div>
+    {/if}
+    {#if !report.total.counterComplete || !report.total.reachComplete}<p class="reports-notice">
         {$_('reports.partial')}
       </p>{/if}
-    {#if year === currentYear}<p>{$_('reports.currentMonth')}</p>{/if}
-    {#if latestObserved}
-      <p>
-        {$_('reports.followerAsOf')}:
-        {new Date(latestObserved.observedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
-          timeZone: 'Europe/Berlin',
-        })}
-      </p>
+    {#if hasHistoryValues && followerHistory?.partial}
+      <p class="reports-notice">{$_('reports.followerHistoryPartial')}</p>
     {/if}
-    {#if hasHistoryValues}
-      <p>{$_('reports.followerHistoryNote')}</p>
-      {#if followerHistory?.partial}<p>{$_('reports.followerHistoryPartial')}</p>{/if}
-    {/if}
-    <div class="reports-saved-state">
-      <span>
-        {#if savedAt}
-          {$_('reports.savedState')}:
-          {new Date(savedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
-            timeZone: 'Europe/Berlin',
-          })}
-        {:else}
-          {$_('reports.noSavedState')}
-        {/if}
-      </span>
-      {#if saved}
-        <button type="button" class="reports-delete" onclick={() => void remove()}
-          >{$_('reports.delete')}</button
-        >
-      {/if}
-    </div>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (Scrollable table needs keyboard focus.) -->
     <div class="reports-scroll" role="region" aria-label={$_('reports.title')} tabindex="0">
       <table>
@@ -953,8 +936,50 @@
         </tbody>
       </table>
     </div>
+    {#if year === currentYear || interactionPartial?.some(Boolean)}
+      <div class="reports-legend">
+        {#if year === currentYear}<span>{$_('reports.currentMonth')}</span>{/if}
+        {#if interactionPartial?.some(Boolean)}<span>{$_('reports.interactionPartial')}</span>{/if}
+      </div>
+    {/if}
+    <details class="reports-details">
+      <summary>{$_('reports.details')}</summary>
+      <div class="reports-details-grid">
+        <div>
+          <h3>{$_('reports.detailsMethod')}</h3>
+          <p>{$_('reports.modelNote')}</p>
+          <p>{interactionNote}</p>
+          {#if hasHistoryValues}<p>{$_('reports.followerHistoryNote')}</p>{/if}
+        </div>
+        <div>
+          <h3>{$_('reports.detailsSources')}</h3>
+          {#if interactionHistory?.oldest != null}
+            <p>
+              {$_('reports.oldestInteraction')}:
+              {new Intl.DateTimeFormat($locale === 'en' ? 'en' : 'de', {
+                dateStyle: 'medium',
+                timeZone: 'Europe/Berlin',
+              }).format(interactionHistory.oldest)}
+            </p>
+          {/if}
+          {#if stop === 'end'}
+            <p>{$_('reports.interactionEnd')}</p>
+          {:else if stop === 'year'}
+            <p>{$_('reports.interactionYear')}</p>
+          {/if}
+          {#if latestObserved}
+            <p>
+              {$_('reports.followerAsOf')}:
+              {new Date(latestObserved.observedAt).toLocaleString($locale === 'en' ? 'en' : 'de', {
+                timeZone: 'Europe/Berlin',
+              })}
+            </p>
+          {/if}
+          <p>{$_('reports.storageNote')}</p>
+        </div>
+      </div>
+    </details>
     <ReportCharts {labels} {rows} />
-    <p>{$_('reports.storageNote')}</p>
   {/if}
 </section>
 
@@ -994,7 +1019,8 @@
     align-items: center;
     margin-left: auto;
   }
-  .reports-export button {
+  .reports-export button,
+  .reports-notice button {
     min-height: 38px;
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--line-dark);
@@ -1004,7 +1030,8 @@
     font: 700 0.64rem var(--mono);
     cursor: pointer;
   }
-  .reports-export button:hover:not(:disabled) {
+  .reports-export button:hover:not(:disabled),
+  .reports-notice button:hover {
     border-color: var(--lime);
     color: var(--lime);
   }
@@ -1012,8 +1039,7 @@
     opacity: 0.45;
     cursor: not-allowed;
   }
-  .reports-hint,
-  .reports-saved-state {
+  .reports-hint {
     margin: 0 0 0.8rem;
     color: var(--text-on-dark);
     font-size: 0.8rem;
@@ -1023,6 +1049,82 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem 0.75rem;
+  }
+  .reports-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0.9rem 0;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: #121316;
+    color: var(--text-on-dark);
+    font-size: 0.8rem;
+  }
+  .reports-meta strong {
+    color: var(--paper);
+  }
+  .reports-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 0.6rem 0;
+    padding: 0.65rem 0.85rem;
+    border-inline-start: 2px solid var(--chart-decline);
+    background: #121316;
+    font-size: 0.85rem;
+  }
+  .reports-notice p {
+    margin: 0;
+  }
+  .reports-notice button {
+    min-height: 44px;
+  }
+  .reports-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    margin-top: 0.7rem;
+    color: var(--text-on-dark);
+    font-size: 0.8rem;
+  }
+  .reports-details {
+    margin-top: 1rem;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: #121316;
+  }
+  .reports-details summary {
+    padding: 0.85rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+  .reports-details summary::marker {
+    color: var(--lime);
+  }
+  .reports-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2rem;
+    margin: 0 0.85rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--line-dark);
+    color: var(--text-on-dark);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .reports-details-grid h3 {
+    margin: 0;
+    color: var(--paper);
+    font: 650 0.72rem var(--mono);
+    text-transform: uppercase;
+  }
+  .reports-details-grid p {
+    margin: 0.4rem 0 0;
   }
   .reports-delete {
     padding: 0;
@@ -1088,6 +1190,8 @@
   }
   .reports-actions :focus-visible,
   .reports-export :focus-visible,
+  .reports-notice button:focus-visible,
+  .reports-details summary:focus-visible,
   .reports-delete:focus-visible,
   .reports-scroll:focus-visible {
     outline: 2px solid var(--lime);
@@ -1117,6 +1221,14 @@
     max-width: 12rem;
   }
   @media (max-width: 720px) {
+    .reports-panel-ready {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+    .reports-details-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .reports-export {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
