@@ -974,7 +974,12 @@
   </main>
 {:else}
   <main>
-    <section class="hero" class:hero-collapsed={heroCollapsed} aria-labelledby="page-title">
+    <section
+      class="hero"
+      class:hero-collapsed={heroCollapsed}
+      class:hero-loading={busy}
+      aria-labelledby="page-title"
+    >
       <div class="hero-copy">
         <img class="hero-emblem" src={emblemUrl} alt="" aria-hidden="true" />
         <p class="kicker">von Ralf Stockmann</p>
@@ -1011,12 +1016,6 @@
             </button>
           </div>
 
-          {#if phase === 'resolving'}
-            <button type="button" class="abort-button" onclick={stopAnalysis}>
-              {$_('hero.abortConnection')}
-            </button>
-          {/if}
-
           <div class="options-row">
             <label>
               <span>{$_('hero.threads')}</span>
@@ -1043,47 +1042,53 @@
       </div>
     {/if}
 
-    {#if account}
-      <section class="results" aria-label={$_('results.region')}>
-        <AccountHeader {account} {origin} {platform} />
-
-        <div class="analysis-bar">
-          <div>
-            <p class="eyebrow">{$_('results.progressLabel')}</p>
-            <strong
-              >{$_('results.progressThreads', {
-                values: {
-                  done: progress.completedPosts,
-                  total: progress.totalPosts,
-                },
-              })}</strong
-            >
-          </div>
-          <div
-            class="progress-track"
-            role="progressbar"
-            aria-label="Analysefortschritt"
-            aria-valuenow={progressPercent}
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            <span
-              class:progress-complete={progressPercent === 100}
-              style:width={`${progressPercent}%`}
-            ></span>
-          </div>
-          <div class="request-counter">
-            <span>{progress.requests}</span>
-            <small>{$_('results.apiRequests')}</small>
-          </div>
-          {#if busy}
-            <button class="stop-button" type="button" onclick={stopAnalysis}
-              >{$_('hero.stop')}</button
-            >
-          {/if}
+    {#snippet analysisProgress()}
+      <div class="analysis-bar">
+        <div>
+          <p class="eyebrow">{$_('results.progressLabel')}</p>
+          <strong>
+            {phase === 'resolving'
+              ? $_(account ? 'reports.fetching' : 'hero.connecting')
+              : $_('results.progressThreads', {
+                  values: { done: progress.completedPosts, total: progress.totalPosts },
+                })}
+          </strong>
         </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          class:progress-pending={phase === 'resolving'}
+          aria-label={$_('results.progressLabel')}
+          aria-valuenow={phase === 'resolving' ? undefined : progressPercent}
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <span
+            class:progress-complete={progressPercent === 100}
+            style:width={phase === 'resolving' ? '30%' : `${progressPercent}%`}
+          ></span>
+        </div>
+        <div class="request-counter">
+          <span>{progress.requests}</span>
+          <small>{$_('results.apiRequests')}</small>
+        </div>
+        {#if busy}
+          <button class="stop-button" type="button" onclick={stopAnalysis}>
+            {$_(phase === 'resolving' ? 'hero.abortConnection' : 'hero.stop')}
+          </button>
+        {/if}
+      </div>
+    {/snippet}
 
-        {#if posts.length > 0}
+    {#if account || busy}
+      <section class="results" class:results-loading={busy} aria-label={$_('results.region')}>
+        {#if busy}{@render analysisProgress()}{/if}
+        {#if account}
+          <AccountHeader {account} {origin} {platform} />
+        {/if}
+        {#if !busy}{@render analysisProgress()}{/if}
+
+        {#if account && posts.length > 0}
           <PostingInsights insights={postingInsights} />
 
           <div class="result-heading">

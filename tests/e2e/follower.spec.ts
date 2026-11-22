@@ -527,6 +527,12 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }, testInfo
     name: 'Report und Follower-Verlauf werden geladen',
   });
   await expect(progress).toBeVisible();
+  const pendingLoad = page.getByRole('button', { name: 'Lädt …', exact: true });
+  await expect(pendingLoad).toBeDisabled();
+  await expect(pendingLoad.locator('.follower-load-spinner')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Laden', exact: true })).toHaveCount(0);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(progress).toBeInViewport({ ratio: 1 });
   await expect(page.locator('.reports-progress')).toContainText('Interaktionen laden');
   await expect(progress).toHaveAttribute('aria-valuenow', /^[1-9]\d?$/);
   await expect(page.getByRole('progressbar')).toHaveCount(1);
@@ -539,13 +545,13 @@ test('zeigt waehrend des Ladens einen Fortschritt an', async ({ page }, testInfo
     await page
       .locator('main')
       .screenshot({ path: 'docs/screenshots/reports-loading-demo-desktop.png' });
-    await page.setViewportSize({ width: 390, height: 1100 });
-    await page
-      .locator('main')
-      .screenshot({ path: 'docs/screenshots/reports-loading-demo-mobile.png' });
+    await page.setViewportSize({ width: 390, height: 640 });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.screenshot({ path: 'docs/screenshots/reports-loading-demo-mobile.png' });
   }
   release();
   await expect(progress).toBeHidden({ timeout: 15_000 });
+  await expect(page.getByRole('button', { name: 'Laden', exact: true })).toBeEnabled();
   await expect(page.getByRole('img', { name: /Neue Follower pro Monat/ })).toBeVisible();
 });
 

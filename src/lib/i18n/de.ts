@@ -131,6 +131,7 @@ export const de = {
     yearTotal: 'Jahr',
     metric: 'Kennzahl',
     load: 'Live-Report laden',
+    loadingButton: 'Lädt …',
     restore: 'Gespeicherten Stand öffnen',
     invalidYear: 'Bitte ein Jahr zwischen 2006 und dem laufenden Jahr wählen.',
     loading: 'Report wird geladen · Seiten:',

@@ -128,6 +128,7 @@ export const en: Messages = {
     yearTotal: 'Year',
     metric: 'Metric',
     load: 'Load live report',
+    loadingButton: 'Loading…',
     restore: 'Open saved snapshot',
     invalidYear: 'Choose a year between 2006 and the current year.',
     loading: 'Loading report · pages:',

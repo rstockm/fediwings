@@ -86,9 +86,8 @@ der Tabelle über **Methodik & Datenquellen** aufklappen.
 Report und Follower-Verlauf teilen sich **eine Fortschrittsanzeige und eine
 Abbrechen-Aktion**. Tabelle und Diagramme erscheinen gemeinsam nach Abschluss
 beider Abrufe; verfügbare Daten bleiben bei einem Teilfehler mit Hinweis nutzbar.
-Solange die Seitenzahl unbekannt ist, läuft die Anzeige ohne Prozentwert.
-Während der Reichweitenberechnung zeigt sie den Anteil der bearbeiteten Beiträge,
-nicht einen geschätzten Gesamtfortschritt.
+Während des Abrufs ist die Lade-Schaltfläche neben dem Handle deaktiviert und
+zeigt einen Spinner. Mobil steht der Fortschritt vor der Report-Aktionsleiste.
 
 Account, geladene Beiträge und vollständige Jahresanalysen werden bis zu fünf
 Minuten im Arbeitsspeicher für denselben verbundenen Account wiederverwendet.
@@ -98,7 +97,7 @@ fehlende ältere Beitragsseiten nach. **Live-Report laden** beziehungsweise
 Browser-Reload leert diese flüchtigen Caches; lokale gespeicherte Reports bleiben
 erhalten.
 
-**UI-Demo, aktualisiert am 21.11.2026:** Die folgenden Aufnahmen verwenden
+**UI-Demo, aktualisiert am 22.11.2026:** Die folgenden Aufnahmen verwenden
 kontrollierte Testantworten für `alice@test.social`, keine echte Anmeldung und
 keine privaten Accountdaten. Sie zeigen den gemeinsamen Ladezustand auf Desktop
 und Mobilgerät; authentifizierte Live-Aufnahmen sind damit nicht abgedeckt.
@@ -172,6 +171,12 @@ Die Methodikseite erläutert Modell, Datenquellen und Grenzen; sie enthält auch
 ![Methodikseite von FediWings mit Erläuterung des Reichweitenmodells](docs/screenshots/methodik.png)
 
 ### Auch auf dem Smartphone
+
+Die Analyse zeigt ihren Fortschritt bereits beim Verbindungsaufbau und beim
+Abruf der Beiträge, noch vor der Profilkarte. Der folgende Ladezustand wurde am
+22.11.2026 mit kontrollierten Testantworten aufgenommen.
+
+<img src="docs/screenshots/analysis-loading-demo-mobile.png" alt="Mobiler Analysefortschritt beim Beitragsabruf, ohne Scrollen oberhalb der Profilkarte sichtbar" width="390" />
 
 <img src="docs/screenshots/analyse-mobile.png" alt="Mobile Analyse von rstockm@chaos.social mit vollständigem FediWings-Logo, Accountdaten und Analysefortschritt" width="390" />
 

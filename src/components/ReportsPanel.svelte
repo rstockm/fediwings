@@ -762,10 +762,14 @@
 <section
   class="follower-card reports-panel"
   class:reports-panel-ready={report && !busy}
+  class:reports-panel-loading={busy}
   aria-labelledby="reports-title"
 >
   <h2 id="reports-title">{$_('reports.title')}</h2>
   {#if !report && !busy}<p>{$_('reports.intro')}</p>{/if}
+  {#if busy}
+    {@render loadingProgress()}
+  {/if}
   <div class="reports-toolbar">
     <form
       class="reports-actions"
@@ -781,9 +785,6 @@
         {/each}
       </select>
       <button type="submit" disabled={busy}>{$_('reports.load')}</button>
-      {#if busy}<button type="button" onclick={() => controller?.abort()}
-          >{$_('follower.cancel')}</button
-        >{/if}
       <button type="button" disabled={busy} onclick={() => void restore()}
         >{$_('reports.restore')}</button
       >
@@ -816,7 +817,7 @@
     </p>
   {/if}
   {#if !report && !busy}<p class="reports-hint">{$_('reports.saveHint')}</p>{/if}
-  {#if busy}
+  {#snippet loadingProgress()}
     <div class="follower-progress-block reports-progress" role="status" aria-live="polite">
       <div class="follower-progress-head">
         <strong>{$_('reports.combinedLoading')}</strong>
@@ -847,7 +848,10 @@
         {/if}
       </p>
     </div>
-  {/if}
+    <button class="reports-cancel" type="button" onclick={() => controller?.abort()}>
+      {$_('follower.cancel')}
+    </button>
+  {/snippet}
   {#if message}<p role="status">{message}</p>{/if}
   {#if report && !busy}
     {@const stop = interactionHistory?.stop}
@@ -1020,7 +1024,8 @@
     margin-left: auto;
   }
   .reports-export button,
-  .reports-notice button {
+  .reports-notice button,
+  .reports-cancel {
     min-height: 38px;
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--line-dark);
@@ -1031,7 +1036,8 @@
     cursor: pointer;
   }
   .reports-export button:hover:not(:disabled),
-  .reports-notice button:hover {
+  .reports-notice button:hover,
+  .reports-cancel:hover {
     border-color: var(--lime);
     color: var(--lime);
   }
@@ -1082,6 +1088,10 @@
   }
   .reports-notice button {
     min-height: 44px;
+  }
+  .reports-cancel {
+    min-height: 44px;
+    margin-top: 0.65rem;
   }
   .reports-legend {
     display: flex;
@@ -1191,6 +1201,7 @@
   .reports-actions :focus-visible,
   .reports-export :focus-visible,
   .reports-notice button:focus-visible,
+  .reports-cancel:focus-visible,
   .reports-details summary:focus-visible,
   .reports-delete:focus-visible,
   .reports-scroll:focus-visible {
@@ -1221,6 +1232,13 @@
     max-width: 12rem;
   }
   @media (max-width: 720px) {
+    .reports-panel-loading {
+      margin-top: 0.75rem;
+      padding: 0.85rem;
+    }
+    .reports-panel-loading h2 {
+      margin-bottom: 0.75rem;
+    }
     .reports-panel-ready {
       padding: 0;
       border: 0;

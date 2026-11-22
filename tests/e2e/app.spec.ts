@@ -1348,9 +1348,40 @@ test('kann die Verbindung waehrend der Aufloesung abbrechen', async ({ page }) =
   await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@hanging.example');
   await page.getByRole('button', { name: 'Analysieren' }).click();
 
+  const progress = page.getByRole('progressbar', { name: 'Analysefortschritt' });
+  await expect(progress).toBeVisible();
+  await expect(progress).not.toHaveAttribute('aria-valuenow');
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(progress).toBeInViewport({ ratio: 1 });
   await page.getByRole('button', { name: 'Verbindung abbrechen' }).click();
   await expect(page.getByText('Analyse abgebrochen')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Analysieren' })).toBeEnabled();
+});
+
+test('zeigt den Analysefortschritt beim Beitragsabruf vor der Profilkarte', async ({
+  page,
+}, testInfo) => {
+  await mockMastodon(page);
+  await page.route('https://test.social/api/v1/accounts/*/statuses?*', () => {});
+  await page.goto('/');
+  await page.getByLabel('Vollständiger Fediverse-Handle').fill('@alice@test.social');
+  await page.getByRole('button', { name: 'Analysieren' }).click();
+  await expect(page.getByText('Beiträge laden', { exact: true })).toBeVisible();
+  const progress = page.getByRole('progressbar', { name: 'Analysefortschritt' });
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(progress).toBeInViewport({ ratio: 1 });
+  expect(
+    await progress.evaluate(
+      (bar) =>
+        bar.getBoundingClientRect().bottom <
+        document.querySelector('.account-card')!.getBoundingClientRect().top,
+    ),
+  ).toBe(true);
+  if (process.env.UPDATE_ANALYSIS_LOADING_SCREENSHOT && testInfo.project.name === 'chromium') {
+    await page.setViewportSize({ width: 390, height: 640 });
+    await page.screenshot({ path: 'docs/screenshots/analysis-loading-demo-mobile.png' });
+  }
+  await page.getByRole('button', { name: 'Verbindung abbrechen' }).click();
 });
 
 test('erfuehlt wesentliche Barrierefreiheitsregeln nach einer Analyse', async ({ page }) => {

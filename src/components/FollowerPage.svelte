@@ -139,6 +139,9 @@
       authSession.origin === origin &&
       authSession.account.id === account.id,
   );
+  const loadingReport = $derived(
+    connectedAccount && anonPhase === 'ready' && !!platform && reportBusy,
+  );
   const heroCollapsed = $derived(anonPhase === 'loading' || account !== null);
   const months = $derived(monthly.map((point) => point.month));
   const monthLabels = $derived.by(() => {
@@ -273,7 +276,7 @@
   });
 
   async function loadAccount(): Promise<void> {
-    if (anonPhase === 'loading') return;
+    if (anonPhase === 'loading' || loadingReport) return;
     anonPhase = 'loading';
     anonMessage = '';
     account = null;
@@ -501,7 +504,11 @@
   }
 </script>
 
-<main class="follower-page" class:follower-page-collapsed={heroCollapsed}>
+<main
+  class="follower-page"
+  class:follower-page-collapsed={heroCollapsed}
+  class:follower-page-loading={loadingReport}
+>
   <section
     class="follower-hero"
     class:follower-hero-collapsed={heroCollapsed}
@@ -537,13 +544,22 @@
         />
         <button
           type="submit"
-          disabled={anonPhase === 'loading' || authPhase === 'connecting' || !handle.trim()}
+          class:follower-load-pending={loadingReport}
+          disabled={loadingReport ||
+            anonPhase === 'loading' ||
+            authPhase === 'connecting' ||
+            !handle.trim()}
         >
-          {anonPhase === 'loading'
-            ? $_('hero.connecting')
-            : handleMatchesSession
-              ? $_('follower.load')
-              : $_('follower.loginButton')}
+          {#if loadingReport}
+            <span class="follower-load-spinner" aria-hidden="true"></span>
+            {$_('reports.loadingButton')}
+          {:else}
+            {anonPhase === 'loading'
+              ? $_('hero.connecting')
+              : handleMatchesSession
+                ? $_('follower.load')
+                : $_('follower.loginButton')}
+          {/if}
         </button>
       </div>
     </form>
